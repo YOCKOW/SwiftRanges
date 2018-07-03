@@ -15,3 +15,23 @@ public struct OpenRange<Bound: Comparable> {
     self.upperBound = bounds.upper
   }
 }
+
+infix operator .<: RangeFormationPrecedence
+public func .< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
+  let lower = lhs.lowerBound
+  guard lower <= upper else {
+    fatalError("Can't form Range with upperBound < lowerBound")
+  }
+  return OpenRange(uncheckedBounds:(lower:lower, upper:upper))
+}
+
+extension OpenRange: RangeExpression {
+  public func contains(_ element: Bound) -> Bool {
+    return self.lowerBound < element && element < self.upperBound
+  }
+  
+  public func relative<C>(to collection: C) -> Range<Bound> where C: Collection, Bound == C.Index {
+    let newLowerBound = collection.index(after:self.lowerBound)
+    return Range(uncheckedBounds:(lower:newLowerBound, upper:self.upperBound))
+  }
+}
