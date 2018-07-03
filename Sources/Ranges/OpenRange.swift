@@ -48,3 +48,21 @@ extension OpenRange where Bound: Strideable, Bound.Stride: BinaryInteger {
 extension OpenRange  {
   public var isEmpty: Bool { return self._isEmpty }
 }
+
+extension OpenRange: Equatable {
+  public static func ==(lhs:OpenRange<Bound>, rhs:OpenRange<Bound>) -> Bool {
+    return lhs.lowerBound == rhs.lowerBound && lhs.upperBound == rhs.upperBound
+  }
+}
+
+extension OpenRange: Hashable where Bound: Hashable {
+  public var hashValue:Int {
+    return self.lowerBound.hashValue ^ self.upperBound.hashValue
+  }
+}
+
+extension OpenRange: CustomStringConvertible {
+  public var description: String {
+    return "\(self.lowerBound)<.<\(self.upperBound)"
+  }
+}
