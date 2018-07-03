@@ -30,6 +30,7 @@ final class LeftOpenRangeTests: XCTestCase {
     let intCR: [(ClosedRange<Int>, Bool)] = [
       (0...10, false),
       (0...11, true),
+      (15...25, true),
       (0...30, true),
       (20...30, true),
       (30...40, false),
@@ -59,6 +60,7 @@ final class LeftOpenRangeTests: XCTestCase {
     let intR: [(Range<Int>, Bool)] = [
       (0..<10, false),
       (0..<11, false),
+      (15..<25, true),
       (0..<30, true),
       (20..<30, true),
       (30..<40, false),
@@ -66,6 +68,7 @@ final class LeftOpenRangeTests: XCTestCase {
     let doubleR: [(Range<Double>, Bool)] = [
       (0..<1.0, false),
       (0..<1.1, true),
+      (1.5..<2.5, true),
       (0..<3.0, true),
       (2.0..<3.0, true),
       (3.0..<4.0, false),
