@@ -9,7 +9,10 @@ extension LeftOpenRange {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
   public func overlaps(_ other:ClosedRange<Bound>) -> Bool {
-    return (!other.isEmpty && self.contains(other.upperBound)) || (!self.isEmpty && other.contains(self.upperBound))
+    if self.isEmpty || other.isEmpty { return false }
+    if self.contains(other.upperBound) { return true }
+    if other.contains(self.upperBound) { return true }
+    return false
   }
 }
 
