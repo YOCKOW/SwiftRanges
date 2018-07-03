@@ -7,6 +7,7 @@ public func allTests() -> [XCTestCaseEntry] {
     testCase(LeftOpenRangeTests.allTests),
     testCase(OpenRangeTests.allTests),
     testCase(OverlapTests.allTests),
+    testCase(PartialRangeGreaterThanTests.allTests),
   ]
 }
 #endif
