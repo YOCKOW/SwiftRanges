@@ -35,3 +35,16 @@ extension OpenRange: RangeExpression {
     return Range(uncheckedBounds:(lower:newLowerBound, upper:self.upperBound))
   }
 }
+
+extension OpenRange {
+  public var _isEmpty: Bool { return lowerBound >= upperBound }
+}
+extension OpenRange where Bound: Strideable, Bound.Stride: BinaryInteger {
+  public var isEmpty: Bool {
+    if self.lowerBound.distance(to:self.upperBound) <= 1 { return true }
+    return self._isEmpty
+  }
+}
+extension OpenRange  {
+  public var isEmpty: Bool { return self._isEmpty }
+}

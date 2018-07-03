@@ -21,6 +21,12 @@ final class OpenRangeTests: XCTestCase {
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
+  func testEmptiness() {
+    XCTAssertTrue((10<.<10).isEmpty)
+    XCTAssertTrue((10<.<11).isEmpty)
+    XCTAssertTrue((1.0<.<1.0).isEmpty)
+    XCTAssertFalse((1.0<.<1.1).isEmpty)
+  }
   
   static var allTests = [
     ("testAsRangeExpression", testAsRangeExpression),
