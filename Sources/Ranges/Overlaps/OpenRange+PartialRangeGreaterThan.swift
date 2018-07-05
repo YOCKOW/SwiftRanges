@@ -5,7 +5,6 @@
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
 
-
 extension OpenRange where Bound: Strideable, Bound.Stride: BinaryInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
@@ -23,5 +22,21 @@ extension OpenRange {
     if self.isEmpty { return false }
     if self.upperBound > other.lowerBound { return true }
     return false
+  }
+}
+
+extension PartialRangeGreaterThan where Bound: Strideable, Bound.Stride: BinaryInteger {
+  /// Returns a Boolean value indicating whether this range and the given range contain an element
+  /// in common.
+  public func overlaps(_ other:OpenRange<Bound>) -> Bool {
+    return other.overlaps(self)
+  }
+}
+
+extension PartialRangeGreaterThan {
+  /// Returns a Boolean value indicating whether this range and the given range contain an element
+  /// in common.
+  public func overlaps(_ other:OpenRange<Bound>) -> Bool {
+    return other.overlaps(self)
   }
 }
