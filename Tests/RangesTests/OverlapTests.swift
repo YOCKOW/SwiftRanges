@@ -226,74 +226,6 @@ final class OverlapTests: XCTestCase {
     }
   }
   
-  func test_LeftOpenRange_PartialRangeFrom_Int() {
-    let cases:[(PartialRangeFrom<Int>, Bool)] = [
-      (10..., true),
-      (19..., true),
-      (20..., true),
-      (30..., true),
-      (39..., true),
-      (40..., true),
-      (41..., false),
-    ]
-    
-    for (range, expected) in cases {
-      let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
-      XCTAssertEqual(leftOpenRange_Int.overlaps(range), expected, message)
-    }
-  }
-  
-  func test_LeftOpenRange_PartialRangeFrom_Double() {
-    let cases:[(PartialRangeFrom<Double>, Bool)] = [
-      (1.0..., true),
-      (1.9..., true),
-      (2.0..., true),
-      (3.0..., true),
-      (3.9..., true),
-      (4.0..., true),
-      (4.1..., false),
-    ]
-    
-    for (range, expected) in cases {
-      let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
-      XCTAssertEqual(leftOpenRange_Double.overlaps(range), expected, message)
-    }
-  }
-  
-  func test_LeftOpenRange_PartialRangeGreaterThan_Int() {
-    let cases:[(PartialRangeGreaterThan<Int>, Bool)] = [
-      (10<.., true),
-      (19<.., true),
-      (20<.., true),
-      (30<.., true),
-      (39<.., true),
-      (40<.., false),
-      (41<.., false),
-      ]
-    
-    for (range, expected) in cases {
-      let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
-      XCTAssertEqual(leftOpenRange_Int.overlaps(range), expected, message)
-    }
-  }
-  
-  func test_LeftOpenRange_PartialRangeGreaterThan_Double() {
-    let cases:[(PartialRangeGreaterThan<Double>, Bool)] = [
-      (1.0<.., true),
-      (1.9<.., true),
-      (2.0<.., true),
-      (3.0<.., true),
-      (3.9<.., true),
-      (4.0<.., false),
-      (4.1<.., false),
-    ]
-    
-    for (range, expected) in cases {
-      let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
-      XCTAssertEqual(leftOpenRange_Double.overlaps(range), expected, message)
-    }
-  }
-  
   func test_LeftOpenRange_OpenRange_Int() {
     let cases:[(OpenRange<Int>, Bool)] = [
       (10<.<15, false),
@@ -391,6 +323,110 @@ final class OverlapTests: XCTestCase {
       (4.1<.<4.1, false),
       (4.1<.<5.0, false),
     ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Double.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeFrom_Int() {
+    let cases:[(PartialRangeFrom<Int>, Bool)] = [
+      (10..., true),
+      (19..., true),
+      (20..., true),
+      (30..., true),
+      (39..., true),
+      (40..., true),
+      (41..., false),
+      ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Int.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeFrom_Double() {
+    let cases:[(PartialRangeFrom<Double>, Bool)] = [
+      (1.0..., true),
+      (1.9..., true),
+      (2.0..., true),
+      (3.0..., true),
+      (3.9..., true),
+      (4.0..., true),
+      (4.1..., false),
+      ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Double.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeGreaterThan_Int() {
+    let cases:[(PartialRangeGreaterThan<Int>, Bool)] = [
+      (10<.., true),
+      (19<.., true),
+      (20<.., true),
+      (30<.., true),
+      (39<.., true),
+      (40<.., false),
+      (41<.., false),
+      ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Int.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeGreaterThan_Double() {
+    let cases:[(PartialRangeGreaterThan<Double>, Bool)] = [
+      (1.0<.., true),
+      (1.9<.., true),
+      (2.0<.., true),
+      (3.0<.., true),
+      (3.9<.., true),
+      (4.0<.., false),
+      (4.1<.., false),
+      ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Double.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeThrough_Int() {
+    let cases:[(PartialRangeThrough<Int>, Bool)] = [
+      (...15, false),
+      (...20, false),
+      (...21, true),
+      (...30, true),
+      (...39, true),
+      (...40, true),
+      (...41, true),
+      (...50, true),
+    ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Int.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeThrough_Double() {
+    let cases:[(PartialRangeThrough<Double>, Bool)] = [
+      (...1.5, false),
+      (...2.0, false),
+      (...2.1, true),
+      (...3.0, true),
+      (...3.9, true),
+      (...4.0, true),
+      (...4.1, true),
+      (...5.0, true),
+      ]
     
     for (range, expected) in cases {
       let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
@@ -1101,6 +1137,7 @@ final class OverlapTests: XCTestCase {
     ("test_LeftOpenRange_PartialRangeFrom_Double", test_LeftOpenRange_PartialRangeFrom_Double),
     ("test_LeftOpenRange_PartialRangeGreaterThan_Int", test_LeftOpenRange_PartialRangeGreaterThan_Int),
     ("test_LeftOpenRange_PartialRangeGreaterThan_Double", test_LeftOpenRange_PartialRangeGreaterThan_Double),
+    ("test_LeftOpenRange_PartialRangeThrough_Int", test_LeftOpenRange_PartialRangeThrough_Int),
     ("test_LeftOpenRange_Range_Int", test_LeftOpenRange_Range_Int),
     ("test_LeftOpenRange_Range_Double", test_LeftOpenRange_Range_Double),
     ("test_OpenRange_ClosedRange_Int", test_OpenRange_ClosedRange_Int),
