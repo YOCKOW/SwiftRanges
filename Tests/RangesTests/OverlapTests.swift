@@ -1166,6 +1166,42 @@ final class OverlapTests: XCTestCase {
     }
   }
   
+  func test_PartialRangeGreaterThan_PartialRangeUpTo_Int() {
+    let cases:[(PartialRangeUpTo<Int>, Bool)] = [
+      (..<15, false),
+      (..<20, false),
+      (..<21, false),
+      (..<30, true),
+      (..<39, true),
+      (..<40, true),
+      (..<41, true),
+      (..<50, true),
+    ]
+    
+    for (range, expected) in cases {
+      let message = "\(partialRangeGreaterThan_Int) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(partialRangeGreaterThan_Int.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_PartialRangeGreaterThan_PartialRangeUpTo_Double() {
+    let cases:[(PartialRangeUpTo<Double>, Bool)] = [
+      (..<1.5, false),
+      (..<2.0, false),
+      (..<2.1, true),
+      (..<3.0, true),
+      (..<3.9, true),
+      (..<4.0, true),
+      (..<4.1, true),
+      (..<5.0, true),
+    ]
+    
+    for (range, expected) in cases {
+      let message = "\(partialRangeGreaterThan_Double) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(partialRangeGreaterThan_Double.overlaps(range), expected, message)
+    }
+  }
+  
   func test_PartialRangeGreaterThan_Range_Int() {
     let cases:[(Range<Int>, Bool)] = [
       (10..<15, false),
@@ -1305,6 +1341,8 @@ final class OverlapTests: XCTestCase {
     ("test_PartialRangeGreaterThan_ClosedRange_Double", test_PartialRangeGreaterThan_ClosedRange_Double),
     ("test_PartialRangeGreaterThan_PartialRangeThrough_Int", test_PartialRangeGreaterThan_PartialRangeThrough_Int),
     ("test_PartialRangeGreaterThan_PartialRangeThrough_Double", test_PartialRangeGreaterThan_PartialRangeThrough_Double),
+    ("test_PartialRangeGreaterThan_PartialRangeUpTo_Int", test_PartialRangeGreaterThan_PartialRangeUpTo_Int),
+    ("test_PartialRangeGreaterThan_PartialRangeUpTo_Double", test_PartialRangeGreaterThan_PartialRangeUpTo_Double),
     ("test_PartialRangeGreaterThan_Range_Int", test_PartialRangeGreaterThan_Range_Int),
     ("test_PartialRangeGreaterThan_Range_Double", test_PartialRangeGreaterThan_Range_Double),
   ]
