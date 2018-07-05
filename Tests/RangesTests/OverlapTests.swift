@@ -226,6 +226,40 @@ final class OverlapTests: XCTestCase {
     }
   }
   
+  func test_LeftOpenRange_PartialRangeFrom_Int() {
+    let cases:[(PartialRangeFrom<Int>, Bool)] = [
+      (10..., true),
+      (19..., true),
+      (20..., true),
+      (30..., true),
+      (39..., true),
+      (40..., true),
+      (41..., false),
+    ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Int.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_LeftOpenRange_PartialRangeFrom_Double() {
+    let cases:[(PartialRangeFrom<Double>, Bool)] = [
+      (1.0..., true),
+      (1.9..., true),
+      (2.0..., true),
+      (3.0..., true),
+      (3.9..., true),
+      (4.0..., true),
+      (4.1..., false),
+    ]
+    
+    for (range, expected) in cases {
+      let message = "\(leftOpenRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(leftOpenRange_Double.overlaps(range), expected, message)
+    }
+  }
+  
   func test_LeftOpenRange_PartialRangeGreaterThan_Int() {
     let cases:[(PartialRangeGreaterThan<Int>, Bool)] = [
       (10<.., true),
@@ -235,7 +269,7 @@ final class OverlapTests: XCTestCase {
       (39<.., true),
       (40<.., false),
       (41<.., false),
-    ]
+      ]
     
     for (range, expected) in cases {
       let message = "\(leftOpenRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
@@ -1029,6 +1063,8 @@ final class OverlapTests: XCTestCase {
     ("test_LeftOpenRange_LeftOpenRange_Double", test_LeftOpenRange_LeftOpenRange_Double),
     ("test_LeftOpenRange_OpenRange_Int", test_LeftOpenRange_OpenRange_Int),
     ("test_LeftOpenRange_OpenRange_Double", test_LeftOpenRange_OpenRange_Double),
+    ("test_LeftOpenRange_PartialRangeFrom_Int", test_LeftOpenRange_PartialRangeFrom_Int),
+    ("test_LeftOpenRange_PartialRangeFrom_Double", test_LeftOpenRange_PartialRangeFrom_Double),
     ("test_LeftOpenRange_PartialRangeGreaterThan_Int", test_LeftOpenRange_PartialRangeGreaterThan_Int),
     ("test_LeftOpenRange_PartialRangeGreaterThan_Double", test_LeftOpenRange_PartialRangeGreaterThan_Double),
     ("test_LeftOpenRange_Range_Int", test_LeftOpenRange_Range_Int),
