@@ -7,7 +7,7 @@
 
 
 /// # LeftOpenRange
-/// A range that is not include its lower bound, but does include its upper bound.  
+/// A range that does not include its lower bound, but does include its upper bound.
 /// Reference: [Interval - Wikipedia](https://en.wikipedia.org/wiki/Interval_(mathematics)#Terminology)
 public struct LeftOpenRange<Bound: Comparable> {
   public let lowerBound: Bound

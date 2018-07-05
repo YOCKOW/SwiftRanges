@@ -1,5 +1,5 @@
 /***************************************************************************************************
- LeftOpenRangeTests.swift
+ PartialRangeGreaterThanTests.swift
    © 2018 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
@@ -8,15 +8,16 @@
 import XCTest
 @testable import Ranges
 
-final class LeftOpenRangeTests: XCTestCase {
+final class PartialRangeGreaterThanTests: XCTestCase {
   func testAsRangeExpression() {
-    let leftOpenRange =  0<..5 // cannot be "0 <..5"
+    let partialRangeGreaterThan =  5<.. // cannot be "5 <.."
     let array = [0,1,2,3,4,5,6,7,8,9,10]
     
-    XCTAssertFalse(leftOpenRange.contains(0))
-    XCTAssertTrue(leftOpenRange.contains(5))
+    XCTAssertFalse(partialRangeGreaterThan.contains(0))
+    XCTAssertFalse(partialRangeGreaterThan.contains(5))
+    XCTAssertTrue(partialRangeGreaterThan.contains(Int.max))
     
-    let rel = leftOpenRange.relative(to:array)
+    let rel = partialRangeGreaterThan.relative(to:array)
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
@@ -24,4 +25,5 @@ final class LeftOpenRangeTests: XCTestCase {
     ("testAsRangeExpression", testAsRangeExpression),
   ]
 }
+
 
