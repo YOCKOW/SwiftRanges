@@ -937,6 +937,8 @@ final class OverlapTests: XCTestCase {
     ("test_OpenRange_PartialRangeGreaterThan_Double", test_OpenRange_PartialRangeGreaterThan_Double),
     ("test_OpenRange_Range_Int", test_OpenRange_Range_Int),
     ("test_OpenRange_Range_Double", test_OpenRange_Range_Double),
+    ("test_PartialRangeGreaterThan_ClosedRange_Int", test_PartialRangeGreaterThan_ClosedRange_Int),
+    ("test_PartialRangeGreaterThan_ClosedRange_Double", test_PartialRangeGreaterThan_ClosedRange_Double),
   ]
 }
 
