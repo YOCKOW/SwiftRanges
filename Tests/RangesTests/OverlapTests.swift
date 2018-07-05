@@ -710,6 +710,40 @@ final class OverlapTests: XCTestCase {
     }
   }
   
+  func test_OpenRange_PartialRangeFrom_Int() {
+    let cases:[(PartialRangeFrom<Int>, Bool)] = [
+      (10..., true),
+      (19..., true),
+      (20..., true),
+      (30..., true),
+      (39..., true),
+      (40..., false),
+      (41..., false),
+      ]
+    
+    for (range, expected) in cases {
+      let message = "\(openRange_Int) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(openRange_Int.overlaps(range), expected, message)
+    }
+  }
+  
+  func test_OpenRange_PartialRangeFrom_Double() {
+    let cases:[(PartialRangeFrom<Double>, Bool)] = [
+      (1.0..., true),
+      (1.9..., true),
+      (2.0..., true),
+      (3.0..., true),
+      (3.9..., true),
+      (4.0..., false),
+      (4.1..., false),
+      ]
+    
+    for (range, expected) in cases {
+      let message = "\(openRange_Double) vs \(range): Overlaps?: `\(expected)` is expected."
+      XCTAssertEqual(openRange_Double.overlaps(range), expected, message)
+    }
+  }
+  
   func test_OpenRange_PartialRangeGreaterThan_Int() {
     let cases:[(PartialRangeGreaterThan<Int>, Bool)] = [
       (10<.., true),
@@ -1073,6 +1107,8 @@ final class OverlapTests: XCTestCase {
     ("test_OpenRange_ClosedRange_Double", test_OpenRange_ClosedRange_Double),
     ("test_OpenRange_OpenRange_Int", test_OpenRange_OpenRange_Int),
     ("test_OpenRange_OpenRange_Double", test_OpenRange_OpenRange_Double),
+    ("test_OpenRange_PartialRangeFrom_Int", test_OpenRange_PartialRangeFrom_Int),
+    ("test_OpenRange_PartialRangeFrom_Double", test_OpenRange_PartialRangeFrom_Double),
     ("test_OpenRange_PartialRangeGreaterThan_Int", test_OpenRange_PartialRangeGreaterThan_Int),
     ("test_OpenRange_PartialRangeGreaterThan_Double", test_OpenRange_PartialRangeGreaterThan_Double),
     ("test_OpenRange_Range_Int", test_OpenRange_Range_Int),
