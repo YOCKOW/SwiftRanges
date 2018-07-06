@@ -22,10 +22,10 @@ final class OpenRangeTests: XCTestCase {
   }
   
   func testEmptiness() {
-    XCTAssertTrue((10<.<10).isEmpty)
-    XCTAssertTrue((10<.<11).isEmpty)
-    XCTAssertTrue((1.0<.<1.0).isEmpty)
-    XCTAssertFalse((1.0<.<1.1).isEmpty)
+    XCTAssertTrue(CountableOpenRange(uncheckedBounds:(lower:10, upper:10)).isEmpty)
+    XCTAssertTrue(CountableOpenRange(uncheckedBounds:(lower:10, upper:11)).isEmpty)
+    XCTAssertTrue(OpenRange(uncheckedBounds:(lower:1.0, upper:1.0)).isEmpty)
+    XCTAssertFalse(OpenRange(uncheckedBounds:(lower:1.0, upper:1.1)).isEmpty)
   }
   
   

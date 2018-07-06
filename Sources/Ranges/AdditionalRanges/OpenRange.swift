@@ -31,8 +31,8 @@ public func .< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
 }
 public func .< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpenRange<T> where T:Strideable, T.Stride:BinaryInteger {
   let lower = lhs.lowerBound
-  guard lower.distance(to:upper) > 1 else {
-    fatalError("Can't form Range with upperBound < lowerBound + 1")
+  guard lower.distance(to:upper) >= 1 else {
+    fatalError("Can't form Range with upperBound < lowerBound + 1 when bound is countable.")
   }
   return CountableOpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
