@@ -55,3 +55,37 @@ extension AnyRange._Range {
     }
   }
 }
+
+extension AnyRange {
+  /// Initialize with an instance that conforms to `RangeExpression`
+  /// FIXME: Waiting for [SR-8291](https://bugs.swift.org/browse/SR-8192) to be resolved.
+  public init<R>(_ range:R) where R:RangeExpression, R.Bound == Bound {
+    self._range = _Range(range)
+  }
+  
+  /// Initialize an instance as a unbounded range.
+  public init(_:UnboundedRange) {
+    self._range = .unboundedRange
+  }
+  /// Represents an unbounded range.
+  public static var unboundedRange: AnyRange<Bound> { return AnyRange<Bound>(...) }
+  
+  private struct _Empty {}
+  private init(_:_Empty) { self._range = .empty }
+  /// Represents an empty range.
+  public static var empty: AnyRange<Bound> { return AnyRange<Bound>(_Empty()) }
+}
+
+extension AnyRange {
+  /// Returns whether the receiver is empty or not.
+  /// Due to [SR-8291](https://bugs.swift.org/browse/SR-8192), `false` might be returned although
+  /// the receiver is empty when a certain empty `OpenRange` has been passed to the initializer.
+  /// That's why `static var empty: AnyRange<Bound>` should be used when you want an empty range.
+  /// FIXME: Waiting for [SR-8291](https://bugs.swift.org/browse/SR-8192) to be resolved.
+  public var isEmpty: Bool {
+    if case .empty = self._range { return true }
+    return false
+  }
+}
+
+
