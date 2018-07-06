@@ -18,6 +18,10 @@ public struct LeftOpenRange<Bound: Comparable> {
   }
 }
 
+/// "Countable" LeftOpenRange
+public typealias CountableLeftOpenRange<Bound> =
+  LeftOpenRange<Bound> where Bound:Strideable, Bound.Stride:BinaryInteger
+
 infix operator ..: RangeFormationPrecedence
 public func .. <T>(lhs:ExcludedLowerBound<T>, upper:T) -> LeftOpenRange<T> {
   let lower = lhs.lowerBound

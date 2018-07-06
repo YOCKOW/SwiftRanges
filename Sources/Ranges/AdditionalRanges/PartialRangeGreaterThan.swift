@@ -13,6 +13,11 @@ public struct PartialRangeGreaterThan<Bound: Comparable> {
   public init(_ lowerBound: Bound) { self.lowerBound = lowerBound }
 }
 
+/// "Countable" PartialRangeGreaterThan
+public typealias CountablePartialRangeGreaterThan<Bound> =
+  PartialRangeGreaterThan<Bound> where Bound:Strideable, Bound.Stride:BinaryInteger
+
+
 postfix operator ..
 public postfix func .. <T>(_ excludedLowerBound:ExcludedLowerBound<T>) -> PartialRangeGreaterThan<T> {
   return PartialRangeGreaterThan<T>(excludedLowerBound.lowerBound)
