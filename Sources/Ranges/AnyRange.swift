@@ -6,7 +6,7 @@
  **************************************************************************************************/
 
 /// # AnyRange
-/// A container for a range.
+/// A container for ranges.
 public struct AnyRange<Bound> where Bound: Comparable {
   internal enum _Range {
     case empty
@@ -21,7 +21,6 @@ public struct AnyRange<Bound> where Bound: Comparable {
   }
   
   private var _range: _Range
-  
   internal init(_ range:_Range) {
     self._range = range
   }
