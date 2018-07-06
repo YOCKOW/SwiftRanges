@@ -15,7 +15,7 @@ extension OpenRange {
   }
 }
 
-extension OpenRange where Bound: Strideable, Bound.Stride: BinaryInteger {
+extension OpenRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
   public func overlaps(_ other:OpenRange<Bound>) -> Bool {

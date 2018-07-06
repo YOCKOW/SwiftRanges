@@ -40,7 +40,7 @@ extension PartialRangeThrough {
 }
 
 // PartialRangeUpTo
-extension Range where Bound: Strideable, Bound.Stride: BinaryInteger {
+extension Range where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
   public func overlaps(_ other:PartialRangeUpTo<Bound>) -> Bool {
@@ -48,7 +48,7 @@ extension Range where Bound: Strideable, Bound.Stride: BinaryInteger {
     return self.lowerBound.distance(to:other.upperBound) > 1
   }
 }
-extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: BinaryInteger {
+extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
   public func overlaps(_ other:Range<Bound>) -> Bool {

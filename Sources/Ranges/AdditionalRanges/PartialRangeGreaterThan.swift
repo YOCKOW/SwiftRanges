@@ -15,7 +15,7 @@ public struct PartialRangeGreaterThan<Bound: Comparable> {
 
 /// "Countable" PartialRangeGreaterThan
 public typealias CountablePartialRangeGreaterThan<Bound> =
-  PartialRangeGreaterThan<Bound> where Bound:Strideable, Bound.Stride:BinaryInteger
+  PartialRangeGreaterThan<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
 
 
 postfix operator ..

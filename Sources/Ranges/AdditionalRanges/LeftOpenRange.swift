@@ -20,7 +20,7 @@ public struct LeftOpenRange<Bound: Comparable> {
 
 /// "Countable" LeftOpenRange
 public typealias CountableLeftOpenRange<Bound> =
-  LeftOpenRange<Bound> where Bound:Strideable, Bound.Stride:BinaryInteger
+  LeftOpenRange<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
 
 infix operator ..: RangeFormationPrecedence
 public func .. <T>(lhs:ExcludedLowerBound<T>, upper:T) -> LeftOpenRange<T> {

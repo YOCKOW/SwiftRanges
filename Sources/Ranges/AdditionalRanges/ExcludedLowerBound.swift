@@ -22,4 +22,4 @@ public postfix func < <T>(_ lowerBound:T) -> ExcludedLowerBound<T> where T: Comp
 /// If `Bound` of `ExcludedLowerBound` is "Countable",
 /// it should be called `ExcludedCountableLowerBound`
 public typealias ExcludedCountableLowerBound<Bound> =
-  ExcludedLowerBound<Bound> where Bound:Strideable, Bound.Stride:BinaryInteger
+  ExcludedLowerBound<Bound> where Bound:Strideable, Bound.Stride:SignedInteger

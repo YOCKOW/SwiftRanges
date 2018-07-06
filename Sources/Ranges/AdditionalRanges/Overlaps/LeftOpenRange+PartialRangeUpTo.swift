@@ -5,7 +5,7 @@
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
  
-extension LeftOpenRange where Bound: Strideable, Bound.Stride: BinaryInteger {
+extension LeftOpenRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
   public func overlaps(_ other:PartialRangeUpTo<Bound>) -> Bool {
@@ -25,7 +25,7 @@ extension LeftOpenRange {
 }
 
 
-extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: BinaryInteger {
+extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
   public func overlaps(_ other:LeftOpenRange<Bound>) -> Bool {
