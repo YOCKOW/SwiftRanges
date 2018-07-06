@@ -25,3 +25,7 @@ public struct AnyRange<Bound> where Bound: Comparable {
     self._range = range
   }
 }
+
+/// A container for countable ranges.
+public typealias AnyCountableRange<Bound> =
+  AnyRange<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
