@@ -245,7 +245,7 @@ final class OverlapTests: XCTestCase {
       (19<.<41, true),
       (19<.<50, true),
       
-      (20<.<20, false),
+      // (20<.<20, false),
       (20<.<21, false),
       (20<.<30, true),
       (20<.<39, true),
@@ -253,22 +253,22 @@ final class OverlapTests: XCTestCase {
       (20<.<41, true),
       (20<.<50, true),
       
-      (30<.<30, false),
+      // (30<.<30, false),
       (30<.<39, true),
       (30<.<40, true),
       (30<.<41, true),
       (30<.<50, true),
       
-      (39<.<39, false),
+      // (39<.<39, false),
       (39<.<40, false),
       (39<.<41, true),
       (39<.<50, true),
       
-      (40<.<40, false),
+      // (40<.<40, false),
       (40<.<41, false),
       (40<.<50, false),
       
-      (41<.<41, false),
+      // (41<.<41, false),
       (41<.<50, false),
     ]
     
@@ -697,7 +697,7 @@ final class OverlapTests: XCTestCase {
       (19<.<41, true),
       (19<.<50, true),
       
-      (20<.<20, false),
+      // (20<.<20, false),
       (20<.<21, false),
       (20<.<30, true),
       (20<.<39, true),
@@ -705,22 +705,22 @@ final class OverlapTests: XCTestCase {
       (20<.<41, true),
       (20<.<50, true),
       
-      (30<.<30, false),
+      // (30<.<30, false),
       (30<.<39, true),
       (30<.<40, true),
       (30<.<41, true),
       (30<.<50, true),
       
-      (39<.<39, false),
+      // (39<.<39, false),
       (39<.<40, false),
       (39<.<41, false),
       (39<.<50, false),
       
-      (40<.<40, false),
+      // (40<.<40, false),
       (40<.<41, false),
       (40<.<50, false),
       
-      (41<.<41, false),
+      // (41<.<41, false),
       (41<.<50, false),
     ]
     

@@ -16,6 +16,11 @@ public struct OpenRange<Bound: Comparable> {
   }
 }
 
+/// "Countable" OpenRange
+public typealias CountableOpenRange<Bound> =
+  OpenRange<Bound> where Bound:Strideable, Bound.Stride:BinaryInteger
+
+/// Make "lower<.<upper" available
 infix operator .<: RangeFormationPrecedence
 public func .< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
   let lower = lhs.lowerBound
@@ -23,6 +28,13 @@ public func .< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
     fatalError("Can't form Range with upperBound < lowerBound")
   }
   return OpenRange(uncheckedBounds:(lower:lower, upper:upper))
+}
+public func .< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpenRange<T> where T:Strideable, T.Stride:BinaryInteger {
+  let lower = lhs.lowerBound
+  guard lower.distance(to:upper) >= 1 else {
+    fatalError("Can't form Range with upperBound < lowerBound + 1 when bound is countable.")
+  }
+  return CountableOpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
 
 extension OpenRange: RangeExpression {
@@ -39,10 +51,10 @@ extension OpenRange: RangeExpression {
 extension OpenRange {
   public var _isEmpty: Bool { return lowerBound >= upperBound }
 }
+// For "Countable"
 extension OpenRange where Bound: Strideable, Bound.Stride: BinaryInteger {
   public var isEmpty: Bool {
-    if self.lowerBound.distance(to:self.upperBound) <= 1 { return true }
-    return self._isEmpty
+    return self.lowerBound.distance(to:self.upperBound) <= 1
   }
 }
 extension OpenRange  {
