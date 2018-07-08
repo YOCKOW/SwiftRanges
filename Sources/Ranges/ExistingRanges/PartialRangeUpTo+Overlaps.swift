@@ -5,5 +5,9 @@
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
  
-// See "*+Overlaps.swift"
-// Any source code is never written in this file.
+extension PartialRangeUpTo {
+  /// Returns `true`
+  public func overlaps(_ other:PartialRangeUpTo<Bound>) -> Bool {
+    return true
+  }
+}
