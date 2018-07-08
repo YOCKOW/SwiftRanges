@@ -19,7 +19,7 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 # Requirements
 
-- Swift 4.1
+- Swift 4.2
 - macOS or Linux
 
 # Usage

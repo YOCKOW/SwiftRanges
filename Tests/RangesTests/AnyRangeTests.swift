@@ -10,7 +10,12 @@ import XCTest
 
 final class AnyRangeTests: XCTestCase {
   func testInitialization() {
-//    XCTAssertFalse(AnyRange<Int>(0..<10 as Range<Int>).isEmpty)
+    XCTAssertTrue(AnyRange<Character>().isEmpty)
+    XCTAssertFalse(AnyRange<Character>(...).isEmpty)
+    
+    XCTAssertFalse(AnyRange<Int>(0..<10).isEmpty)
+    XCTAssertTrue(AnyRange<Int>(0<.<1).isEmpty)
+    XCTAssertFalse(AnyRange<Double>(0<.<1.0).isEmpty)
   }
   
   static var allTests = [
