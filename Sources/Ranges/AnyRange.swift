@@ -78,6 +78,39 @@ extension AnyRange {
   }
 }
 
+extension AnyRange._Range {
+  /// - parameter bounds: A tuple of the lower and upper bounds of the range.
+  ///                     Initialized as a partial range if one of bounds is `nil`.
+  ///                     Initialized as a unbounded range if both bounds are `nil`.
+  /// - parameter including: Specify whether the bound is included or not.
+  /// - returns: an instance of `AnyRange<Bound>._Range`. Returns `nil` if no range can be formed.
+  fileprivate static func range(
+    bounds:(lower:Bound?, upper:Bound?),
+    including:(lowerBound:Bool, upperBound:Bool)
+  ) -> AnyRange<Bound>._Range? {
+    switch bounds {
+    case (nil, nil):
+      return .unboundedRange
+    case (let lower?, let upper?):
+      guard lower <= upper else { return nil }
+      switch including {
+      case (true, true):
+        return .closedRange(lower...upper)
+      case (true, false):
+        return .range(lower..<upper)
+      case (false, true):
+        return .leftOpenRange(lower<..upper)
+      case (false, false):
+        return .openRange(lower<.<upper)
+      }
+    case (let lower?, nil):
+      return including.lowerBound ? .partialRangeFrom(lower...) : .partialRangeGreaterThan(lower<..)
+    case (nil, let upper?):
+      return including.upperBound ? .partialRangeThrough(...upper) : .partialRangeUpTo(..<upper)
+    }
+  }
+}
+
 extension AnyRange {
   /// Returns whether the receiver represents an empty range or not.
   public var isEmpty: Bool {
