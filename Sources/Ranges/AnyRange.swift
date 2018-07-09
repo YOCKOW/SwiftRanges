@@ -78,36 +78,70 @@ extension AnyRange {
   }
 }
 
-extension AnyRange._Range {
-  /// - parameter bounds: A tuple of the lower and upper bounds of the range.
-  ///                     Initialized as a partial range if one of bounds is `nil`.
-  ///                     Initialized as a unbounded range if both bounds are `nil`.
-  /// - parameter including: Specify whether the bound is included or not.
-  /// - returns: an instance of `AnyRange<Bound>._Range`. Returns `nil` if no range can be formed.
-  fileprivate static func range(
-    bounds:(lower:Bound?, upper:Bound?),
+extension AnyRange {
+  private init(
+    _uncheckedBounds:(lower:Bound?, upper:Bound?),
     including:(lowerBound:Bool, upperBound:Bool)
-  ) -> AnyRange<Bound>._Range? {
-    switch bounds {
+  ) {
+    switch _uncheckedBounds {
     case (nil, nil):
-      return .unboundedRange
+      self.init(...)
     case (let lower?, let upper?):
-      guard lower <= upper else { return nil }
+      let bounds: (lower:Bound, upper:Bound) = (lower:lower, upper:upper)
       switch including {
       case (true, true):
-        return .closedRange(lower...upper)
+        self.init(ClosedRange<Bound>(uncheckedBounds:bounds))
       case (true, false):
-        return .range(lower..<upper)
+        self.init(Range<Bound>(uncheckedBounds:bounds))
       case (false, true):
-        return .leftOpenRange(lower<..upper)
+        self.init(LeftOpenRange<Bound>(uncheckedBounds:bounds))
       case (false, false):
-        return .openRange(lower<.<upper)
+        self.init(OpenRange<Bound>(uncheckedBounds:bounds))
       }
     case (let lower?, nil):
-      return including.lowerBound ? .partialRangeFrom(lower...) : .partialRangeGreaterThan(lower<..)
+      if including.lowerBound {
+        self.init(PartialRangeFrom<Bound>(lower))
+      } else {
+        self.init(PartialRangeGreaterThan<Bound>(lower))
+      }
     case (nil, let upper?):
-      return including.upperBound ? .partialRangeThrough(...upper) : .partialRangeUpTo(..<upper)
+      if including.upperBound {
+        self.init(PartialRangeThrough<Bound>(upper))
+      } else {
+        self.init(PartialRangeUpTo<Bound>(upper))
+      }
     }
+  }
+}
+extension AnyRange where Bound:Strideable, Bound.Stride: SignedInteger {
+  /// - parameter uncheckedBounds: A tuple of the lower and upper bounds of the range.
+  ///                              Initialized as a partial range if one of bounds is `nil`.
+  ///                              Initialized as a unbounded range if both bounds are `nil`.
+  /// - parameter including: Specify whether the bound is included or not.
+  /// - returns: an instance of `AnyRange<Bound>`.
+  public init(
+    uncheckedBounds:(lower:Bound?, upper:Bound?),
+    including:(lowerBound:Bool, upperBound:Bool)
+  ) {
+    if let lower = uncheckedBounds.lower, let upper = uncheckedBounds.upper,
+       !including.lowerBound, !including.upperBound {
+      self.init(OpenRange<Bound>(uncheckedBounds:(lower:lower, upper:upper)))
+    } else {
+      self.init(_uncheckedBounds:uncheckedBounds, including:including)
+    }
+  }
+}
+extension AnyRange {
+  /// - parameter uncheckedBounds: A tuple of the lower and upper bounds of the range.
+  ///                              Initialized as a partial range if one of bounds is `nil`.
+  ///                              Initialized as a unbounded range if both bounds are `nil`.
+  /// - parameter including: Specify whether the bound is included or not.
+  /// - returns: an instance of `AnyRange<Bound>`.
+  public init(
+    uncheckedBounds:(lower:Bound?, upper:Bound?),
+    including:(lowerBound:Bool, upperBound:Bool)
+  ) {
+    self.init(_uncheckedBounds:uncheckedBounds, including:including)
   }
 }
 
