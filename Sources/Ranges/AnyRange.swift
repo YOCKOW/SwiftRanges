@@ -31,6 +31,9 @@ public typealias AnyCountableRange<Bound> =
 extension AnyRange {
   fileprivate mutating func _init<R>(_ range:R) where R:RangeExpression, R.Bound == Bound {
     switch range {
+    case let any as AnyRange<Bound>:
+      self._range = any._range
+      
     case let closed as ClosedRange<Bound>:
       self._range = closed.isEmpty ? .empty : .closedRange(closed)
     case let leftOpen as LeftOpenRange<Bound>:
@@ -39,6 +42,7 @@ extension AnyRange {
         self._range = open.isEmpty ? .empty : .openRange(open)
     case let range as Range<Bound>:
       self._range = range.isEmpty ? .empty : .range(range)
+      
     case let from as PartialRangeFrom<Bound>:
       self._range = .partialRangeFrom(from)
     case let greater as PartialRangeGreaterThan<Bound>:
@@ -47,6 +51,7 @@ extension AnyRange {
       self._range = .partialRangeThrough(through)
     case let upTo as PartialRangeUpTo<Bound>:
       self._range = .partialRangeUpTo(upTo)
+      
     default:
       fatalError("Unimplemented Range")
     }
@@ -160,4 +165,61 @@ extension AnyRange {
     if case .empty = self._range { return true }
     return false
   }
+}
+
+extension AnyRange: RangeExpression {
+  public func relative<C>(to collection:C) -> Range<Bound> where C:Collection, Bound == C.Index {
+    switch self._range {
+    case .empty:
+      return collection.startIndex..<collection.startIndex
+    case .unboundedRange:
+      return collection.startIndex..<collection.endIndex
+      
+    case .closedRange(let range):
+      return range.relative(to:collection)
+    case .leftOpenRange(let range):
+      return range.relative(to:collection)
+    case .openRange(let range):
+      return range.relative(to:collection)
+    case .range(let range):
+      return range.relative(to:collection)
+      
+    case .partialRangeFrom(let range):
+      return range.relative(to:collection)
+    case .partialRangeGreaterThan(let range):
+      return range.relative(to:collection)
+    case .partialRangeThrough(let range):
+      return range.relative(to:collection)
+    case .partialRangeUpTo(let range):
+      return range.relative(to:collection)
+    }
+  }
+  
+  public func contains(_ element: Bound) -> Bool {
+    switch self._range {
+    case .empty:
+      return false
+    case .unboundedRange:
+      return true
+      
+    case .closedRange(let range):
+      return range.contains(element)
+    case .leftOpenRange(let range):
+      return range.contains(element)
+    case .openRange(let range):
+      return range.contains(element)
+    case .range(let range):
+      return range.contains(element)
+      
+    case .partialRangeFrom(let range):
+      return range.contains(element)
+    case .partialRangeGreaterThan(let range):
+      return range.contains(element)
+    case .partialRangeThrough(let range):
+      return range.contains(element)
+    case .partialRangeUpTo(let range):
+      return range.contains(element)
+    }
+  }
+  
 }
