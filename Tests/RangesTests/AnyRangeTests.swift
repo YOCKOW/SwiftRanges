@@ -18,8 +18,21 @@ final class AnyRangeTests: XCTestCase {
     XCTAssertFalse(AnyRange<Double>(0<.<1.0).isEmpty)
   }
   
+  func testOverlaps() {
+    // Detailed tests are in "OverlapTests.swift"
+    
+    XCTAssertFalse(AnyCountableRange<Int>(0..<10).overlaps(AnyCountableRange<Int>(9<..15)))
+    XCTAssertFalse(AnyCountableRange<Int>(0..<10).overlaps(AnyCountableRange<Int>(9<.<15)))
+    XCTAssertFalse(AnyCountableRange<Int>(0..<10).overlaps(AnyCountableRange<Int>(9<..)))
+    
+    XCTAssertFalse(AnyCountableRange<Int>(0<.<10).overlaps(AnyCountableRange<Int>(9<..15)))
+    XCTAssertFalse(AnyCountableRange<Int>(0<.<10).overlaps(AnyCountableRange<Int>(9<.<15)))
+    XCTAssertFalse(AnyCountableRange<Int>(0<.<10).overlaps(AnyCountableRange<Int>(9<..)))
+  }
+  
   static var allTests = [
     ("testInitialization", testInitialization),
+    ("testOverlaps", testOverlaps)
   ]
 }
 
