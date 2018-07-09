@@ -31,6 +31,7 @@ extension OpenRange {
 extension OpenRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:LeftOpenRange<Bound>) -> Bool {
     if self.isEmpty || other.isEmpty { return false }
     if other.lowerBound.distance(to:self.upperBound) <= 1 { return false }
@@ -58,6 +59,7 @@ extension OpenRange {
 extension OpenRange where Bound:Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:OpenRange<Bound>) -> Bool {
     if self.isEmpty || other.isEmpty { return false }
     if self.lowerBound.distance(to:other.upperBound) <= 1 { return false }
@@ -86,6 +88,7 @@ extension OpenRange {
 extension OpenRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:Range<Bound>) -> Bool {
     if self.isEmpty || other.isEmpty { return false }
     if self.lowerBound.distance(to:other.upperBound) <= 1 { return false }
@@ -116,6 +119,7 @@ extension OpenRange {
 extension OpenRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:PartialRangeGreaterThan<Bound>) -> Bool {
     if self.isEmpty { return false }
     return other.lowerBound.distance(to:self.upperBound) > 1
@@ -145,6 +149,7 @@ extension OpenRange {
 extension OpenRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:PartialRangeUpTo<Bound>) -> Bool {
     if self.isEmpty { return false }
     return self.lowerBound.distance(to:other.upperBound) > 1

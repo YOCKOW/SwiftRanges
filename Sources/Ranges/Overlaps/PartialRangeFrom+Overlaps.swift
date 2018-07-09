@@ -53,6 +53,14 @@ extension PartialRangeFrom {
   }
 }
 
+// PartialRangeGreaterThan
+extension PartialRangeFrom {
+  /// Returns `true`.
+  public func overlaps(_ other:PartialRangeGreaterThan<Bound>) -> Bool {
+    return true
+  }
+}
+
 // PartialRangeThrough
 extension PartialRangeFrom {
   /// Returns a Boolean value indicating whether this range and the given range contain an element

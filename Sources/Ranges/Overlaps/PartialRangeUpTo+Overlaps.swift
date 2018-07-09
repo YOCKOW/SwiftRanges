@@ -19,6 +19,7 @@ extension PartialRangeUpTo {
 extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:LeftOpenRange<Bound>) -> Bool {
     if other.isEmpty { return false }
     return other.lowerBound.distance(to:self.upperBound) > 1
@@ -37,6 +38,7 @@ extension PartialRangeUpTo {
 extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:OpenRange<Bound>) -> Bool {
     if other.isEmpty { return false }
     return other.lowerBound.distance(to:self.upperBound) > 1
@@ -74,6 +76,7 @@ extension PartialRangeUpTo {
 extension PartialRangeUpTo where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:PartialRangeGreaterThan<Bound>) -> Bool {
     return other.lowerBound.distance(to:self.upperBound) > 1
   }

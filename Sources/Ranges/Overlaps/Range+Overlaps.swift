@@ -23,6 +23,7 @@ extension Range {
 extension Range where Bound:Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:LeftOpenRange<Bound>) -> Bool {
     if self.isEmpty || other.isEmpty { return false }
     if other.lowerBound.distance(to:self.upperBound) <= 1 { return false }
@@ -50,6 +51,7 @@ extension Range {
 extension Range where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:OpenRange<Bound>) -> Bool {
     if self.isEmpty || other.isEmpty { return false }
     if other.lowerBound.distance(to:self.upperBound) <= 1 { return false }
@@ -90,6 +92,7 @@ extension Range {
 extension Range where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Returns a Boolean value indicating whether this range and the given range contain an element
   /// in common.
+  /// They will be handled as countable ranges.
   public func overlaps(_ other:PartialRangeGreaterThan<Bound>) -> Bool {
     if self.isEmpty { return false }
     if other.lowerBound.distance(to:self.upperBound) <= 1 { return false }
