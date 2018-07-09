@@ -118,7 +118,7 @@ extension AnyRange where Bound:Strideable, Bound.Stride: SignedInteger {
   ///                              Initialized as a partial range if one of bounds is `nil`.
   ///                              Initialized as a unbounded range if both bounds are `nil`.
   /// - parameter including: Specify whether the bound is included or not.
-  /// - returns: an instance of `AnyRange<Bound>`.
+  /// - returns: an instance of `AnyRange<Bound>`(`AnyCountableRange<Bound>`).
   public init(
     uncheckedBounds:(lower:Bound?, upper:Bound?),
     including:(lowerBound:Bool, upperBound:Bool)
@@ -142,6 +142,15 @@ extension AnyRange {
     including:(lowerBound:Bool, upperBound:Bool)
   ) {
     self.init(_uncheckedBounds:uncheckedBounds, including:including)
+  }
+}
+
+extension AnyRange {
+  /// Initialize an instance with a single value.
+  /// - parameter singleValue: The only value to be contained by the range.
+  /// - returns: A range that is equal to `AnyRange<Bound>(singleValue...singleValue)`
+  public init(singleValue:Bound) {
+    self.init(singleValue...singleValue)
   }
 }
 
