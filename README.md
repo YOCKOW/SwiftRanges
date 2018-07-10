@@ -37,7 +37,7 @@ print(openRange.contains(10)) // -> false
 print(openRange.contains(15)) // -> true
 print(openRange.contains(20)) // -> false
 
-let greaterThan: PartialRangeGreaterThan<Int> 10<..
+let greaterThan: PartialRangeGreaterThan<Int> = 10<..
 print(greaterThan.contains(10)) // -> false
 print(greaterThan.contains(Int.max)) // -> true
 ```
