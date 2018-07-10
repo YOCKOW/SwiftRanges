@@ -30,9 +30,65 @@ final class AnyRangeTests: XCTestCase {
     XCTAssertFalse(AnyCountableRange<Int>(0<.<10).overlaps(AnyCountableRange<Int>(9<..)))
   }
   
+  
+  func testComparison() {
+    let ranges: [AnyRange<Int>] = [
+      AnyRange<Int>(),
+      AnyRange<Int>(40<..),
+      AnyRange<Int>(40...),
+      AnyRange<Int>(20...40),
+      AnyRange<Int>(20<..40),
+      AnyRange<Int>(20<.<40),
+      AnyRange<Int>(20..<40),
+      AnyRange<Int>(20...30),
+      AnyRange<Int>(20<..30),
+      AnyRange<Int>(20<.<30),
+      AnyRange<Int>(20..<30),
+      AnyRange<Int>(10...30),
+      AnyRange<Int>(10<..30),
+      AnyRange<Int>(10<.<30),
+      AnyRange<Int>(10..<30),
+      AnyRange<Int>(...20),
+      AnyRange<Int>(..<20),
+      AnyRange<Int>(...),
+    ]
+    
+    let expected: [AnyRange<Int>] = [
+      AnyRange<Int>(...),
+      AnyRange<Int>(..<20),
+      AnyRange<Int>(...20),
+      AnyRange<Int>(10..<30),
+      AnyRange<Int>(10...30),
+      AnyRange<Int>(10<.<30),
+      AnyRange<Int>(10<..30),
+      AnyRange<Int>(20..<30),
+      AnyRange<Int>(20...30),
+      AnyRange<Int>(20..<40),
+      AnyRange<Int>(20...40),
+      AnyRange<Int>(20<.<30),
+      AnyRange<Int>(20<..30),
+      AnyRange<Int>(20<.<40),
+      AnyRange<Int>(20<..40),
+      AnyRange<Int>(40...),
+      AnyRange<Int>(40<..),
+      AnyRange<Int>(),
+    ]
+    
+    let sorted = ranges.sorted(by:<)
+    
+    precondition(expected.count == sorted.count)
+    
+    for ii in 0..<expected.count {
+      XCTAssertEqual(expected[ii], sorted[ii],
+                     "\(ii); expected: \(expected[ii]), actual:\(sorted[ii])")
+    }
+  }
+  
+  
   static var allTests = [
     ("testInitialization", testInitialization),
-    ("testOverlaps", testOverlaps)
+    ("testOverlaps", testOverlaps),
+    ("testComparison", testComparison),
   ]
 }
 

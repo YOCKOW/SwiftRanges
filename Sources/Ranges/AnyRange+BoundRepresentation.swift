@@ -94,3 +94,62 @@ extension AnyRange {
     self.init(_uncheckedBounds:uncheckedBounds)
   }
 }
+
+extension AnyRange {
+  public typealias Bounds = (lower:AnyRange.BoundRepresentation?, upper:AnyRange.BoundRepresentation?)
+  
+  /// Returns a pair of the lower bound and the upper bound.
+  /// Returns `nil` if the receiver represents an empty range.
+  /// Returns `(nil, nil)` if the receiver represents an unbounded range.
+  public var bounds:Bounds? {
+    switch self._range {
+    case .empty:
+      return nil
+    case .unboundedRange:
+      return (nil, nil)
+      
+    case .closedRange(let range):
+      return (
+        lower:BoundRepresentation(range.lowerBound, isIncluded:true),
+        upper:BoundRepresentation(range.upperBound, isIncluded:true)
+      )
+    case .leftOpenRange(let range):
+      return (
+        lower:BoundRepresentation(range.lowerBound, isIncluded:false),
+        upper:BoundRepresentation(range.upperBound, isIncluded:true)
+      )
+    case .openRange(let range):
+      return (
+        lower:BoundRepresentation(range.lowerBound, isIncluded:false),
+        upper:BoundRepresentation(range.upperBound, isIncluded:false)
+      )
+    case .range(let range):
+      return (
+        lower:BoundRepresentation(range.lowerBound, isIncluded:true),
+        upper:BoundRepresentation(range.upperBound, isIncluded:false)
+      )
+      
+    case .partialRangeFrom(let range):
+      return (
+        lower:BoundRepresentation(range.lowerBound, isIncluded:true),
+        upper:nil
+      )
+    case .partialRangeGreaterThan(let range):
+      return (
+        lower:BoundRepresentation(range.lowerBound, isIncluded:false),
+        upper:nil
+      )
+    case .partialRangeThrough(let range):
+      return (
+        lower:nil,
+        upper:BoundRepresentation(range.upperBound, isIncluded:true)
+      )
+    case .partialRangeUpTo(let range):
+      return (
+        lower:nil,
+        upper:BoundRepresentation(range.upperBound, isIncluded:false)
+      )
+      
+    }
+  }
+}
