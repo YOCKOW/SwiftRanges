@@ -9,7 +9,7 @@ matrix:
       language: ruby
       before_install:
         - export SYM_INSTALL_URL="https://gist.githubusercontent.com/YOCKOW/52756b7061c4e92ca960cf2ff9506560/raw/847fc88e5db0c488b610e2f7bc5f0e06c0b74892/symbolic-install"
-        - export SWIFT_ARCHIVE_URL="https://swift.org/builds/swift-4.2-branch/ubuntu1404/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-08-a/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-08-a-ubuntu14.04.tar.gz"
+        - export SWIFT_ARCHIVE_URL="https://swift.org/builds/swift-4.2-branch/ubuntu1404/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-09-a/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-09-a-ubuntu14.04.tar.gz"
         - curl ${SWIFT_ARCHIVE_URL} -o ../swift.tar.gz
         - mkdir ../swift
         - tar xzf ../swift.tar.gz -C ../swift --strip-components 2
