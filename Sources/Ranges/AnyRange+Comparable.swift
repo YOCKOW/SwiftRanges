@@ -7,12 +7,12 @@
 
 import Foundation
 
-private enum WhichBound {
+internal enum WhichBound {
   case lower, upper
 }
 
 extension AnyRange.BoundRepresentation {
-  fileprivate func _compare(_ other:AnyRange.BoundRepresentation, as bound:WhichBound) -> ComparisonResult {
+  internal func _compare(_ other:AnyRange.BoundRepresentation, as bound:WhichBound) -> ComparisonResult {
     if self.bound < other.bound { return .orderedAscending }
     if self.bound > other.bound { return .orderedDescending }
     

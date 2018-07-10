@@ -84,11 +84,47 @@ final class AnyRangeTests: XCTestCase {
     }
   }
   
+  func testConcatenation() {
+    let upTo10 = AnyRange<Int>(..<10)
+    let through10 = AnyRange<Int>(...10)
+    let upTo30 = AnyRange<Int>(..<30)
+    let through30 = AnyRange<Int>(...30)
+    
+    let from10 = AnyRange<Int>(10...)
+    let greater10 = AnyRange<Int>(10<..)
+    let from30 = AnyRange<Int>(30...)
+    let greater30 = AnyRange<Int>(30<..)
+    
+    let closed = AnyRange<Int>(20...25)
+    let leftOpen = AnyRange<Int>(20<..25)
+    let open = AnyRange<Int>(20<.<25)
+    let range = AnyRange<Int>(20..<25)
+    
+    let ranges: [AnyRange<Int>] = [
+      upTo10, through10, upTo30, through30,
+      from10, greater10, from30, greater30,
+      closed, leftOpen, open, range
+    ]
+    
+    for rr in ranges {
+      XCTAssertEqual(rr.concatenated(with:.empty), rr)
+      XCTAssertEqual(rr.concatenated(with:.unbounded), .unbounded)
+    }
+    
+    XCTAssertNil(upTo10.concatenated(with:greater10))
+    XCTAssertEqual(through10.concatenated(with:greater10), .unbounded)
+    XCTAssertEqual(upTo30.concatenated(with:closed), AnyRange<Int>(..<30))
+    XCTAssertEqual(open.concatenated(with:greater10), AnyRange<Int>(10<..))
+    XCTAssertNil(range.concatenated(with:from30))
+  }
+  
+  
   
   static var allTests = [
     ("testInitialization", testInitialization),
     ("testOverlaps", testOverlaps),
     ("testComparison", testComparison),
+    ("testConcatenation", testConcatenation),
   ]
 }
 

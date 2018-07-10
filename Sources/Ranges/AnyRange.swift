@@ -93,9 +93,23 @@ extension AnyRange {
 }
 
 extension AnyRange {
+  /// An instance of `AnyRange` representing an empty range.
+  public static var empty: AnyRange<Bound> { return AnyRange<Bound>() }
+  
+  /// An instance of `AnyRange` representing an unbounded range.
+  public static var unbounded: AnyRange<Bound> { return AnyRange<Bound>(...) }
+}
+
+extension AnyRange {
   /// Returns whether the receiver represents an empty range or not.
   public var isEmpty: Bool {
     if case .empty = self._range { return true }
+    return false
+  }
+  
+  /// Returns whether the receiver represents an unbounded range or not.
+  public var isUnboundedRange: Bool {
+    if case .unboundedRange = self._range { return true }
     return false
   }
 }
