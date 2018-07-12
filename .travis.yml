@@ -25,7 +25,7 @@ matrix:
         - export XCODE_ARCHIVE_URL="https://swift.org/builds/swift-4.2-branch/xcode/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-11-a/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-11-a-osx.pkg"
         - curl ${XCODE_ARCHIVE_URL} -o ./xcode.pkg
         - sudo installer -pkg ./xcode.pkg -target /
-        - export PATH=~/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin:$PATH
+        - export PATH=/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin:$PATH
 script:
   - swift build
   - swift build --configuration release
