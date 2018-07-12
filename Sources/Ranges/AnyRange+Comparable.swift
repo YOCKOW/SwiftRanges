@@ -7,25 +7,6 @@
 
 import Foundation
 
-internal enum WhichBound {
-  case lower, upper
-}
-
-extension AnyRange.BoundRepresentation {
-  internal func _compare(_ other:AnyRange.BoundRepresentation, as bound:WhichBound) -> ComparisonResult {
-    if self.bound < other.bound { return .orderedAscending }
-    if self.bound > other.bound { return .orderedDescending }
-    
-    // from here, self.bound == other.bound
-    if self.isIncluded == other.isIncluded { return .orderedSame }
-    if self.isIncluded {
-      // other is not included
-      return bound == .lower ? .orderedAscending : .orderedDescending
-    }
-    return bound == .lower ? .orderedDescending : .orderedAscending
-  }
-}
-
 extension AnyRange {
   /// Compare two ranges.
   ///
@@ -57,7 +38,7 @@ extension AnyRange {
       return .orderedAscending
     }
     
-    let compare: (BoundRepresentation?, BoundRepresentation?, WhichBound) -> ComparisonResult = {
+    let compare: (BoundRepresentation?, BoundRepresentation?, BoundRepresentation._WhichBound) -> ComparisonResult = {
       switch ($0, $1) {
       case (nil, nil):
         return .orderedSame

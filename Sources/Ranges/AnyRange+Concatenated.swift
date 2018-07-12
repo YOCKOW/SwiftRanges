@@ -37,11 +37,9 @@ extension AnyRange {
     
     let bounds = (less.bounds!, greater.bounds!)
     
-    let maxUpperBound: (BoundRepresentation?, BoundRepresentation?) -> BoundRepresentation? = {
-      if $0 == nil || $1 == nil { return nil }
-      return $0!._compare($1!, as:.upper) == .orderedAscending ? $1! : $0!
+    let maxUpperBound = {(b0:BoundRepresentation?, b1:BoundRepresentation?) -> BoundRepresentation? in
+      return AnyRange.BoundRepresentation._max(b0, b1, as:.upper)
     }
-    
     
     switch (bounds.0.lower, bounds.1.lower, bounds.0.upper, bounds.1.upper) {
     case (nil, nil, let upper0?, let upper1?):
