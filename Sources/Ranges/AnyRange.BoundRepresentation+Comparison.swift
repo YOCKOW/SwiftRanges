@@ -49,10 +49,12 @@ extension AnyRange.BoundRepresentation {
           if max._compare(bound, as:side) == .orderedAscending { nilableMax = bound }
         } else {
           // nilableMax == nil
-          if side == .lower { nilableMax = bound }
-          
-          // nilableMax must not be nil here if side == .upper
-          assertionFailure("nilableMax must not be nil.")
+          if side == .lower {
+            nilableMax = bound
+          } else {
+            // nilableMax must not be nil here if side == .upper
+            assertionFailure("nilableMax must not be nil.")
+          }
         }
       }
     }
@@ -79,10 +81,12 @@ extension AnyRange.BoundRepresentation {
           if min._compare(bound, as:side) == .orderedDescending { nilableMin = bound }
         } else {
           // nilableMin == nil
-          if side == .upper { nilableMin = bound }
-          
-          // nilableMin must not be nil here if side == .lower
-          assertionFailure("nilableMin must not be nil.")
+          if side == .upper {
+            nilableMin = bound
+          } else {
+            // nilableMin must not be nil here if side == .lower
+            assertionFailure("nilableMin must not be nil.")
+          }
         }
       }
     }

@@ -116,15 +116,24 @@ final class AnyRangeTests: XCTestCase {
     XCTAssertEqual(upTo30.concatenated(with:closed), AnyRange<Int>(..<30))
     XCTAssertEqual(open.concatenated(with:greater10), AnyRange<Int>(10<..))
     XCTAssertNil(range.concatenated(with:from30))
+    
+    // TODO: Add more test cases
   }
   
-  
+  func testIntersection() {
+    XCTAssertEqual(AnyRange<Int>(..<10).intersection(AnyRange<Int>(5...)), AnyRange<Int>(5..<10))
+    XCTAssertEqual(AnyRange<Int>(..<10).intersection(AnyRange<Int>(9<..)), .empty)
+    XCTAssertEqual(AnyRange<Int>(20<.<40).intersection(AnyRange<Int>(30<..60)), AnyRange<Int>(30<.<40))
+    XCTAssertEqual(AnyRange<Int>(50...).intersection(AnyRange<Int>(30<.<60)),  AnyRange<Int>(50..<60))
+    // TODO: Add more test cases
+  }
   
   static var allTests = [
     ("testInitialization", testInitialization),
     ("testOverlaps", testOverlaps),
     ("testComparison", testComparison),
     ("testConcatenation", testConcatenation),
+    ("testIntersection", testIntersection),
   ]
 }
 
