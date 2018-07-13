@@ -128,12 +128,54 @@ final class AnyRangeTests: XCTestCase {
     // TODO: Add more test cases
   }
   
+  
+  func testSubtracting() {
+    let equal: ((AnyRange<Int>, AnyRange<Int>?), (AnyRange<Int>, AnyRange<Int>?)) -> Bool = {
+      return $0.0 == $1.0 && $0.1 == $1.1
+    }
+    
+    XCTAssertTrue(equal(
+      AnyRange<Int>(...).subtracting(AnyRange<Int>(10...20)),
+      (AnyRange<Int>(..<10), AnyRange<Int>(20<..))
+    ))
+    
+    XCTAssertTrue(equal(
+      AnyRange<Int>(...100).subtracting(AnyRange<Int>(10<.<20)),
+      (AnyRange<Int>(...10), AnyRange<Int>(20...100))
+    ))
+    
+    
+    XCTAssertTrue(equal(
+      AnyRange<Int>(10<..).subtracting(AnyRange<Int>(20<..100)),
+      (AnyRange<Int>(10<..20), AnyRange<Int>(100<..))
+    ))
+    
+    XCTAssertTrue(equal(
+      AnyRange<Int>(10..<100).subtracting(AnyRange<Int>(20..<90)),
+      (AnyRange<Int>(10..<20), AnyRange<Int>(90..<100))
+    ))
+
+    XCTAssertTrue(equal(
+      AnyRange<Int>(10..<100).subtracting(AnyRange<Int>(20..<90)),
+      (AnyRange<Int>(10..<20), AnyRange<Int>(90..<100))
+    ))
+    
+    
+    XCTAssertTrue(equal(
+      AnyRange<Int>(10..<100).subtracting(AnyRange<Int>(...90)),
+      (AnyRange<Int>(90<.<100), nil)
+    ))
+    
+    // TODO: Add more test cases
+  }
+  
   static var allTests = [
     ("testInitialization", testInitialization),
     ("testOverlaps", testOverlaps),
     ("testComparison", testComparison),
     ("testConcatenation", testConcatenation),
     ("testIntersection", testIntersection),
+    ("testSubtracting", testSubtracting),
   ]
 }
 

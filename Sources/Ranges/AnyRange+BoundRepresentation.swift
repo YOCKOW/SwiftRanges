@@ -153,3 +153,10 @@ extension AnyRange {
     }
   }
 }
+
+
+extension AnyRange.BoundRepresentation {
+  internal static prefix func ~(_ rhs:AnyRange.BoundRepresentation) -> AnyRange.BoundRepresentation {
+    return AnyRange.BoundRepresentation(rhs.bound, isIncluded:!rhs.isIncluded)
+  }
+}
