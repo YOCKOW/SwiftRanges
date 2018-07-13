@@ -107,6 +107,11 @@ extension MultipleRanges {
   public mutating func insert(_:UnboundedRange) {
     self._ranges = [AnyRange<Bound>(...)]
   }
+  
+  /// Inserts a single value
+  public mutating func insert(singleValue value:Bound) {
+    self._insert(value...value)
+  }
 }
 
 extension MultipleRanges {
