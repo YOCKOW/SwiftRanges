@@ -68,10 +68,6 @@ extension AnyRange {
 }
 
 extension AnyRange {
-  public var isEmpty: Bool { return self._bounds == nil }
-}
-
-extension AnyRange {
   /// Creates a *countable* range from `range`.
   public init<T>(_ range:T)
     where T:GeneralizedRange, T.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
@@ -95,8 +91,28 @@ extension AnyRange {
   }
 }
 
+extension AnyRange {
+  /// Creates an empty range.
+  public init() {
+    self.init(checkedBounds:nil)
+  }
+  
+  /// Creates an unbounded range.
+  public init(_:UnboundedRange) {
+    self.init(checkedBounds:(lower:nil, upper:nil))
+  }
+}
+
 extension AnyRange: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     return self._bounds
+  }
+}
+
+extension AnyRange {
+  public var isEmpty: Bool { return self._bounds == nil }
+  public var isUnbounded: Bool {
+    guard let bounds = self._bounds else { return false }
+    return bounds.lower == nil && bounds.upper == nil
   }
 }
