@@ -101,6 +101,12 @@ extension AnyRange {
   public init(_:UnboundedRange) {
     self.init(checkedBounds:(lower:nil, upper:nil))
   }
+  
+  /// An instance of `AnyRange` representing an empty range.
+  public static var empty: AnyRange<Bound> { return AnyRange<Bound>() }
+  
+  /// An instance of `AnyRange` representing an unbounded range.
+  public static var unbounded: AnyRange<Bound> { return AnyRange<Bound>(...) }
 }
 
 extension AnyRange: GeneralizedRange {
