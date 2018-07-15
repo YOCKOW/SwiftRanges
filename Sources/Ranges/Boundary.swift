@@ -22,6 +22,9 @@ public struct Boundary<Bound> where Bound: Comparable {
   }
 }
 
+public typealias CountableBoundary<Bound> =
+  Boundary<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
+
 extension Boundary: Equatable {
   public static func ==(lhs:Boundary<Bound>, rhs:Boundary<Bound>) -> Bool {
     return lhs.bound == rhs.bound && lhs.isIncluded == rhs.isIncluded
