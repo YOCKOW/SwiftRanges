@@ -32,7 +32,7 @@ extension PartialRangeGreaterThan: Equatable {
 
 extension PartialRangeGreaterThan: Hashable where Bound: Hashable {
   public var hashValue: Int {
-    return self.lowerBound
+    return self.lowerBound.hashValue
   }
 }
 
