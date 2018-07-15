@@ -84,3 +84,9 @@ extension AnyRange {
     self.init(uncheckedBounds:range.bounds)
   }
 }
+
+extension AnyRange: GeneralizedRange {
+  public var bounds: Bounds<Bound>? {
+    return self._bounds
+  }
+}
