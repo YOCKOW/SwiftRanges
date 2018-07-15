@@ -76,12 +76,22 @@ extension AnyRange {
   public init<T>(_ range:T)
     where T:GeneralizedRange, T.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
-    self.init(uncheckedBounds:range.bounds)
+    if case let any as AnyRange<Bound> = range {
+      // `bounds` must have been already checked if it is an instance of `AnyRange`.
+      self.init(checkedBounds:any.bounds)
+    } else {
+      self.init(uncheckedBounds:range.bounds)
+    }
   }
   
   /// Creates a range form `range`.
   public init<T>(_ range:T) where T:GeneralizedRange, T.Bound == Bound {
-    self.init(uncheckedBounds:range.bounds)
+    if case let any as AnyRange<Bound> = range {
+      // `bounds` must have been already checked if it is an instance of `AnyRange`.
+      self.init(checkedBounds:any.bounds)
+    } else {
+      self.init(uncheckedBounds:range.bounds)
+    }
   }
 }
 
