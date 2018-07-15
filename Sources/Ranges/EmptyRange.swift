@@ -22,8 +22,8 @@ extension EmptyRange: Equatable {
 }
 
 extension EmptyRange: Hashable where Bound: Hashable {
-  public func hash(into hasher:inout Hasher) {
-    hasher.combine(0)
+  public var hashValue: Int {
+    return 0
   }
 }
 

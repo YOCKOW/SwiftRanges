@@ -31,8 +31,8 @@ extension PartialRangeGreaterThan: Equatable {
 }
 
 extension PartialRangeGreaterThan: Hashable where Bound: Hashable {
-  public func hash(into hasher:inout Hasher) {
-    hasher.combine(self.lowerBound)
+  public var hashValue: Int {
+    return self.lowerBound
   }
 }
 
