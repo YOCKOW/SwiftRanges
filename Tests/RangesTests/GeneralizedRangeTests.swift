@@ -13,6 +13,14 @@ final class GeneralizedRangeTests: XCTestCase {
     XCTAssertFalse(EmptyRange<Double>() == TangibleUnboundedRange<Double>())
     XCTAssertTrue(EmptyRange<Int>() > TangibleUnboundedRange<Int>())
     XCTAssertTrue(0...10 > 0..<10)
+    
+    XCTAssertTrue(EmptyRange<Double>() == ())
+    XCTAssertTrue(() == EmptyRange<Int>())
+    XCTAssertTrue(10..<20 < ())
+    XCTAssertTrue((...) <= 100...200)
+    XCTAssertTrue((...) < ())
+    
+    // TODO: Add more test cases
   }
   
   func testIntersection() {
