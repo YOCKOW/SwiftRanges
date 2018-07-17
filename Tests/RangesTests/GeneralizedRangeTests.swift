@@ -29,6 +29,9 @@ final class GeneralizedRangeTests: XCTestCase {
     XCTAssertTrue((0...).intersection(..<15) == 0..<15)
     XCTAssertTrue((..<100).intersection(90<..) == 90<.<100)
     XCTAssertTrue((..<100).intersection(99<..) == .empty)
+    
+    XCTAssertTrue((0...100).intersection(()) == .empty)
+    XCTAssertTrue((0...100).intersection((...)) == 0...100)
   }
   
   static var allTests = [

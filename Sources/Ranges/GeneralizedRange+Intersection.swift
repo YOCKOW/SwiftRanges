@@ -33,4 +33,14 @@ extension GeneralizedRange {
   {
     return AnyRange(uncheckedBounds:_intersection(self.bounds, other.bounds))
   }
+  
+  /// Returns `.empty`.
+  public func intersection(_:()) -> AnyRange<Bound> {
+    return .empty
+  }
+  
+  /// Returns `AnyRange<Bound>(self)`
+  public func intersection(_:UnboundedRange) -> AnyRange<Bound> {
+    return AnyRange<Bound>(self)
+  }
 }
