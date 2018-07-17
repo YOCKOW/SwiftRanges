@@ -25,6 +25,7 @@ final class GeneralizedRangeTests: XCTestCase {
   
   static var allTests = [
     ("testComparison", testComparison),
+    ("testIntersection", testIntersection),
   ]
 }
 
