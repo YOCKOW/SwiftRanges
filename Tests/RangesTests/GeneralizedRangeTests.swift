@@ -34,9 +34,17 @@ final class GeneralizedRangeTests: XCTestCase {
     XCTAssertTrue((0...100).intersection((...)) == 0...100)
   }
   
+  func testOverlaps() {
+    XCTAssertFalse((0...100).overlaps(()))
+    XCTAssertTrue((0...100).overlaps(...))
+    XCTAssertTrue((0...100).overlaps(10<.<20))
+    XCTAssertFalse((0...100).overlaps(100<.<200))
+  }
+  
   static var allTests = [
     ("testComparison", testComparison),
     ("testIntersection", testIntersection),
+    ("testOverlaps", testOverlaps),
   ]
 }
 
