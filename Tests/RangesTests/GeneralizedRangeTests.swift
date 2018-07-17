@@ -20,7 +20,7 @@ final class GeneralizedRangeTests: XCTestCase {
     XCTAssertTrue((0..<10).intersection(10..<15) == EmptyRange<Int>())
     XCTAssertTrue((0...).intersection(..<15) == 0..<15)
     XCTAssertTrue((..<100).intersection(90<..) == 90<.<100)
-    XCTAssertTrue((..<100).intersection(99<..).isEmpty)
+    XCTAssertTrue((..<100).intersection(99<..) == .empty)
   }
   
   static var allTests = [

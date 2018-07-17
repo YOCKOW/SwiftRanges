@@ -122,3 +122,9 @@ extension AnyRange {
     return bounds.lower == nil && bounds.upper == nil
   }
 }
+
+extension AnyRange: Equatable {
+  public static func ==(lhs:AnyRange, rhs:AnyRange) -> Bool {
+    return lhs.compare(rhs) == .orderedSame
+  }
+}
