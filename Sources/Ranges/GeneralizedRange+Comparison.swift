@@ -79,6 +79,10 @@ extension GeneralizedRange {
     return lhs.compare(rhs) == .orderedSame
   }
   
+  public static func != <T>(lhs:Self, rhs:T) -> Bool where T:GeneralizedRange, T.Bound == Self.Bound {
+    return lhs.compare(rhs) != .orderedSame
+  }
+  
   public static func < <T>(lhs:Self, rhs:T) -> Bool where T:GeneralizedRange, T.Bound == Self.Bound {
     return lhs.compare(rhs) == .orderedAscending
   }
