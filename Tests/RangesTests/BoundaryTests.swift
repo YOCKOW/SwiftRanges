@@ -28,13 +28,13 @@ final class BoundaryTests: XCTestCase {
     XCTAssertEqual(boundary1._compare(boundary3, as:.upper), .orderedAscending)
     
     
-    XCTAssertEqual(Boundary._min(boundary1, boundary2, boundary3, boundary4, as:.lower),
+    XCTAssertEqual(_min(boundary1, boundary2, boundary3, boundary4, as:.lower),
                    boundary1)
-    XCTAssertEqual(Boundary._min(boundary1, boundary2, boundary3, boundary4, as:.upper),
+    XCTAssertEqual(_min(boundary1, boundary2, boundary3, boundary4, as:.upper),
                    boundary2)
-    XCTAssertEqual(Boundary._max(boundary1, boundary2, boundary3, boundary4, as:.lower),
+    XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, as:.lower),
                    boundary4)
-    XCTAssertEqual(Boundary._max(boundary1, boundary2, boundary3, boundary4, as:.upper),
+    XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, as:.upper),
                    boundary3)
     
   }

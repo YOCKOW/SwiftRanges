@@ -28,69 +28,70 @@ extension Boundary {
   }
 }
 
-extension Boundary {
-  internal static func _max(
-    _ firstBoundary:Boundary?,
-    _ otherBoundaries:Boundary?...,
-    as side:Boundary._Side) -> Boundary?
-  {
-    if firstBoundary == nil && side == .upper { return nil }
-    var nilableMax: Boundary? = firstBoundary
-    
-    for nilableBoundary in otherBoundaries {
-      switch (nilableBoundary, side) {
-      case (nil, .lower):
-        break
-      case (nil, .upper):
-        return nil
-      case (let boundary?, _):
-        if let max = nilableMax {
-          if max._compare(boundary, as:side) == .orderedAscending { nilableMax = boundary }
+internal func _max<Bound>(
+  _ firstBoundary:Boundary<Bound>?,
+  _ otherBoundaries:Boundary<Bound>?...,
+  as side:Boundary<Bound>._Side
+  ) -> Boundary<Bound>? where Bound: Comparable
+{
+  if firstBoundary == nil && side == .upper { return nil }
+  var nilableMax: Boundary? = firstBoundary
+  
+  for nilableBoundary in otherBoundaries {
+    switch (nilableBoundary, side) {
+    case (nil, .lower):
+      break
+    case (nil, .upper):
+      return nil
+    case (let boundary?, _):
+      if let max = nilableMax {
+        if max._compare(boundary, as:side) == .orderedAscending { nilableMax = boundary }
+      } else {
+        // nilableMax == nil
+        if side == .lower {
+          nilableMax = boundary
         } else {
-          // nilableMax == nil
-          if side == .lower {
-            nilableMax = boundary
-          } else {
-            // nilableMax must not be nil here if side == .upper
-            assertionFailure("nilableMax must not be nil.")
-          }
+          // nilableMax must not be nil here if side == .upper
+          assertionFailure("nilableMax must not be nil.")
         }
       }
     }
-    
-    return nilableMax
   }
   
-  internal static func _min(
-    _ firstBoundary:Boundary?,
-    _ otherBoundaries:Boundary?...,
-    as side:Boundary._Side) -> Boundary?
-  {
-    if firstBoundary == nil && side == .lower { return nil }
-    var nilableMin: Boundary? = firstBoundary
-    
-    for nilableBoundary in otherBoundaries {
-      switch (nilableBoundary, side) {
-      case (nil, .lower):
-        return nil
-      case (nil, .upper):
-        break
-      case (let boundary?, _):
-        if let min = nilableMin {
-          if min._compare(boundary, as:side) == .orderedDescending { nilableMin = boundary }
+  return nilableMax
+}
+
+internal func _min<Bound>(
+  _ firstBoundary:Boundary<Bound>?,
+  _ otherBoundaries:Boundary<Bound>?...,
+  as side:Boundary<Bound>._Side
+  ) -> Boundary<Bound>? where Bound: Comparable
+{
+  if firstBoundary == nil && side == .lower { return nil }
+  var nilableMin: Boundary? = firstBoundary
+  
+  for nilableBoundary in otherBoundaries {
+    switch (nilableBoundary, side) {
+    case (nil, .lower):
+      return nil
+    case (nil, .upper):
+      break
+    case (let boundary?, _):
+      if let min = nilableMin {
+        if min._compare(boundary, as:side) == .orderedDescending { nilableMin = boundary }
+      } else {
+        // nilableMin == nil
+        if side == .upper {
+          nilableMin = boundary
         } else {
-          // nilableMin == nil
-          if side == .upper {
-            nilableMin = boundary
-          } else {
-            // nilableMin must not be nil here if side == .lower
-            assertionFailure("nilableMin must not be nil.")
-          }
+          // nilableMin must not be nil here if side == .lower
+          assertionFailure("nilableMin must not be nil.")
         }
       }
     }
-    
-    return nilableMin
   }
+  
+  return nilableMin
 }
+
 

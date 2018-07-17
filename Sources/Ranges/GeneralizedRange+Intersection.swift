@@ -13,8 +13,8 @@ private func _intersection<Bound>(_ lb:Bounds<Bound>?, _ rb:Bounds<Bound>?) -> B
     return nil
   }
   
-  let lower = Boundary._max(leftBounds.lower, rightBounds.lower, as:.lower)
-  let upper = Boundary._min(leftBounds.upper, rightBounds.upper, as:.upper)
+  let lower = _max(leftBounds.lower, rightBounds.lower, as:.lower)
+  let upper = _min(leftBounds.upper, rightBounds.upper, as:.upper)
   
   return (lower:lower, upper:upper)
 }
