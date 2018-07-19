@@ -42,7 +42,7 @@ private func _concatenating<Bound>(_ b0:Bounds<Bound>, _ b1:Bounds<Bound>) -> Bo
 extension GeneralizedRange {
   /// Concatenate two ranges if possible.
   /// Returns `nil` if the two ranges are apart.
-  /// *This method is independent on countability*
+  /// *This method is independent from countability*
   public func concatenating<R>(_ other:R) -> AnyRange<Bound>?
     where R:GeneralizedRange, R.Bound == Bound
   {
