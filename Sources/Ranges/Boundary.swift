@@ -30,3 +30,10 @@ extension Boundary: Equatable {
     return lhs.bound == rhs.bound && lhs.isIncluded == rhs.isIncluded
   }
 }
+
+extension Boundary {
+  internal static prefix func ~(_ boundary:Boundary<Bound>) -> Boundary<Bound> {
+    return Boundary<Bound>(bound:boundary.bound,
+                           isIncluded:!boundary.isIncluded)
+  }
+}

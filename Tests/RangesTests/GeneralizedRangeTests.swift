@@ -49,11 +49,28 @@ final class GeneralizedRangeTests: XCTestCase {
     XCTAssertTrue((...400).concatenating(100...)! == (...))
   }
   
+  func testSubtraction() {
+    var subtracted = (0...100).subtracting(20...80)
+    XCTAssertTrue(subtracted.0 == 0..<20)
+    XCTAssertNotNil(subtracted.1)
+    XCTAssertTrue(subtracted.1! == 80<..100)
+    
+    subtracted = TangibleUnboundedRange<Int>().subtracting(20<.<80)
+    XCTAssertTrue(subtracted.0 == ...20)
+    XCTAssertNotNil(subtracted.1)
+    XCTAssertTrue(subtracted.1! == 80...)
+    
+    subtracted = (10<.<20).subtracting(11...19)
+    XCTAssertTrue(subtracted.0 == .empty)
+    XCTAssertNil(subtracted.1)
+  }
+  
   static var allTests = [
     ("testComparison", testComparison),
     ("testIntersection", testIntersection),
     ("testOverlaps", testOverlaps),
     ("testConcatenation", testConcatenation),
+    ("testSubtraction", testSubtraction),
   ]
 }
 
