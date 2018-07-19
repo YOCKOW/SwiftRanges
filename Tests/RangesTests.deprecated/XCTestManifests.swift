@@ -4,13 +4,12 @@ import XCTest
 public func allTests() -> [XCTestCaseEntry] {
   return [
     testCase(AnyRangeTests.allTests),
-    
-    testCase(BoundaryTests.allTests),
     testCase(ExcludedLowerBoundTests.allTests),
-    testCase(GeneralizedRangeTests.allTests),
-    
+    testCase(ExistingRanges_OverlapTests.allTests),
+    testCase(MultipleRangesTests.allTests),
     testCase(LeftOpenRangeTests.allTests),
     testCase(OpenRangeTests.allTests),
+    testCase(OverlapTests.allTests),
     testCase(PartialRangeGreaterThanTests.allTests),
   ]
 }

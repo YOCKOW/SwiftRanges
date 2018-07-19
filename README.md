@@ -19,12 +19,28 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 # Requirements
 
-- Swift 4.1
+- Swift 4.2
 - macOS or Linux
 
 # Usage
 
-*in printing*
+```
+import Ranges
+
+let leftOpenRange: LeftOpenRange<Int> = 10<..20
+print(leftOpenRange.contains(10)) // -> false
+print(leftOpenRange.contains(15)) // -> true
+print(leftOpenRange.contains(20)) // -> true
+
+let openRange: OpenRange<Int> = 10<.<20
+print(openRange.contains(10)) // -> false
+print(openRange.contains(15)) // -> true
+print(openRange.contains(20)) // -> false
+
+let greaterThan: PartialRangeGreaterThan<Int> = 10<..
+print(greaterThan.contains(10)) // -> false
+print(greaterThan.contains(Int.max)) // -> true
+```
 
 # License
 
