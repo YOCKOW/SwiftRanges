@@ -41,10 +41,19 @@ final class GeneralizedRangeTests: XCTestCase {
     XCTAssertFalse((0...100).overlaps(100<.<200))
   }
   
+  func testConcatenation() {
+    XCTAssertNil((0..<100).concatenating(100<..200))
+    XCTAssertTrue((0..<100).concatenating(100..<200)! == 0..<200)
+    XCTAssertTrue((...400).concatenating(100..<200)! == ...400)
+    XCTAssertTrue((0<.<10).concatenating(())! == 0<.<10)
+    XCTAssertTrue((...400).concatenating(100...)! == (...))
+  }
+  
   static var allTests = [
     ("testComparison", testComparison),
     ("testIntersection", testIntersection),
     ("testOverlaps", testOverlaps),
+    ("testConcatenation", testConcatenation),
   ]
 }
 
