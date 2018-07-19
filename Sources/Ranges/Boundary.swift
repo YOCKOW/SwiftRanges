@@ -31,6 +31,8 @@ extension Boundary: Equatable {
   }
 }
 
+extension Boundary: Hashable where Bound:Hashable {}
+
 extension Boundary {
   internal static prefix func ~(_ boundary:Boundary<Bound>) -> Boundary<Bound> {
     return Boundary<Bound>(bound:boundary.bound,

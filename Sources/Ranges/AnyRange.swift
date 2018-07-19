@@ -128,3 +128,10 @@ extension AnyRange: Equatable {
     return lhs.compare(rhs) == .orderedSame
   }
 }
+
+extension AnyRange:Hashable where Bound:Hashable {
+  public func hash(into hasher:inout Hasher) {
+    hasher.combine(self.bounds?.lower)
+    hasher.combine(self.bounds?.upper)
+  }
+}
