@@ -21,17 +21,33 @@ final class OpenRangeTests: XCTestCase {
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
+  func testAsGeneralizedRange() {
+    let bounds = (0<.<5).bounds
+    
+    XCTAssertNotNil(bounds)
+    XCTAssertNotNil(bounds?.lower)
+    XCTAssertEqual(bounds?.lower?.bound, 0)
+    XCTAssertEqual(bounds?.lower?.isIncluded, false)
+    XCTAssertNotNil(bounds?.upper)
+    XCTAssertEqual(bounds?.upper?.bound, 5)
+    XCTAssertEqual(bounds?.upper?.isIncluded, false)
+  }
+  
   func testEmptiness() {
-    XCTAssertTrue((10<.<10).isEmpty)
-    XCTAssertTrue((10<.<11).isEmpty)
-    XCTAssertTrue((1.0<.<1.0).isEmpty)
-    XCTAssertFalse((1.0<.<1.1).isEmpty)
+    XCTAssertTrue(CountableOpenRange(uncheckedBounds:(lower:10, upper:10)).isEmpty)
+    XCTAssertTrue(CountableOpenRange(uncheckedBounds:(lower:10, upper:11)).isEmpty) // empty!!
+    XCTAssertFalse(CountableOpenRange(uncheckedBounds:(lower:10, upper:12)).isEmpty)
+    
+    XCTAssertTrue(OpenRange(uncheckedBounds:(lower:1.0, upper:1.0)).isEmpty)
+    XCTAssertFalse(OpenRange(uncheckedBounds:(lower:1.0, upper:1.1)).isEmpty)
+    XCTAssertFalse(OpenRange(uncheckedBounds:(lower:1.0, upper:1.2)).isEmpty)
   }
   
   
   
   static var allTests = [
     ("testAsRangeExpression", testAsRangeExpression),
+    ("testAsGeneralizedRange", testAsGeneralizedRange),
     ("testEmptiness", testEmptiness),
   ]
 }

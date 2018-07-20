@@ -24,7 +24,48 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 # Usage
 
-*in printing*
+```
+import Ranges
+
+let leftOpenRange: LeftOpenRange<Int> = 10<..20
+print(leftOpenRange.contains(10)) // -> false
+print(leftOpenRange.contains(15)) // -> true
+print(leftOpenRange.contains(20)) // -> true
+
+let openRange: OpenRange<Int> = 10<.<20
+print(openRange.contains(10)) // -> false
+print(openRange.contains(15)) // -> true
+print(openRange.contains(20)) // -> false
+
+let greaterThan: PartialRangeGreaterThan<Int> = 10<..
+print(greaterThan.contains(10)) // -> false
+print(greaterThan.contains(Int.max)) // -> true
+
+print(greaterThan.overlaps(...11)) // -> true
+print(greaterThan.overlaps(..<11)) // -> false
+                                   // Because there is no integer in "10<.<11"
+
+var multi = MultipleRanges<Int>()
+multi.insert(10...20) 
+multi.insert(30...40)
+print(multi.contains(15)) // -> true
+print(multi.contains(25)) // -> false
+print(multi.contains(35)) // -> true
+
+multi.subtract(15...35)
+print(multi.contains(15)) // -> false
+print(multi.contains(20)) // -> false
+print(multi.contains(25)) // -> false
+print(multi.contains(30)) // -> false
+print(multi.contains(35)) // -> false
+
+```
+
+Other methods like `Set` are also implemented in `MultipleRanges`:
+* `intersection(_:)`
+* `union(_:)`
+* `symmetricDifference(_:)`
+
 
 # License
 
