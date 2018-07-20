@@ -12,6 +12,8 @@ public func allTests() -> [XCTestCaseEntry] {
     testCase(LeftOpenRangeTests.allTests),
     testCase(OpenRangeTests.allTests),
     testCase(PartialRangeGreaterThanTests.allTests),
+    
+    testCase(MultipleRangesTests.allTests),
   ]
 }
 #endif
