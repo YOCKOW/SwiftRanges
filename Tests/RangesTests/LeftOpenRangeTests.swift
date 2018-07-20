@@ -20,8 +20,21 @@ final class LeftOpenRangeTests: XCTestCase {
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
+  func testAsGeneralizedRange() {
+    let bounds = (0<..5).bounds
+    
+    XCTAssertNotNil(bounds)
+    XCTAssertNotNil(bounds?.lower)
+    XCTAssertEqual(bounds?.lower?.bound, 0)
+    XCTAssertEqual(bounds?.lower?.isIncluded, false)
+    XCTAssertNotNil(bounds?.upper)
+    XCTAssertEqual(bounds?.upper?.bound, 5)
+    XCTAssertEqual(bounds?.upper?.isIncluded, true)
+  }
+  
   static var allTests = [
     ("testAsRangeExpression", testAsRangeExpression),
+    ("testAsGeneralizedRange", testAsGeneralizedRange),
   ]
 }
 

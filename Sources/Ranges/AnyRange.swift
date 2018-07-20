@@ -4,84 +4,149 @@
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
+ 
 
-/// # AnyRange
-/// A container for ranges.
-public struct AnyRange<Bound> where Bound: Comparable {
-  internal enum _Range {
-    case empty
-    case unboundedRange
-    case closedRange(ClosedRange<Bound>)
-    case leftOpenRange(LeftOpenRange<Bound>)
-    case openRange(OpenRange<Bound>)
-    case range(Range<Bound>)
-    case partialRangeFrom(PartialRangeFrom<Bound>)
-    case partialRangeGreaterThan(PartialRangeGreaterThan<Bound>)
-    case partialRangeThrough(PartialRangeThrough<Bound>)
-    case partialRangeUpTo(PartialRangeUpTo<Bound>)
+/// # AnyRange<Bound>
+///
+/// A type-erased range of `Bound`.
+public struct AnyRange<Bound> where Bound:Comparable {
+  private let _bounds: Bounds<Bound>?
+  
+  private init(checkedBounds:Bounds<Bound>?) {
+    // `checkedBounds` must have been checked for its validity before this initializer is called.
+    self._bounds = checkedBounds
   }
   
-  internal var _range: _Range = .empty
-}
-
-/// A container for countable ranges.
-public typealias AnyCountableRange<Bound> =
-  AnyRange<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
-
-extension AnyRange {
-  fileprivate mutating func _init<R>(_ range:R) where R:RangeExpression, R.Bound == Bound {
-    switch range {
-    case let closed as ClosedRange<Bound>:
-      self._range = closed.isEmpty ? .empty : .closedRange(closed)
-    case let leftOpen as LeftOpenRange<Bound>:
-      self._range = leftOpen.isEmpty ? .empty : .leftOpenRange(leftOpen)
-    case let open as OpenRange<Bound>:
-        self._range = open.isEmpty ? .empty : .openRange(open)
-    case let range as Range<Bound>:
-      self._range = range.isEmpty ? .empty : .range(range)
-    case let from as PartialRangeFrom<Bound>:
-      self._range = .partialRangeFrom(from)
-    case let greater as PartialRangeGreaterThan<Bound>:
-      self._range = .partialRangeGreaterThan(greater)
-    case let through as PartialRangeThrough<Bound>:
-      self._range = .partialRangeThrough(through)
-    case let upTo as PartialRangeUpTo<Bound>:
-      self._range = .partialRangeUpTo(upTo)
-    default:
-      fatalError("Unimplemented Range")
+  private init(_uncheckedBounds:Bounds<Bound>?) {
+    guard let lower = _uncheckedBounds?.lower, let upper = _uncheckedBounds?.upper else {
+      // Not required to be checked for its emptiness.
+      self.init(checkedBounds:_uncheckedBounds)
+      return
     }
-  }
-}
-
-extension AnyRange {
-  /// Initialize with an existing range.
-  /// `range` must be "countable".
-  public init<R>(_ range:R)
-    where R:RangeExpression, R.Bound == Bound, Bound:Strideable, Bound.Stride: SignedInteger {
     
-    // Emptiness of `OpenRange` depends on its countability.
-    if case let open as OpenRange<Bound> = range {
-      self._range = open.isEmpty ? .empty : .openRange(open)
-    } else {
-      self._init(range)
+    guard lower.bound <= upper.bound else {
+      self.init(checkedBounds:nil)
+      return
     }
+    
+    if lower.bound == upper.bound {
+      guard lower.isIncluded && upper.isIncluded else {
+        self.init(checkedBounds:nil)
+        return
+      }
+    }
+    
+    // true is...
+    // `lower.bound < upper.bound` or
+    // `lower.bound == upper.bound && lower.isIncluded && upper.isIncluded`
+    self.init(checkedBounds:_uncheckedBounds)
   }
-  
-  /// Initialize with an existing range.
-  public init<R>(_ range:R) where R:RangeExpression, R.Bound == Bound {
-    self._init(range)
-  }
-  
-  /// Initialize with an unbounded range.
-  public init(_:UnboundedRange) {
-    self._range = .unboundedRange
+}
+
+extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
+  /// Creates a *countable* range.
+  /// Pass `nil` if you want to create a instance that represents an empty range.
+  public init(uncheckedBounds bounds:Bounds<Bound>?) {
+    // Emptiness of Open Range depends on countability.
+    if let lower = bounds?.lower, let upper = bounds?.upper, !lower.isIncluded, !upper.isIncluded {
+      // It is OpenRange<Bound>.
+      if OpenRange<Bound>(uncheckedBounds:(lower:lower.bound, upper:upper.bound)).isEmpty {
+        self.init(uncheckedBounds:nil)
+        return
+      }
+    }
+    self.init(_uncheckedBounds:bounds)
   }
 }
 
 extension AnyRange {
-  /// Returns whether the receiver represents an empty range or not.
-  public var isEmpty: Bool {
-    if case .empty = self._range { return true }
-    return false
+  /// Creates a range.
+  /// Pass `nil` if you want to create a instance that represents an empty range.
+  public init(uncheckedBounds bounds: Bounds<Bound>?) {
+    self.init(_uncheckedBounds:bounds)
   }
+}
+
+extension AnyRange {
+  /// Creates a *countable* range from `range`.
+  public init<T>(_ range:T)
+    where T:GeneralizedRange, T.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
+  {
+    if case let any as AnyRange<Bound> = range {
+      // `bounds` must have been already checked if it is an instance of `AnyRange`.
+      self.init(checkedBounds:any.bounds)
+    } else {
+      self.init(uncheckedBounds:range.bounds)
+    }
+  }
+  
+  /// Creates a range form `range`.
+  public init<T>(_ range:T) where T:GeneralizedRange, T.Bound == Bound {
+    if case let any as AnyRange<Bound> = range {
+      // `bounds` must have been already checked if it is an instance of `AnyRange`.
+      self.init(checkedBounds:any.bounds)
+    } else {
+      self.init(uncheckedBounds:range.bounds)
+    }
+  }
+}
+
+extension AnyRange {
+  /// Creates a range that contains only the indicated value.
+  public init(singleValue:Bound) {
+    self.init(singleValue...singleValue)
+  }
+}
+
+extension AnyRange {
+  /// Creates an empty range.
+  public init() {
+    self.init(checkedBounds:nil)
+  }
+  
+  /// Creates an unbounded range.
+  public init(_:UnboundedRange) {
+    self.init(checkedBounds:(lower:nil, upper:nil))
+  }
+  
+  /// An instance of `AnyRange` representing an empty range.
+  public static var empty: AnyRange<Bound> { return AnyRange<Bound>() }
+  
+  /// An instance of `AnyRange` representing an unbounded range.
+  public static var unbounded: AnyRange<Bound> { return AnyRange<Bound>(...) }
+}
+
+extension AnyRange: GeneralizedRange {
+  public var bounds: Bounds<Bound>? {
+    return self._bounds
+  }
+}
+
+extension AnyRange {
+  public var isEmpty: Bool { return self._bounds == nil }
+  public var isUnbounded: Bool {
+    guard let bounds = self._bounds else { return false }
+    return bounds.lower == nil && bounds.upper == nil
+  }
+}
+
+extension AnyRange: Equatable {
+  public static func ==(lhs:AnyRange, rhs:AnyRange) -> Bool {
+    return lhs.compare(rhs) == .orderedSame
+  }
+}
+
+extension AnyRange:Hashable where Bound:Hashable {
+  #if swift(>=4.2)
+  public func hash(into hasher:inout Hasher) {
+    hasher.combine(self.bounds?.lower)
+    hasher.combine(self.bounds?.upper)
+  }
+  #else
+  public var hashValue: Int {
+    var hh = self.bounds?.lower?.hashValue ?? 0
+    hh ^= self.bounds?.upper?.hashValue ?? 0
+    return hh
+  }
+  #endif
 }

@@ -21,8 +21,19 @@ final class PartialRangeGreaterThanTests: XCTestCase {
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
+  func testAsGeneralizedRange() {
+    let bounds = (0<..).bounds
+    
+    XCTAssertNotNil(bounds)
+    XCTAssertNotNil(bounds?.lower)
+    XCTAssertEqual(bounds?.lower?.bound, 0)
+    XCTAssertEqual(bounds?.lower?.isIncluded, false)
+    XCTAssertNil(bounds?.upper)
+  }
+  
   static var allTests = [
     ("testAsRangeExpression", testAsRangeExpression),
+    ("testAsGeneralizedRange", testAsGeneralizedRange),
   ]
 }
 

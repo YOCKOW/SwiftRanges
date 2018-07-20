@@ -9,17 +9,25 @@ import XCTest
 @testable import Ranges
 
 final class AnyRangeTests: XCTestCase {
-  func testInitialization() {
-    XCTAssertTrue(AnyRange<Character>().isEmpty)
-    XCTAssertFalse(AnyRange<Character>(...).isEmpty)
+  func testAsRangeExpression() {
+    // Default implementation is in "GeneralizedRange"
     
-    XCTAssertFalse(AnyRange<Int>(0..<10).isEmpty)
-    XCTAssertTrue(AnyRange<Int>(0<.<1).isEmpty)
-    XCTAssertFalse(AnyRange<Double>(0<.<1.0).isEmpty)
+    let range1 = AnyRange<Int>(0..<1)
+    XCTAssertTrue(range1.contains(0))
+    XCTAssertFalse(range1.contains(1))
+    
+    let range2 = AnyRange<Int>(0<.<1)
+    XCTAssertTrue(range2.isEmpty)
+    let range2_1 = AnyRange<Double>(0<.<1)
+    XCTAssertFalse(range2_1.isEmpty)
+    
+    let range3 = AnyRange<Int>(1<..)
+    XCTAssertEqual(range3.relative(to:[0,1,2,3]), 2..<4)
   }
   
   static var allTests = [
-    ("testInitialization", testInitialization),
+    ("testAsRangeExpression", testAsRangeExpression),
   ]
 }
+
 
