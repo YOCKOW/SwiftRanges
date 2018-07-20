@@ -105,7 +105,7 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertEqual(multi3.ranges[2], AnyRange<Int>(55<..60))
     XCTAssertEqual(multi3.ranges[3], AnyRange<Int>(70...80))
 
-//    XCTAssertEqual(multi3.union(multi2).subtracting(AnyRange<Int>(singleValue:90)), multi)
+    XCTAssertEqual(multi3.union(multi2).subtracting(AnyRange<Int>(singleValue:90)), multi)
   }
   
   static var allTests = [
