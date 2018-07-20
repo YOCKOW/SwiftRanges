@@ -1,12 +1,13 @@
 /***************************************************************************************************
  LefOpenRange.swift
-   © 2018 YOCKOW.
+   © 2017-2018 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
 
 
 /// # LeftOpenRange
+/// 
 /// A range that does not include its lower bound, but does include its upper bound.
 /// Reference: [Interval - Wikipedia](https://en.wikipedia.org/wiki/Interval_(mathematics)#Terminology)
 public struct LeftOpenRange<Bound: Comparable> {
@@ -31,6 +32,29 @@ public func .. <T>(lhs:ExcludedLowerBound<T>, upper:T) -> LeftOpenRange<T> {
   return LeftOpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
 
+extension LeftOpenRange {
+  public var isEmpty: Bool { return lowerBound >= upperBound }
+}
+
+extension LeftOpenRange: Equatable {
+  public static func ==(lhs:LeftOpenRange<Bound>, rhs:LeftOpenRange<Bound>) -> Bool {
+    return lhs.lowerBound == rhs.lowerBound && lhs.upperBound == rhs.upperBound
+  }
+}
+
+extension LeftOpenRange: Hashable where Bound: Hashable {
+  public func hash(into hasher:inout Hasher) {
+    hasher.combine(self.lowerBound)
+    hasher.combine(self.upperBound)
+  }
+}
+
+extension LeftOpenRange: CustomStringConvertible {
+  public var description: String {
+    return "\(self.lowerBound)<..\(self.upperBound)"
+  }
+}
+
 extension LeftOpenRange: RangeExpression {
   public func contains(_ element: Bound) -> Bool {
     return self.lowerBound < element && element <= self.upperBound
@@ -43,24 +67,10 @@ extension LeftOpenRange: RangeExpression {
   }
 }
 
-extension LeftOpenRange {
-  public var isEmpty: Bool { return lowerBound >= upperBound }
-}
-
-extension LeftOpenRange: Equatable {
-  public static func ==(lhs:LeftOpenRange<Bound>, rhs:LeftOpenRange<Bound>) -> Bool {
-    return lhs.lowerBound == rhs.lowerBound && lhs.upperBound == rhs.upperBound
-  }
-}
-
-extension LeftOpenRange: Hashable where Bound: Hashable {
-  public var hashValue:Int {
-    return self.lowerBound.hashValue ^ self.upperBound.hashValue
-  }
-}
-
-extension LeftOpenRange: CustomStringConvertible {
-  public var description: String {
-    return "\(self.lowerBound)<..\(self.upperBound)"
+extension LeftOpenRange: GeneralizedRange {
+  public var bounds:Bounds<Bound>? {
+    if self.isEmpty { return nil }
+    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:false),
+            upper:Boundary<Bound>(bound:self.upperBound, isIncluded:true))
   }
 }

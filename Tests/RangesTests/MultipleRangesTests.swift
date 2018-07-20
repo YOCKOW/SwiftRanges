@@ -67,13 +67,13 @@ final class MultipleRangesTests: XCTestCase {
   }
   
   func testSubtraction() {
-    var multi = MultipleRanges<Int>(
-      ..<20,
-      30<.<40,
-      50<..60,
-      70..<80,
-      80...
-    )
+    var multi: MultipleRanges<Int> = [
+      AnyRange<Int>(..<20),
+      AnyRange<Int>(30<.<40),
+      AnyRange<Int>(50<..60),
+      AnyRange<Int>(70..<80),
+      AnyRange<Int>(80...)
+    ]
     
     multi.subtract(AnyRange<Int>(35...55))
     XCTAssertEqual(multi.ranges.count, 4)
@@ -108,9 +108,33 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertEqual(multi3.union(multi2).subtracting(AnyRange<Int>(singleValue:90)), multi)
   }
   
+  func testIntersection() {
+    let multi1: MultipleRanges<Int> = [
+      AnyRange<Int>(..<20),
+      AnyRange<Int>(30<.<40),
+      AnyRange<Int>(50<..60),
+      AnyRange<Int>(70..<80),
+      AnyRange<Int>(80...)
+    ]
+    let multi2: MultipleRanges<Int> = [
+      AnyRange<Int>(15...55),
+      AnyRange<Int>(60<..79),
+      AnyRange<Int>(90<..)
+    ]
+    
+    let intersections = multi1.intersection(multi2).ranges
+    XCTAssertEqual(intersections.count, 5)
+    XCTAssertTrue(intersections[0] == 15..<20)
+    XCTAssertTrue(intersections[1] == 30<.<40)
+    XCTAssertTrue(intersections[2] == 50<..55)
+    XCTAssertTrue(intersections[3] == 70...79)
+    XCTAssertTrue(intersections[4] == 90<..)
+  }
+  
   static var allTests = [
     ("testNormalization", testNormalization),
     ("testSubtraction", testSubtraction),
+    ("testIntersection", testIntersection),
   ]
 }
 

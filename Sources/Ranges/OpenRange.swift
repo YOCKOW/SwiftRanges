@@ -1,24 +1,39 @@
 /***************************************************************************************************
  OpenRange.swift
-   © 2018 YOCKOW.
+   © 2017-2018 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
  
 /// # OpenRange
+///
 /// A range that does not include neither its lower bound nor its upper bound.
 public struct OpenRange<Bound: Comparable> {
   public let lowerBound: Bound
   public let upperBound: Bound
-  public init(uncheckedBounds bounds: (lower: Bound, upper: Bound)) {
-    self.lowerBound = bounds.lower
-    self.upperBound = bounds.upper
-  }
+  internal let _isEmpty: Bool // emptiness depends on its countability
 }
 
 /// "Countable" OpenRange
 public typealias CountableOpenRange<Bound> =
   OpenRange<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
+
+extension OpenRange where Bound:Strideable, Bound.Stride:SignedInteger {
+  public init(uncheckedBounds bounds:(lower:Bound, upper:Bound)) {
+    self.lowerBound = bounds.lower
+    self.upperBound = bounds.upper
+    self._isEmpty = bounds.lower.distance(to:bounds.upper) <= 1
+  }
+}
+
+extension OpenRange {
+  public init(uncheckedBounds bounds:(lower:Bound, upper:Bound)) {
+    self.lowerBound = bounds.lower
+    self.upperBound = bounds.upper
+    self._isEmpty = bounds.lower >= bounds.upper
+  }
+}
+
 
 /// Make "lower<.<upper" available
 infix operator .<: RangeFormationPrecedence
@@ -37,26 +52,6 @@ public func .< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpen
   return CountableOpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
 
-extension OpenRange: RangeExpression {
-  public func contains(_ element: Bound) -> Bool {
-    return self.lowerBound < element && element < self.upperBound
-  }
-  
-  public func relative<C>(to collection: C) -> Range<Bound> where C: Collection, Bound == C.Index {
-    let newLowerBound = collection.index(after:self.lowerBound)
-    return Range(uncheckedBounds:(lower:newLowerBound, upper:self.upperBound))
-  }
-}
-
-extension OpenRange {
-  public var _isEmpty: Bool { return lowerBound >= upperBound }
-}
-// For "Countable"
-extension OpenRange where Bound: Strideable, Bound.Stride: SignedInteger {
-  public var isEmpty: Bool {
-    return self.lowerBound.distance(to:self.upperBound) <= 1
-  }
-}
 extension OpenRange  {
   public var isEmpty: Bool { return self._isEmpty }
 }
@@ -68,13 +63,33 @@ extension OpenRange: Equatable {
 }
 
 extension OpenRange: Hashable where Bound: Hashable {
-  public var hashValue:Int {
-    return self.lowerBound.hashValue ^ self.upperBound.hashValue
+  public func hash(into hasher:inout Hasher) {
+    hasher.combine(self.lowerBound)
+    hasher.combine(self.upperBound)
   }
 }
 
 extension OpenRange: CustomStringConvertible {
   public var description: String {
     return "\(self.lowerBound)<.<\(self.upperBound)"
+  }
+}
+
+extension OpenRange: RangeExpression {
+  public func contains(_ element: Bound) -> Bool {
+    return self.lowerBound < element && element < self.upperBound
+  }
+  
+  public func relative<C>(to collection: C) -> Range<Bound> where C: Collection, Bound == C.Index {
+    let newLowerBound = collection.index(after:self.lowerBound)
+    return Range(uncheckedBounds:(lower:newLowerBound, upper:self.upperBound))
+  }
+}
+
+extension OpenRange: GeneralizedRange {
+  public var bounds:Bounds<Bound>? {
+    if self.isEmpty { return nil }
+    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:false),
+            upper:Boundary<Bound>(bound:self.upperBound, isIncluded:false))
   }
 }

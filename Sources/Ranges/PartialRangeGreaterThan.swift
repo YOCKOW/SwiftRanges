@@ -7,6 +7,7 @@
  
 
 /// # PartialRangeGreaterThan
+/// 
 /// A partial interval extending upward from a lower bound, but excluding the lower bound.
 public struct PartialRangeGreaterThan<Bound: Comparable> {
   public let lowerBound: Bound
@@ -23,6 +24,24 @@ public postfix func .. <T>(_ excludedLowerBound:ExcludedLowerBound<T>) -> Partia
   return PartialRangeGreaterThan<T>(excludedLowerBound.lowerBound)
 }
 
+extension PartialRangeGreaterThan: Equatable {
+  public static func ==(lhs:PartialRangeGreaterThan<Bound>, rhs:PartialRangeGreaterThan<Bound>) -> Bool {
+    return lhs.lowerBound == rhs.lowerBound
+  }
+}
+
+extension PartialRangeGreaterThan: Hashable where Bound: Hashable {
+  public var hashValue: Int {
+    return self.lowerBound.hashValue
+  }
+}
+
+extension PartialRangeGreaterThan: CustomStringConvertible {
+  public var description: String {
+    return "\(self.lowerBound)<.."
+  }
+}
+
 extension PartialRangeGreaterThan: RangeExpression {
   public func contains(_ element: Bound) -> Bool {
     return self.lowerBound < element
@@ -35,20 +54,9 @@ extension PartialRangeGreaterThan: RangeExpression {
   }
 }
 
-extension PartialRangeGreaterThan: Equatable {
-  public static func ==(lhs:PartialRangeGreaterThan<Bound>, rhs:PartialRangeGreaterThan<Bound>) -> Bool {
-    return lhs.lowerBound == rhs.lowerBound
-  }
-}
-
-extension PartialRangeGreaterThan: Hashable where Bound: Hashable {
-  public var hashValue:Int {
-    return self.lowerBound.hashValue
-  }
-}
-
-extension PartialRangeGreaterThan: CustomStringConvertible {
-  public var description: String {
-    return "\(self.lowerBound)<.."
+extension PartialRangeGreaterThan: GeneralizedRange {
+  public var bounds: Bounds<Bound>? {
+    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:false),
+            upper:nil)
   }
 }
