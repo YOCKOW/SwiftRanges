@@ -82,6 +82,7 @@ extension GeneralizedRange {
   public func subtracting<R>(_ other:R) -> (AnyRange<Bound>, AnyRange<Bound>?)
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
+    guard self.overlaps(other) else { return (AnyRange<Bound>(self), nil) }
     return _arrange(_convert(_subtracting(self, other)))
   }
   
@@ -90,6 +91,7 @@ extension GeneralizedRange {
   public func subtracting<R>(_ other:R) -> (AnyRange<Bound>, AnyRange<Bound>?)
     where R:GeneralizedRange, R.Bound == Bound
   {
+    guard self.overlaps(other) else { return (AnyRange<Bound>(self), nil) }
     return _arrange(_convert(_subtracting(self, other)))
   }
 }

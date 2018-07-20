@@ -74,7 +74,7 @@ final class MultipleRangesTests: XCTestCase {
       AnyRange<Int>(70..<80),
       AnyRange<Int>(80...)
     ]
-
+    
     multi.subtract(AnyRange<Int>(35...55))
     XCTAssertEqual(multi.ranges.count, 4)
     XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
