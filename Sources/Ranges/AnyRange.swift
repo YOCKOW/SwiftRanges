@@ -92,6 +92,13 @@ extension AnyRange {
 }
 
 extension AnyRange {
+  /// Creates a range that contains only the indicated value.
+  public init(singleValue:Bound) {
+    self.init(singleValue...singleValue)
+  }
+}
+
+extension AnyRange {
   /// Creates an empty range.
   public init() {
     self.init(checkedBounds:nil)
