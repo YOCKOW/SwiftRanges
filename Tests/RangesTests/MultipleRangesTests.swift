@@ -66,51 +66,51 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertTrue(multi.contains(Int.max))
   }
   
-//  func testSubtraction() {
-//    var multi = MultipleRanges<Int>(
-//      ..<20,
-//      30<.<40,
-//      50<..60,
-//      70..<80,
-//      80...
-//    )
-//
-//    multi.subtract(AnyRange<Int>(35...55))
-//    XCTAssertEqual(multi.ranges.count, 4)
-//    XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
-//    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<.<35))
-//    XCTAssertEqual(multi.ranges[2], AnyRange<Int>(55<..60))
-//    XCTAssertEqual(multi.ranges[3], AnyRange<Int>(70...))
-//
-//    multi.subtract(AnyRange<Int>(singleValue:90))
-//    XCTAssertEqual(multi.ranges.count, 5)
-//    XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
-//    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<.<35))
-//    XCTAssertEqual(multi.ranges[2], AnyRange<Int>(55<..60))
-//    XCTAssertEqual(multi.ranges[3], AnyRange<Int>(70..<90))
-//    XCTAssertEqual(multi.ranges[4], AnyRange<Int>(90<..))
-//
-//    let multi2: MultipleRanges<Int> = [
-//      AnyRange<Int>(...10),
-//      AnyRange<Int>(80<..)
-//    ]
-//
-//    let multi3 = multi.subtracting(multi2)
-//
-//    XCTAssertEqual(multi, multi)
-//    XCTAssertNotEqual(multi, multi3)
-//    XCTAssertEqual(multi3.ranges.count, 4)
-//    XCTAssertEqual(multi3.ranges[0], AnyRange<Int>(10<.<20))
-//    XCTAssertEqual(multi3.ranges[1], AnyRange<Int>(30<.<35))
-//    XCTAssertEqual(multi3.ranges[2], AnyRange<Int>(55<..60))
-//    XCTAssertEqual(multi3.ranges[3], AnyRange<Int>(70...80))
-//
+  func testSubtraction() {
+    var multi: MultipleRanges<Int> = [
+      AnyRange<Int>(..<20),
+      AnyRange<Int>(30<.<40),
+      AnyRange<Int>(50<..60),
+      AnyRange<Int>(70..<80),
+      AnyRange<Int>(80...)
+    ]
+
+    multi.subtract(AnyRange<Int>(35...55))
+    XCTAssertEqual(multi.ranges.count, 4)
+    XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
+    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<.<35))
+    XCTAssertEqual(multi.ranges[2], AnyRange<Int>(55<..60))
+    XCTAssertEqual(multi.ranges[3], AnyRange<Int>(70...))
+
+    multi.subtract(AnyRange<Int>(singleValue:90))
+    XCTAssertEqual(multi.ranges.count, 5)
+    XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
+    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<.<35))
+    XCTAssertEqual(multi.ranges[2], AnyRange<Int>(55<..60))
+    XCTAssertEqual(multi.ranges[3], AnyRange<Int>(70..<90))
+    XCTAssertEqual(multi.ranges[4], AnyRange<Int>(90<..))
+
+    let multi2: MultipleRanges<Int> = [
+      AnyRange<Int>(...10),
+      AnyRange<Int>(80<..)
+    ]
+
+    let multi3 = multi.subtracting(multi2)
+
+    XCTAssertEqual(multi, multi)
+    XCTAssertNotEqual(multi, multi3)
+    XCTAssertEqual(multi3.ranges.count, 4)
+    XCTAssertEqual(multi3.ranges[0], AnyRange<Int>(10<.<20))
+    XCTAssertEqual(multi3.ranges[1], AnyRange<Int>(30<.<35))
+    XCTAssertEqual(multi3.ranges[2], AnyRange<Int>(55<..60))
+    XCTAssertEqual(multi3.ranges[3], AnyRange<Int>(70...80))
+
 //    XCTAssertEqual(multi3.union(multi2).subtracting(AnyRange<Int>(singleValue:90)), multi)
-//  }
+  }
   
   static var allTests = [
     ("testNormalization", testNormalization),
-//    ("testSubtraction", testSubtraction),
+    ("testSubtraction", testSubtraction),
   ]
 }
 
