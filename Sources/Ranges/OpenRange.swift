@@ -63,10 +63,16 @@ extension OpenRange: Equatable {
 }
 
 extension OpenRange: Hashable where Bound: Hashable {
+  #if swift(>=4.2)
   public func hash(into hasher:inout Hasher) {
     hasher.combine(self.lowerBound)
     hasher.combine(self.upperBound)
   }
+  #else
+  public var hashValue: Int {
+    return AnyRange(self).hashValue
+  }
+  #endif
 }
 
 extension OpenRange: CustomStringConvertible {

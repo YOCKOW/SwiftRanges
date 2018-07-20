@@ -31,7 +31,16 @@ extension Boundary: Equatable {
   }
 }
 
-extension Boundary: Hashable where Bound:Hashable {}
+extension Boundary: Hashable where Bound:Hashable {
+  #if swift(>=4.2)
+  #else
+  public var hashValue: Int {
+    var hh = bound.hashValue
+    if self.isIncluded { hh = ~hh }
+    return hh
+  }
+  #endif
+}
 
 extension Boundary {
   internal static prefix func ~(_ boundary:Boundary<Bound>) -> Boundary<Bound> {
