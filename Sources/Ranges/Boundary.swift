@@ -33,9 +33,13 @@ extension Boundary: Equatable {
 
 extension Boundary: Hashable where Bound:Hashable {
   #if swift(>=4.2)
+  public func hash(into hasher:inout Hasher) {
+    hasher.combine(self.bound)
+    hasher.combine(self.isIncluded)
+  }
   #else
   public var hashValue: Int {
-    var hh = bound.hashValue
+    var hh = self.bound.hashValue
     if self.isIncluded { hh = ~hh }
     return hh
   }

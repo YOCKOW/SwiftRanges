@@ -136,17 +136,4 @@ extension AnyRange: Equatable {
   }
 }
 
-extension AnyRange:Hashable where Bound:Hashable {
-  #if swift(>=4.2)
-  public func hash(into hasher:inout Hasher) {
-    hasher.combine(self.bounds?.lower)
-    hasher.combine(self.bounds?.upper)
-  }
-  #else
-  public var hashValue: Int {
-    var hh = self.bounds?.lower?.hashValue ?? 0
-    hh ^= self.bounds?.upper?.hashValue ?? 0
-    return hh
-  }
-  #endif
-}
+extension AnyRange: Hashable, HashableRange where Bound: Hashable {}
