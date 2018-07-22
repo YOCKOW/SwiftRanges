@@ -21,14 +21,6 @@ extension EmptyRange: Equatable {
   }
 }
 
-extension EmptyRange: Hashable, HashableRange where Bound: Hashable {}
-
-extension EmptyRange: CustomStringConvertible {
-  public var description: String {
-    return "()"
-  }
-}
-
 extension EmptyRange: RangeExpression {
   public func contains(_ element: Bound) -> Bool {
     return false
@@ -45,3 +37,7 @@ extension EmptyRange: GeneralizedRange {
     return nil
   }
 }
+
+extension EmptyRange: Hashable, HashableRange where Bound: Hashable {}
+
+extension EmptyRange: CustomStringConvertible, CustomStringConvertibleRange where Bound: CustomStringConvertible {}

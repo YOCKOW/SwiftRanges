@@ -42,14 +42,6 @@ extension LeftOpenRange: Equatable {
   }
 }
 
-extension LeftOpenRange: Hashable, HashableRange where Bound: Hashable {}
-
-extension LeftOpenRange: CustomStringConvertible {
-  public var description: String {
-    return "\(self.lowerBound)<..\(self.upperBound)"
-  }
-}
-
 extension LeftOpenRange: RangeExpression {
   public func contains(_ element: Bound) -> Bool {
     return self.lowerBound < element && element <= self.upperBound
@@ -69,3 +61,7 @@ extension LeftOpenRange: GeneralizedRange {
             upper:Boundary<Bound>(bound:self.upperBound, isIncluded:true))
   }
 }
+
+extension LeftOpenRange: Hashable, HashableRange where Bound: Hashable {}
+
+extension LeftOpenRange: CustomStringConvertible, CustomStringConvertibleRange where Bound: CustomStringConvertible {}

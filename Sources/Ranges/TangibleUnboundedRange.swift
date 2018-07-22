@@ -26,7 +26,7 @@ extension TangibleUnboundedRange: Hashable, HashableRange where Bound: Hashable 
 
 extension TangibleUnboundedRange: CustomStringConvertible {
   public var description: String {
-    return "(...)"
+    return "..."
   }
 }
 

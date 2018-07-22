@@ -58,6 +58,7 @@ print(multi.contains(20)) // -> false
 print(multi.contains(25)) // -> false
 print(multi.contains(30)) // -> false
 print(multi.contains(35)) // -> false
+print(multi.ranges) // -> [10..<15, 35<..40]
 
 ```
 
