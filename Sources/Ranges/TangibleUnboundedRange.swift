@@ -22,11 +22,7 @@ extension TangibleUnboundedRange: Equatable {
   }
 }
 
-extension TangibleUnboundedRange: Hashable where Bound: Hashable {
-  public var hashValue: Int {
-    return Int.max
-  }
-}
+extension TangibleUnboundedRange: Hashable, HashableRange where Bound: Hashable {}
 
 extension TangibleUnboundedRange: CustomStringConvertible {
   public var description: String {

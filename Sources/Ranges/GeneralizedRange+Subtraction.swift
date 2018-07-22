@@ -6,10 +6,28 @@
  **************************************************************************************************/
  
 
+/// it may be subtractable...
+private func _subtractable<Bound>(_ minuend:Bounds<Bound>,
+                                  _ subtrahend:Bounds<Bound>) -> Bool
+  where Bound:Comparable
+{
+  if let mLower = minuend.lower, let sUpper = subtrahend.upper, mLower.bound > sUpper.bound {
+    return false
+  }
+  if let mUpper = minuend.upper, let sLower = subtrahend.lower, mUpper.bound < sLower.bound {
+    return false
+  }
+  return true
+}
+
 private func _subtracting<Bound>(_ minuend:Bounds<Bound>,
                                  _ subtrahend:Bounds<Bound>) -> [Bounds<Bound>]
   where Bound:Comparable
 {
+  guard _subtractable(minuend, subtrahend) else {
+    return [minuend]
+  }
+  
   var result: [Bounds<Bound>] = []
   
   if let sLower = subtrahend.lower {
@@ -82,7 +100,6 @@ extension GeneralizedRange {
   public func subtracting<R>(_ other:R) -> (AnyRange<Bound>, AnyRange<Bound>?)
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
-    guard self.overlaps(other) else { return (AnyRange<Bound>(self), nil) }
     return _arrange(_convert(_subtracting(self, other)))
   }
   
@@ -91,7 +108,6 @@ extension GeneralizedRange {
   public func subtracting<R>(_ other:R) -> (AnyRange<Bound>, AnyRange<Bound>?)
     where R:GeneralizedRange, R.Bound == Bound
   {
-    guard self.overlaps(other) else { return (AnyRange<Bound>(self), nil) }
     return _arrange(_convert(_subtracting(self, other)))
   }
 }

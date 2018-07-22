@@ -67,6 +67,10 @@ final class GeneralizedRangeTests: XCTestCase {
     subtracted = (..<20).subtracting(35...55)
     XCTAssertTrue(subtracted.0 == ..<20)
     XCTAssertNil(subtracted.1)
+    
+    subtracted = (10<.<20).subtracting(0..<11)
+    XCTAssertTrue(subtracted.0 == 11..<20)
+    XCTAssertNil(subtracted.1)
   }
   
   static var allTests = [
