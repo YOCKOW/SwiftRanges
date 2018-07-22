@@ -4,15 +4,28 @@ branches:
 env:
   global:
     - SYM_INSTALL_URL="https://gist.githubusercontent.com/YOCKOW/52756b7061c4e92ca960cf2ff9506560/raw/847fc88e5db0c488b610e2f7bc5f0e06c0b74892/symbolic-install"
-  matrix:
-  - SWIFT_ARCHIVE_URL=https://swift.org/builds/swift-4.1.2-release/ubuntu1404/swift-4.1.2-RELEASE/swift-4.1.2-RELEASE-ubuntu14.04.tar.gz
-  - SWIFT_ARCHIVE_URL=https://swift.org/builds/swift-4.2-branch/ubuntu1404/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-21-a/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-21-a-ubuntu14.04.tar.gz
 matrix:
   include:
     - os: linux
       dist: trusty
       sudo: required
       language: ruby
+      env:
+        - SWIFT_ARCHIVE_URL=https://swift.org/builds/swift-4.1.2-release/ubuntu1404/swift-4.1.2-RELEASE/swift-4.1.2-RELEASE-ubuntu14.04.tar.gz
+      before_install:
+        - curl ${SWIFT_ARCHIVE_URL} -o ../swift.tar.gz
+        - mkdir ../swift
+        - tar xzf ../swift.tar.gz -C ../swift --strip-components 2
+        - curl ${SYM_INSTALL_URL} -o ../symbolic-install
+        - chmod a+x ../symbolic-install
+        - sudo ../symbolic-install ../swift > /dev/null
+        - sudo ldconfig
+    - os: linux
+      dist: trusty
+      sudo: required
+      language: ruby
+      env:
+        - SWIFT_ARCHIVE_URL=https://swift.org/builds/swift-4.2-branch/ubuntu1404/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-21-a/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-21-a-ubuntu14.04.tar.gz
       before_install:
         - curl ${SWIFT_ARCHIVE_URL} -o ../swift.tar.gz
         - mkdir ../swift
