@@ -21,11 +21,7 @@ extension EmptyRange: Equatable {
   }
 }
 
-extension EmptyRange: Hashable where Bound: Hashable {
-  public var hashValue: Int {
-    return 0
-  }
-}
+extension EmptyRange: Hashable, HashableRange where Bound: Hashable {}
 
 extension EmptyRange: CustomStringConvertible {
   public var description: String {

@@ -30,11 +30,7 @@ extension PartialRangeGreaterThan: Equatable {
   }
 }
 
-extension PartialRangeGreaterThan: Hashable where Bound: Hashable {
-  public var hashValue: Int {
-    return self.lowerBound.hashValue
-  }
-}
+extension PartialRangeGreaterThan: Hashable, HashableRange where Bound: Hashable {}
 
 extension PartialRangeGreaterThan: CustomStringConvertible {
   public var description: String {
