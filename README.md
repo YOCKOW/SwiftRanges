@@ -24,7 +24,7 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 # Usage
 
-```
+```Swift
 import Ranges
 
 let leftOpenRange: LeftOpenRange<Int> = 10<..20
