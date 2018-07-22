@@ -137,3 +137,5 @@ extension AnyRange: Equatable {
 }
 
 extension AnyRange: Hashable, HashableRange where Bound: Hashable {}
+
+extension AnyRange: CustomStringConvertible, CustomStringConvertibleRange where Bound: CustomStringConvertible {}
