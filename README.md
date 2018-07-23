@@ -17,6 +17,11 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 | PartialRangeUpTo        | (Neg. Inf.) | Excluded    | Swift Standard Library |
 | UnboundedRange          | (Neg. Inf.) | (Pos. Inf.) | Swift Standard Library |
 
+### Other `struct`s implemented in this library
+
+* `AnyRange`: A type-erased range.
+* `MultipleRanges`: A set that can contain multiple types of ranges.
+
 # Requirements
 
 - Swift 4.1, 4.2(recommended)
@@ -53,11 +58,6 @@ print(multi.contains(25)) // -> false
 print(multi.contains(35)) // -> true
 
 multi.subtract(15...35)
-print(multi.contains(15)) // -> false
-print(multi.contains(20)) // -> false
-print(multi.contains(25)) // -> false
-print(multi.contains(30)) // -> false
-print(multi.contains(35)) // -> false
 print(multi.ranges) // -> [10..<15, 35<..40]
 
 ```
