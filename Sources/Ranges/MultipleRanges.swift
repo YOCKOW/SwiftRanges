@@ -17,6 +17,10 @@ public typealias MultipleCountableRanges<Bound> =
   MultipleRanges<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
 
 extension MultipleRanges {
+  public var isEmpty:Bool { return self._ranges.isEmpty }
+}
+
+extension MultipleRanges {
   /// sort, and concatenate ranges if possible.
   private mutating func _normalize() {
     // First, sort them.
