@@ -129,6 +129,16 @@ extension MultipleRanges where Bound:Strideable, Bound.Stride:SignedInteger {
     newRanges.subtract(other)
     return newRanges
   }
+  
+  /// Subtract the single value.
+  public mutating func subtract(singleValue value:Bound) {
+    self.subtract(value...value)
+  }
+  
+  /// Returns a new instance with subtracting the single value.
+  public func subtracting(singleValue value:Bound) -> MultipleRanges<Bound> {
+    return self.subtracting(value...value)
+  }
 }
 
 extension MultipleRanges {
@@ -145,5 +155,15 @@ extension MultipleRanges {
     var newRanges = self
     newRanges.subtract(other)
     return newRanges
+  }
+  
+  /// Subtract the single value.
+  public mutating func subtract(singleValue value:Bound) {
+    self.subtract(value...value)
+  }
+  
+  /// Returns a new instance with subtracting the single value.
+  public func subtracting(singleValue value:Bound) -> MultipleRanges<Bound> {
+    return self.subtracting(value...value)
   }
 }
