@@ -10,7 +10,10 @@
 /// A range that has no bounds. Because `UnboundedRange` in Swift Standard Library is a `typealias`
 /// of the function `(UnboundedRange_) -> ()`, it is not able to be extended.
 /// That is why this structure exists.
-public struct TangibleUnboundedRange<Bound> where Bound:Comparable {}
+public struct TangibleUnboundedRange<Bound> where Bound:Comparable {
+  public init() {}
+  public init(_:UnboundedRange) {}
+}
 
 extension TangibleUnboundedRange  {
   public var isEmpty: Bool { return false }
