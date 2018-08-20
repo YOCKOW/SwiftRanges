@@ -29,6 +29,9 @@ extension MultipleRanges {
     self._ranges.removeAll(keepingCapacity:true)
     
     appendRanges: for range in ranges {
+      // if `range` is empty, the rest ranges are also empty because `ranges` are sorted.
+      if range.isEmpty { break appendRanges }
+      
       if self._ranges.isEmpty {
         self._ranges.append(range)
       } else {
