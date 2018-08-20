@@ -131,10 +131,17 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertTrue(intersections[4] == 90<..)
   }
   
+  func testCountableIntersection() {
+    let multi1: MultipleRanges<Int> = [AnyRange<Int>(..<10)]
+    let multi2: MultipleRanges<Int> = [AnyRange<Int>(9<..)]
+    XCTAssertTrue(multi1.intersection(multi2).isEmpty)
+  }
+  
   static var allTests = [
     ("testNormalization", testNormalization),
     ("testSubtraction", testSubtraction),
     ("testIntersection", testIntersection),
+    ("testCountableIntersection", testCountableIntersection),
   ]
 }
 
