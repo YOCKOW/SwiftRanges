@@ -32,7 +32,7 @@ extension Boundary: Equatable {
 }
 
 extension Boundary: Hashable where Bound:Hashable {
-  #if swift(>=4.2)
+  #if compiler(>=4.2)
   public func hash(into hasher:inout Hasher) {
     hasher.combine(self.bound)
     hasher.combine(self.isIncluded)

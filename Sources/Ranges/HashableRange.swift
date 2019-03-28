@@ -14,7 +14,7 @@ extension HashableRange  {
     return lhs.compare(rhs) == .orderedSame
   }
   
-  #if swift(>=4.2)
+  #if compiler(>=4.2)
   public func hash(into hasher:inout Hasher) {
     hasher.combine(0)
     if let bounds = self.bounds {
