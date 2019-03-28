@@ -2,39 +2,47 @@ branches:
   except:
     - /^\d+\.\d+\.\d+(-\S*)?$/
 
-env:
-  global:
-    - SYM_INSTALL_URL=https://gist.githubusercontent.com/YOCKOW/52756b7061c4e92ca960cf2ff9506560/raw/847fc88e5db0c488b610e2f7bc5f0e06c0b74892/symbolic-install
-
 matrix:
   include:
     - &macos
       os: osx
-      osx_image: xcode9.4
+      osx_image: xcode10.2
       sudo: required
       language: objective-c
+      env:
+        - SWIFT_BUILD_OPTION="-Xswiftc -swift-version -Xswiftc 4"
+
+    - <<: *macos
+      env:
+        - SWIFT_BUILD_OPTION="-Xswiftc -swift-version -Xswiftc 4.2"
+
+    - <<: *macos
+      env:
+        - SWIFT_BUILD_OPTION="-Xswiftc -swift-version -Xswiftc 5"
 
     - &linux
       os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       language: ruby
-      env:
-        - SWIFT_ARCHIVE_URL=https://swift.org/builds/swift-4.1.3-release/ubuntu1404/swift-4.1.3-RELEASE/swift-4.1.3-RELEASE-ubuntu14.04.tar.gz
       before_install:
+        - export SWIFT_ARCHIVE_URL="https://swift.org/builds/swift-5.0-release/ubuntu1604/swift-5.0-RELEASE/swift-5.0-RELEASE-ubuntu16.04.tar.gz"
         - curl ${SWIFT_ARCHIVE_URL} -o ../swift.tar.gz
         - mkdir ../swift
         - tar xzf ../swift.tar.gz -C ../swift --strip-components 2
-        - curl ${SYM_INSTALL_URL} -o ../symbolic-install
-        - chmod a+x ../symbolic-install
-        - sudo ../symbolic-install ../swift > /dev/null
-        - sudo ldconfig
+        - export PATH="$(dirname $(pwd))/swift/bin:$PATH"
+      env:
+        - SWIFT_BUILD_OPTION="-Xswiftc -swift-version -Xswiftc 4"
 
     - <<: *linux
       env:
-        - SWIFT_ARCHIVE_URL=https://swift.org/builds/swift-4.2-branch/ubuntu1404/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-08-18-a/swift-4.2-DEVELOPMENT-SNAPSHOT-2018-08-18-a-ubuntu14.04.tar.gz
+        - SWIFT_BUILD_OPTION="-Xswiftc -swift-version -Xswiftc 4.2"
+
+    - <<: *linux
+      env:
+        - SWIFT_BUILD_OPTION="-Xswiftc -swift-version -Xswiftc 5"
 
 script:
-  - swift build
-  - swift build --configuration release
-  - swift test
+  - swift build ${SWIFT_BUILD_OPTION}
+  - swift build --configuration release ${SWIFT_BUILD_OPTION}
+  - swift test ${SWIFT_BUILD_OPTION}

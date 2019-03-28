@@ -7,7 +7,7 @@
  
  
 extension MultipleRanges: Hashable where Bound:Hashable {
-  #if swift(>=4.2)
+  #if compiler(>=4.2)
   public func hash(into hasher:inout Hasher) {
     for range in self.ranges {
       hasher.combine(range)
