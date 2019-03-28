@@ -35,16 +35,16 @@ extension OpenRange {
 }
 
 
-/// Make "lower<.<upper" available
-infix operator .<: RangeFormationPrecedence
-public func .< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
+/// Make "lower<..<upper" available
+infix operator ..<: RangeFormationPrecedence
+public func ..< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
   let lower = lhs.lowerBound
   guard lower <= upper else {
     fatalError("Can't form Range with upperBound < lowerBound")
   }
   return OpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
-public func .< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpenRange<T> where T:Strideable, T.Stride:SignedInteger {
+public func ..< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpenRange<T> where T:Strideable, T.Stride:SignedInteger {
   let lower = lhs.lowerBound
   guard lower.distance(to:upper) >= 1 else {
     fatalError("Can't form Range with upperBound < lowerBound + 1 when bound is countable.")

@@ -37,7 +37,7 @@ print(leftOpenRange.contains(10)) // -> false
 print(leftOpenRange.contains(15)) // -> true
 print(leftOpenRange.contains(20)) // -> true
 
-let openRange: OpenRange<Int> = 10<.<20
+let openRange: OpenRange<Int> = 10<..<20
 print(openRange.contains(10)) // -> false
 print(openRange.contains(15)) // -> true
 print(openRange.contains(20)) // -> false
@@ -48,7 +48,7 @@ print(greaterThan.contains(Int.max)) // -> true
 
 print(greaterThan.overlaps(...11)) // -> true
 print(greaterThan.overlaps(..<11)) // -> false
-                                   // Because there is no integer in "10<.<11"
+                                   // Because there is no integer in "10<..<11"
 
 var multi = MultipleRanges<Int>()
 multi.insert(10...20) 

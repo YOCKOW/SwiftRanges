@@ -46,7 +46,7 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertFalse(multi.contains(40))
     XCTAssertTrue(multi.contains(41))
     
-    let range7: OpenRange<Int> = 50<.<60
+    let range7: OpenRange<Int> = 50<..<60
     multi.insert(range7)
     XCTAssertEqual(multi.ranges.count, 3)
     XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<40))
@@ -69,7 +69,7 @@ final class MultipleRangesTests: XCTestCase {
   func testSubtraction() {
     var multi: MultipleRanges<Int> = [
       AnyRange<Int>(..<20),
-      AnyRange<Int>(30<.<40),
+      AnyRange<Int>(30<..<40),
       AnyRange<Int>(50<..60),
       AnyRange<Int>(70..<80),
       AnyRange<Int>(80...)
@@ -78,14 +78,14 @@ final class MultipleRangesTests: XCTestCase {
     multi.subtract(AnyRange<Int>(35...55))
     XCTAssertEqual(multi.ranges.count, 4)
     XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
-    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<.<35))
+    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<..<35))
     XCTAssertEqual(multi.ranges[2], AnyRange<Int>(55<..60))
     XCTAssertEqual(multi.ranges[3], AnyRange<Int>(70...))
 
     multi.subtract(AnyRange<Int>(singleValue:90))
     XCTAssertEqual(multi.ranges.count, 5)
     XCTAssertEqual(multi.ranges[0], AnyRange<Int>(..<20))
-    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<.<35))
+    XCTAssertEqual(multi.ranges[1], AnyRange<Int>(30<..<35))
     XCTAssertEqual(multi.ranges[2], AnyRange<Int>(55<..60))
     XCTAssertEqual(multi.ranges[3], AnyRange<Int>(70..<90))
     XCTAssertEqual(multi.ranges[4], AnyRange<Int>(90<..))
@@ -100,8 +100,8 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertEqual(multi, multi)
     XCTAssertNotEqual(multi, multi3)
     XCTAssertEqual(multi3.ranges.count, 4)
-    XCTAssertEqual(multi3.ranges[0], AnyRange<Int>(10<.<20))
-    XCTAssertEqual(multi3.ranges[1], AnyRange<Int>(30<.<35))
+    XCTAssertEqual(multi3.ranges[0], AnyRange<Int>(10<..<20))
+    XCTAssertEqual(multi3.ranges[1], AnyRange<Int>(30<..<35))
     XCTAssertEqual(multi3.ranges[2], AnyRange<Int>(55<..60))
     XCTAssertEqual(multi3.ranges[3], AnyRange<Int>(70...80))
 
@@ -111,7 +111,7 @@ final class MultipleRangesTests: XCTestCase {
   func testIntersection() {
     let multi1: MultipleRanges<Int> = [
       AnyRange<Int>(..<20),
-      AnyRange<Int>(30<.<40),
+      AnyRange<Int>(30<..<40),
       AnyRange<Int>(50<..60),
       AnyRange<Int>(70..<80),
       AnyRange<Int>(80...)
@@ -125,7 +125,7 @@ final class MultipleRangesTests: XCTestCase {
     let intersections = multi1.intersection(multi2).ranges
     XCTAssertEqual(intersections.count, 5)
     XCTAssertTrue(intersections[0] == 15..<20)
-    XCTAssertTrue(intersections[1] == 30<.<40)
+    XCTAssertTrue(intersections[1] == 30<..<40)
     XCTAssertTrue(intersections[2] == 50<..55)
     XCTAssertTrue(intersections[3] == 70...79)
     XCTAssertTrue(intersections[4] == 90<..)
