@@ -1,6 +1,6 @@
 /***************************************************************************************************
  Boundary+Comparison.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -14,84 +14,73 @@ extension Boundary {
 }
 
 extension Boundary {
-  internal func _compare(_ other:Boundary<Bound>, as side:_Side) -> ComparisonResult {
-    if self.bound < other.bound { return .orderedAscending }
-    if self.bound > other.bound { return .orderedDescending }
+  internal func _compare(_ other: Boundary<Value>, side: _Side) -> ComparisonResult {
+    if self == other { return .orderedSame }
     
-    // from here, self.bound == other.bound
-    if self.isIncluded == other.isIncluded { return .orderedSame }
-    if self.isIncluded {
+    // from here, self != other
+    if self == .unbounded {
+      return side == .lower ? .orderedAscending : .orderedDescending
+    } else if other == .unbounded {
+      return side == .lower ? .orderedDescending : .orderedAscending
+    }
+    
+    // from here, both self and other are not .unbounded
+    let myValue = self.value!
+    let otherValue = other.value!
+    
+    if myValue < otherValue { return .orderedAscending }
+    if myValue > otherValue { return .orderedDescending }
+    
+    // from here, they have the same values
+    if case .included = self {
       // other is not included
       return side == .lower ? .orderedAscending : .orderedDescending
     }
     return side == .lower ? .orderedDescending : .orderedAscending
   }
-}
-
-internal func _max<Bound>(
-  _ firstBoundary:Boundary<Bound>?,
-  _ otherBoundaries:Boundary<Bound>?...,
-  as side:Boundary<Bound>._Side
-  ) -> Boundary<Bound>? where Bound: Comparable
-{
-  if firstBoundary == nil && side == .upper { return nil }
-  var nilableMax: Boundary? = firstBoundary
   
-  for nilableBoundary in otherBoundaries {
-    switch (nilableBoundary, side) {
-    case (nil, .lower):
-      break
-    case (nil, .upper):
-      return nil
-    case (let boundary?, _):
-      if let max = nilableMax {
-        if max._compare(boundary, as:side) == .orderedAscending { nilableMax = boundary }
-      } else {
-        // nilableMax == nil
-        if side == .lower {
-          nilableMax = boundary
-        } else {
-          // nilableMax must not be nil here if side == .upper
-          assertionFailure("nilableMax must not be nil.")
-        }
-      }
+  internal func _compare(_ value: Value, side: _Side) -> ComparisonResult {
+    switch (self, side) {
+    case (.unbounded, .lower):
+      return .orderedAscending
+    case (.unbounded, .upper):
+      return .orderedDescending
+    case (.included(let myValue), _):
+      if myValue < value { return .orderedAscending }
+      if myValue == value { return .orderedSame }
+      return .orderedDescending
+    case (.excluded(let myValue), .lower):
+      if myValue < value { return .orderedAscending }
+      return .orderedDescending
+    case (.excluded(let myValue), .upper):
+      if myValue <= value { return .orderedAscending }
+      return .orderedDescending
     }
   }
-  
-  return nilableMax
 }
 
-internal func _min<Bound>(
-  _ firstBoundary:Boundary<Bound>?,
-  _ otherBoundaries:Boundary<Bound>?...,
-  as side:Boundary<Bound>._Side
-  ) -> Boundary<Bound>? where Bound: Comparable
+internal func _max<Bound>(_ firstBoundary: Boundary<Bound>,
+                          _ otherBoundaries: Boundary<Bound>...,
+                          side: Boundary<Bound>._Side) -> Boundary<Bound> where Bound: Comparable
 {
-  if firstBoundary == nil && side == .lower { return nil }
-  var nilableMin: Boundary? = firstBoundary
-  
-  for nilableBoundary in otherBoundaries {
-    switch (nilableBoundary, side) {
-    case (nil, .lower):
-      return nil
-    case (nil, .upper):
-      break
-    case (let boundary?, _):
-      if let min = nilableMin {
-        if min._compare(boundary, as:side) == .orderedDescending { nilableMin = boundary }
-      } else {
-        // nilableMin == nil
-        if side == .upper {
-          nilableMin = boundary
-        } else {
-          // nilableMin must not be nil here if side == .lower
-          assertionFailure("nilableMin must not be nil.")
-        }
-      }
-    }
+  var max: Boundary<Bound> = firstBoundary
+  for boundary in otherBoundaries {
+    if boundary == .unbounded && side == .upper { return .unbounded }
+    if max._compare(boundary, side: side) == .orderedAscending { max = boundary }
   }
-  
-  return nilableMin
+  return max
+}
+
+internal func _min<Bound>(_ firstBoundary: Boundary<Bound>,
+                          _ otherBoundaries: Boundary<Bound>...,
+                          side:Boundary<Bound>._Side) -> Boundary<Bound> where Bound: Comparable
+{
+  var min: Boundary<Bound> = firstBoundary
+  for boundary in otherBoundaries {
+    if boundary == .unbounded && side == .lower { return .unbounded }
+    if min._compare(boundary, side: side) == .orderedDescending { min = boundary }
+  }
+  return min
 }
 
 

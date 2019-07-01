@@ -1,6 +1,6 @@
 /***************************************************************************************************
  CustomStringConvertibleRange.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -17,18 +17,26 @@ extension CustomStringConvertibleRange {
     
     var desc = ""
     
-    if let lower = bounds.lower {
-      desc += lower.bound.description
-      desc += lower.isIncluded ? ".." : "<."
-    } else {
+    switch bounds.lower {
+    case .unbounded:
       desc += ".."
+    case .included(let lower):
+      desc += "\(lower.description).."
+    case .excluded(let lower):
+      desc += "\(lower.description)<."
     }
     
-    if let upper = bounds.upper {
-      desc += upper.isIncluded ? "." : "<"
-      desc += upper.bound.description
-    } else {
-      desc += "."
+    switch bounds.upper {
+    case .unbounded:
+      desc += ".."
+    case .included(let upper):
+      desc += ".\(upper.description)"
+    case .excluded(let upper):
+      if case .excluded = bounds.lower {
+        desc += ".<\(upper.description)"
+      } else {
+        desc += "<\(upper.description)"
+      }
     }
     
     return desc

@@ -8,7 +8,7 @@
 /// # OpenRange
 ///
 /// A range that does not include neither its lower bound nor its upper bound.
-public struct OpenRange<Bound: Comparable> {
+public struct OpenRange<Bound> where Bound: Comparable {
   public let lowerBound: Bound
   public let upperBound: Bound
   internal let _isEmpty: Bool // emptiness depends on its countability
@@ -39,16 +39,14 @@ extension OpenRange {
 infix operator ..<: RangeFormationPrecedence
 public func ..< <T>(lhs:ExcludedLowerBound<T>, upper:T) -> OpenRange<T> {
   let lower = lhs.lowerBound
-  guard lower <= upper else {
-    fatalError("Can't form Range with upperBound < lowerBound")
-  }
+  precondition(lower <= upper, "Can't form Range with upperBound < lowerBound")
   return OpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
-public func ..< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpenRange<T> where T:Strideable, T.Stride:SignedInteger {
+public func ..< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpenRange<T>
+  where T:Strideable, T.Stride:SignedInteger
+{
   let lower = lhs.lowerBound
-  guard lower.distance(to:upper) >= 1 else {
-    fatalError("Can't form Range with upperBound < lowerBound + 1 when bound is countable.")
-  }
+  precondition(lower.distance(to:upper) >= 1, "Can't form Range with upperBound < lowerBound + 1 when bound is countable.")
   return CountableOpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
 
@@ -76,8 +74,7 @@ extension OpenRange: RangeExpression {
 extension OpenRange: GeneralizedRange {
   public var bounds:Bounds<Bound>? {
     if self.isEmpty { return nil }
-    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:false),
-            upper:Boundary<Bound>(bound:self.upperBound, isIncluded:false))
+    return (lower: .excluded(self.lowerBound), upper: .excluded(self.upperBound))
   }
 }
 

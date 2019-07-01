@@ -9,7 +9,7 @@ import XCTest
 @testable import Ranges
 
 final class AnyRangeTests: XCTestCase {
-  func testAsRangeExpression() {
+  func test_asRangeExpression() {
     // Default implementation is in "GeneralizedRange"
     
     let range1 = AnyRange<Int>(0..<1)
@@ -24,10 +24,6 @@ final class AnyRangeTests: XCTestCase {
     let range3 = AnyRange<Int>(1<..)
     XCTAssertEqual(range3.relative(to:[0,1,2,3]), 2..<4)
   }
-  
-  static var allTests = [
-    ("testAsRangeExpression", testAsRangeExpression),
-  ]
 }
 
 

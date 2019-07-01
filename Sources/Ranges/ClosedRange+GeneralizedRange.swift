@@ -1,6 +1,6 @@
 /***************************************************************************************************
  ClosedRange+GeneralizedRange.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -8,7 +8,6 @@
 extension ClosedRange: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     if self.isEmpty { return nil }
-    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:true),
-            upper:Boundary<Bound>(bound:self.upperBound, isIncluded:true))
+    return (lower: .included(self.lowerBound), upper: .included(self.upperBound))
   }
 }

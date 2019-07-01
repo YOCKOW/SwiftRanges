@@ -9,12 +9,8 @@ import XCTest
 @testable import Ranges
 
 final class ExcludedLowerBoundTests: XCTestCase {
-  func testFunctions() {
+  func test_functions() {
     let abc = "ABC"<
     XCTAssertEqual(abc.lowerBound, "ABC")
   }
-  
-  static var allTests = [
-    ("testFunctions", testFunctions),
-  ]
 }

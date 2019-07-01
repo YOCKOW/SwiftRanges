@@ -1,6 +1,6 @@
 /***************************************************************************************************
  PartialRangeGreaterThan.swift
-   © 2017-2018 YOCKOW.
+   © 2017-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -9,7 +9,7 @@
 /// # PartialRangeGreaterThan
 /// 
 /// A partial interval extending upward from a lower bound, but excluding the lower bound.
-public struct PartialRangeGreaterThan<Bound: Comparable> {
+public struct PartialRangeGreaterThan<Bound> where Bound: Comparable {
   public let lowerBound: Bound
   public init(_ lowerBound: Bound) { self.lowerBound = lowerBound }
 }
@@ -52,7 +52,6 @@ extension PartialRangeGreaterThan: RangeExpression {
 
 extension PartialRangeGreaterThan: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
-    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:false),
-            upper:nil)
+    return (lower: .excluded(self.lowerBound), upper: .unbounded)
   }
 }
