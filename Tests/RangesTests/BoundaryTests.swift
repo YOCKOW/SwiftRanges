@@ -9,14 +9,14 @@ import XCTest
 @testable import Ranges
 
 final class BoundaryTests: XCTestCase {
-  func testInitialization() {
+  func test_initialization() {
     let boundary1: Boundary<Character> = .included("A")
     let boundary2: Boundary<Character> = .included("Z")
     
     XCTAssertNotEqual(boundary1, boundary2)
   }
   
-  func testComparison() {
+  func test_comparison() {
     let boundary1: Boundary<Int> = .included(0)
     let boundary2: Boundary<Int> = .excluded(0)
     let boundary3: Boundary<Int> = .included(1)
@@ -37,11 +37,6 @@ final class BoundaryTests: XCTestCase {
     XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, side: .upper),
                    boundary3)
   }
-  
-  static var allTests = [
-    ("testInitialization", testInitialization),
-    ("testComparison", testComparison),
-  ]
 }
 
 

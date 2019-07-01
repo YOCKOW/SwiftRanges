@@ -9,7 +9,7 @@ import XCTest
 @testable import Ranges
 
 final class MultipleRangesTests: XCTestCase {
-  func testNormalization() {
+  func test_normalization() {
     let range1: PartialRangeUpTo<Int> = ..<15
     let range2: Range<Int> = 10 ..< 40
     let range3: ClosedRange<Int> = 60 ... 80
@@ -66,7 +66,7 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertTrue(multi.contains(Int.max))
   }
   
-  func testSubtraction() {
+  func test_subtraction() {
     var multi: MultipleRanges<Int> = [
       AnyRange<Int>(..<20),
       AnyRange<Int>(30<..<40),
@@ -108,7 +108,7 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertEqual(multi3.union(multi2).subtracting(AnyRange<Int>(singleValue:90)), multi)
   }
   
-  func testIntersection() {
+  func test_intersection() {
     let multi1: MultipleRanges<Int> = [
       AnyRange<Int>(..<20),
       AnyRange<Int>(30<..<40),
@@ -131,17 +131,10 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertTrue(intersections[4] == 90<..)
   }
   
-  func testCountableIntersection() {
+  func test_countableIntersection() {
     let multi1: MultipleRanges<Int> = [AnyRange<Int>(..<10)]
     let multi2: MultipleRanges<Int> = [AnyRange<Int>(9<..)]
     XCTAssertTrue(multi1.intersection(multi2).isEmpty)
   }
-  
-  static var allTests = [
-    ("testNormalization", testNormalization),
-    ("testSubtraction", testSubtraction),
-    ("testIntersection", testIntersection),
-    ("testCountableIntersection", testCountableIntersection),
-  ]
 }
 
