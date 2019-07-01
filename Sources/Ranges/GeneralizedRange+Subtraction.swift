@@ -1,20 +1,21 @@
 /***************************************************************************************************
  GeneralizedRange+Subtraction.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
  
 
-/// it may be subtractable...
+///
+/// it *may* be subtractable...
 private func _subtractable<Bound>(_ minuend:Bounds<Bound>,
                                   _ subtrahend:Bounds<Bound>) -> Bool
   where Bound:Comparable
 {
-  if let mLower = minuend.lower, let sUpper = subtrahend.upper, mLower.bound > sUpper.bound {
+  if let mLower = minuend.lower.value, let sUpper = subtrahend.upper.value, mLower > sUpper {
     return false
   }
-  if let mUpper = minuend.upper, let sLower = subtrahend.lower, mUpper.bound < sLower.bound {
+  if let mUpper = minuend.upper.value, let sLower = subtrahend.lower.value, mUpper < sLower {
     return false
   }
   return true
@@ -30,12 +31,12 @@ private func _subtracting<Bound>(_ minuend:Bounds<Bound>,
   
   var result: [Bounds<Bound>] = []
   
-  if let sLower = subtrahend.lower {
-    result.append((lower:minuend.lower, upper:~sLower))
+  if subtrahend.lower != .unbounded {
+    result.append((lower:minuend.lower, upper:~subtrahend.lower))
   }
   
-  if let sUpper = subtrahend.upper {
-    result.append((lower:~sUpper, upper:minuend.upper))
+  if subtrahend.upper != .unbounded {
+    result.append((lower:~subtrahend.upper, upper:minuend.upper))
   }
   
   return result
@@ -87,8 +88,7 @@ private func _arrange<Bound>(_ list:[AnyRange<Bound>]) -> (AnyRange<Bound>, AnyR
     case (false, false): return (list[0], list[1])
     }
   default:
-    assertionFailure("list.count >= 3")
-    return (.empty, nil)
+    fatalError("Too many ranges.")
   }
 }
 

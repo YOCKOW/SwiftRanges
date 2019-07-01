@@ -1,6 +1,6 @@
 /***************************************************************************************************
  LeftOpenRangeTests.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -24,12 +24,8 @@ final class LeftOpenRangeTests: XCTestCase {
     let bounds = (0<..5).bounds
     
     XCTAssertNotNil(bounds)
-    XCTAssertNotNil(bounds?.lower)
-    XCTAssertEqual(bounds?.lower?.bound, 0)
-    XCTAssertEqual(bounds?.lower?.isIncluded, false)
-    XCTAssertNotNil(bounds?.upper)
-    XCTAssertEqual(bounds?.upper?.bound, 5)
-    XCTAssertEqual(bounds?.upper?.isIncluded, true)
+    XCTAssertEqual(bounds?.lower, .excluded(0))
+    XCTAssertEqual(bounds?.upper, .included(5))
   }
   
   static var allTests = [

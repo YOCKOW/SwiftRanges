@@ -1,6 +1,6 @@
 /***************************************************************************************************
  MultipleRanges.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -44,7 +44,7 @@ extension MultipleRanges {
           // No more elements are necessary
           // if `concatenated` is unbounded or `PartialRange(From|GreaterThan)`
           // because `ranges` has been already sorted.
-          if let bounds = concatenated.bounds, bounds.upper == nil {
+          if let bounds = concatenated.bounds, bounds.upper == .unbounded {
             break appendRanges
           }
         } else {
@@ -95,14 +95,8 @@ extension MultipleRanges {
   public mutating func insert<R>(_ newRange:R)
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
-    if let bounds = newRange.bounds, let lower = bounds.lower, let upper = bounds.upper,
-      !lower.isIncluded, !upper.isIncluded
-    {
-      // OpenRange
-      self._insert(AnyRange<Bound>(uncheckedBounds:bounds))
-    } else {
-      self._insert(newRange)
-    }
+    guard let bounds = newRange.bounds, _validateBounds(bounds) else { return }
+    self._insert(newRange)
   }
   
   /// Inserts the given range.

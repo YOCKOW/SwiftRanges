@@ -1,6 +1,6 @@
 /***************************************************************************************************
  TangibleUnboundedRange.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -46,8 +46,7 @@ extension TangibleUnboundedRange: RangeExpression {
 
 extension TangibleUnboundedRange: GeneralizedRange {
   public var bounds:Bounds<Bound>? {
-    return (lower:nil,
-            upper:nil)
+    return (lower: .unbounded, upper: .unbounded)
   }
 }
 

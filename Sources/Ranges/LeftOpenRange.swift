@@ -1,16 +1,16 @@
 /***************************************************************************************************
  LefOpenRange.swift
-   © 2017-2018 YOCKOW.
+   © 2017-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
 
 
 /// # LeftOpenRange
-/// 
+///
 /// A range that does not include its lower bound, but does include its upper bound.
 /// Reference: [Interval - Wikipedia](https://en.wikipedia.org/wiki/Interval_(mathematics)#Terminology)
-public struct LeftOpenRange<Bound: Comparable> {
+public struct LeftOpenRange<Bound> where Bound: Comparable {
   public let lowerBound: Bound
   public let upperBound: Bound
   public init(uncheckedBounds bounds: (lower: Bound, upper: Bound)) {
@@ -26,9 +26,7 @@ public typealias CountableLeftOpenRange<Bound> =
 infix operator ..: RangeFormationPrecedence
 public func .. <T>(lhs:ExcludedLowerBound<T>, upper:T) -> LeftOpenRange<T> {
   let lower = lhs.lowerBound
-  guard lower <= upper else {
-    fatalError("Can't form Range with upperBound < lowerBound")
-  }
+  precondition(lower <= upper,"Can't form Range with upperBound < lowerBound")
   return LeftOpenRange(uncheckedBounds:(lower:lower, upper:upper))
 }
 
@@ -57,8 +55,7 @@ extension LeftOpenRange: RangeExpression {
 extension LeftOpenRange: GeneralizedRange {
   public var bounds:Bounds<Bound>? {
     if self.isEmpty { return nil }
-    return (lower:Boundary<Bound>(bound:self.lowerBound, isIncluded:false),
-            upper:Boundary<Bound>(bound:self.upperBound, isIncluded:true))
+    return (lower: .excluded(self.lowerBound), upper: .included(self.upperBound))
   }
 }
 

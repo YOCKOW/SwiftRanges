@@ -1,6 +1,6 @@
 /***************************************************************************************************
  MultipleRanges+Subtraction.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -13,8 +13,10 @@ private func _endIndex<R, Bound>(_ ranges:[AnyRange<Bound>],
 {
   for ii in 0..<ranges.count {
     let range = ranges[ii]
-    if let lower = range.bounds?.lower, let anotherUpper = subtrahend.bounds?.upper {
-      if anotherUpper._compare(lower, as:.upper) == .orderedAscending {
+    if let lower = range.bounds?.lower, let anotherUpper = subtrahend.bounds?.upper,
+      lower != .unbounded, anotherUpper != .unbounded
+    {
+      if anotherUpper._compare(lower, side: .upper) == .orderedAscending {
         // there are no more ranges to be subtracted,
         // because `self.ranges` is always sorted.
         return ii

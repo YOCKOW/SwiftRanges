@@ -1,6 +1,6 @@
 /***************************************************************************************************
  PartialRangeGreaterThanTests.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -25,10 +25,8 @@ final class PartialRangeGreaterThanTests: XCTestCase {
     let bounds = (0<..).bounds
     
     XCTAssertNotNil(bounds)
-    XCTAssertNotNil(bounds?.lower)
-    XCTAssertEqual(bounds?.lower?.bound, 0)
-    XCTAssertEqual(bounds?.lower?.isIncluded, false)
-    XCTAssertNil(bounds?.upper)
+    XCTAssertEqual(bounds?.lower, .excluded(0))
+    XCTAssertEqual(bounds?.upper, .unbounded)
   }
   
   static var allTests = [

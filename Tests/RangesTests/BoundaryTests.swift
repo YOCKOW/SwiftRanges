@@ -1,6 +1,6 @@
 /***************************************************************************************************
  PartialRangeGreaterThanTests.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -10,33 +10,32 @@ import XCTest
 
 final class BoundaryTests: XCTestCase {
   func testInitialization() {
-    let boundary1 = Boundary<Character>(bound:"A", isIncluded:true)
-    let boundary2 = Boundary<Character>(bound:"Z", isIncluded:true)
+    let boundary1: Boundary<Character> = .included("A")
+    let boundary2: Boundary<Character> = .included("Z")
     
     XCTAssertNotEqual(boundary1, boundary2)
   }
   
   func testComparison() {
-    let boundary1 = Boundary<Int>(bound:0, isIncluded:true)
-    let boundary2 = Boundary<Int>(bound:0, isIncluded:false)
-    let boundary3 = Boundary<Int>(bound:1, isIncluded:true)
-    let boundary4 = Boundary<Int>(bound:1, isIncluded:false)
+    let boundary1: Boundary<Int> = .included(0)
+    let boundary2: Boundary<Int> = .excluded(0)
+    let boundary3: Boundary<Int> = .included(1)
+    let boundary4: Boundary<Int> = .excluded(1)
     
-    XCTAssertEqual(boundary1._compare(boundary1, as:.lower), .orderedSame)
-    XCTAssertEqual(boundary1._compare(boundary2, as:.lower), .orderedAscending)
-    XCTAssertEqual(boundary1._compare(boundary2, as:.upper), .orderedDescending)
-    XCTAssertEqual(boundary1._compare(boundary3, as:.upper), .orderedAscending)
+    XCTAssertEqual(boundary1._compare(boundary1, side: .lower), .orderedSame)
+    XCTAssertEqual(boundary1._compare(boundary2, side: .lower), .orderedAscending)
+    XCTAssertEqual(boundary1._compare(boundary2, side: .upper), .orderedDescending)
+    XCTAssertEqual(boundary1._compare(boundary3, side: .upper), .orderedAscending)
     
     
-    XCTAssertEqual(_min(boundary1, boundary2, boundary3, boundary4, as:.lower),
+    XCTAssertEqual(_min(boundary1, boundary2, boundary3, boundary4, side: .lower),
                    boundary1)
-    XCTAssertEqual(_min(boundary1, boundary2, boundary3, boundary4, as:.upper),
+    XCTAssertEqual(_min(boundary1, boundary2, boundary3, boundary4, side: .upper),
                    boundary2)
-    XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, as:.lower),
+    XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, side: .lower),
                    boundary4)
-    XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, as:.upper),
+    XCTAssertEqual(_max(boundary1, boundary2, boundary3, boundary4, side: .upper),
                    boundary3)
-    
   }
   
   static var allTests = [

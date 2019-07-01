@@ -1,6 +1,6 @@
 /***************************************************************************************************
  GeneralizedRange+Comparison+ParticularCases.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -52,10 +52,7 @@ public func <= <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
 /* ***** GeneralizedRange <=> UnboundedRange ******************************************************/
 extension GeneralizedRange {
   public static func ==(lhs:Self, _:UnboundedRange) -> Bool {
-    guard let lBounds = lhs.bounds, lBounds.lower == nil, lBounds.upper == nil else {
-      return false
-    }
-    return true
+    return lhs.bounds?.lower == .unbounded && lhs.bounds?.upper == .unbounded
   }
   public static func !=(lhs:Self, _:UnboundedRange) -> Bool {
     return !(lhs == (...))

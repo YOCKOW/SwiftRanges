@@ -1,6 +1,6 @@
 /***************************************************************************************************
  GeneralizedRange+Intersection.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -13,10 +13,10 @@ private func _intersection<Bound>(_ lb:Bounds<Bound>?, _ rb:Bounds<Bound>?) -> B
     return nil
   }
   
-  let lower = _max(leftBounds.lower, rightBounds.lower, as:.lower)
-  let upper = _min(leftBounds.upper, rightBounds.upper, as:.upper)
+  let lower = _max(leftBounds.lower, rightBounds.lower, side: .lower)
+  let upper = _min(leftBounds.upper, rightBounds.upper, side: .upper)
   
-  return (lower:lower, upper:upper)
+  return (lower:lower, upper:upper) // unchecked
 }
 
 extension GeneralizedRange {
