@@ -43,22 +43,20 @@ final class GeneralizedRangeTests: XCTestCase {
   
   func test_concatenation() {
     XCTAssertNil((0..<100).concatenating(100<..200))
-    XCTAssertTrue((0..<100).concatenating(100..<200)! == 0..<200)
-    XCTAssertTrue((...400).concatenating(100..<200)! == ...400)
-    XCTAssertTrue((0<..<10).concatenating(())! == 0<..<10)
-    XCTAssertTrue((...400).concatenating(100...)! == (...))
+    XCTAssertTrue((0..<100).concatenating(100..<200) == 0..<200)
+    XCTAssertTrue((...400).concatenating(100..<200) == ...400)
+    XCTAssertTrue((0<..<10).concatenating(()) == 0<..<10)
+    XCTAssertTrue((...400).concatenating(100...) == (...))
   }
   
   func test_subtraction() {
     var subtracted = (0...100).subtracting(20...80)
     XCTAssertTrue(subtracted.0 == 0..<20)
-    XCTAssertNotNil(subtracted.1)
-    XCTAssertTrue(subtracted.1! == 80<..100)
+    XCTAssertTrue(subtracted.1 == 80<..100)
     
     subtracted = TangibleUnboundedRange<Int>().subtracting(20<..<80)
     XCTAssertTrue(subtracted.0 == ...20)
-    XCTAssertNotNil(subtracted.1)
-    XCTAssertTrue(subtracted.1! == 80...)
+    XCTAssertTrue(subtracted.1 == 80...)
     
     subtracted = (10<..<20).subtracting(11...19)
     XCTAssertTrue(subtracted.0 == .empty)

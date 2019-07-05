@@ -46,15 +46,23 @@ extension GeneralizedRange {
   
 }
 
+
+extension Optional where Wrapped: GeneralizedRange {
+  public static func ==<R>(lhs: Optional, rhs: R?) -> Bool
+    where R: GeneralizedRange, Wrapped.Bound == R.Bound
+  {
+    guard let range1 = lhs, let range2 = rhs else { return lhs == nil && rhs == nil }
+    return range1.compare(range2) == .orderedSame
+  }
+  
+  public static func !=<R>(lhs: Optional, rhs: R?) -> Bool
+    where R: GeneralizedRange, Wrapped.Bound == R.Bound
+  {
+    return !(lhs == rhs)
+  }
+}
+
 extension GeneralizedRange {
-  public static func ==<T>(lhs:Self, rhs:T) -> Bool where T:GeneralizedRange, T.Bound == Self.Bound {
-    return lhs.compare(rhs) == .orderedSame
-  }
-  
-  public static func != <T>(lhs:Self, rhs:T) -> Bool where T:GeneralizedRange, T.Bound == Self.Bound {
-    return lhs.compare(rhs) != .orderedSame
-  }
-  
   public static func < <T>(lhs:Self, rhs:T) -> Bool where T:GeneralizedRange, T.Bound == Self.Bound {
     return lhs.compare(rhs) == .orderedAscending
   }

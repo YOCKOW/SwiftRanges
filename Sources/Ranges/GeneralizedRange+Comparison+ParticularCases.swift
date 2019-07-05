@@ -7,13 +7,16 @@
  
  
 /* ***** GeneralizedRange <=> Empty Range *********************************************************/
+extension Optional where Wrapped: GeneralizedRange {
+  public static func ==(lhs: Optional, rhs: ()?) -> Bool {
+    guard let range = lhs, let _ = rhs else { return lhs == nil && rhs == nil }
+    return range.bounds == nil
+  }
+  public static func !=(lhs: Optional, rhs: ()?) -> Bool {
+    return !(lhs == rhs)
+  }
+}
 extension GeneralizedRange {
-  public static func ==(lhs:Self, _:()) -> Bool {
-    return lhs.bounds == nil
-  }
-  public static func !=(lhs:Self, _:()) -> Bool {
-    return lhs.bounds != nil
-  }
   public static func <(lhs:Self, _:()) -> Bool {
     if lhs == () { return false }
     return true
@@ -29,11 +32,13 @@ extension GeneralizedRange {
   }
 }
 
-public func ==<R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
-  return rhs == ()
-}
-public func !=<R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
-  return rhs != ()
+extension Optional where Wrapped == Void {
+  public static func ==<R>(lhs: Optional, rhs: R?) -> Bool where R: GeneralizedRange {
+    return rhs == lhs
+  }
+  public static func !=<R>(lhs: Optional, rhs: R?) -> Bool where R: GeneralizedRange {
+    return rhs != lhs
+  }
 }
 public func < <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
   return rhs > ()
@@ -50,13 +55,16 @@ public func <= <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
 
 
 /* ***** GeneralizedRange <=> UnboundedRange ******************************************************/
+extension Optional where Wrapped: GeneralizedRange {
+  public static func ==(lhs: Optional, rhs: UnboundedRange?) -> Bool {
+    guard let range = lhs, let _ = rhs else { return lhs == nil && rhs == nil }
+    return range.bounds?.lower == .unbounded  && range.bounds?.upper == .unbounded
+  }
+  public static func !=(lhs: Optional, rhs: UnboundedRange?) -> Bool {
+    return !(lhs == rhs)
+  }
+}
 extension GeneralizedRange {
-  public static func ==(lhs:Self, _:UnboundedRange) -> Bool {
-    return lhs.bounds?.lower == .unbounded && lhs.bounds?.upper == .unbounded
-  }
-  public static func !=(lhs:Self, _:UnboundedRange) -> Bool {
-    return !(lhs == (...))
-  }
   public static func <(lhs:Self, _:UnboundedRange) -> Bool {
     return false
   }
@@ -72,11 +80,13 @@ extension GeneralizedRange {
   }
 }
 
-public func ==<R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
-  return rhs == (...)
-}
-public func !=<R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
-  return rhs != (...)
+extension Optional where Wrapped == UnboundedRange {
+  public static func ==<R>(lhs: Optional, rhs: R?) -> Bool where R: GeneralizedRange {
+    return rhs == lhs
+  }
+  public static func !=<R>(lhs: Optional, rhs: R?) -> Bool where R: GeneralizedRange {
+    return rhs != lhs
+  }
 }
 public func < <R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
   return rhs > (...)
@@ -92,11 +102,13 @@ public func <= <R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
 }
 
 /* ***** UnboundedRange <=> UnboundedRange ********************************************************/
-public func ==(_:UnboundedRange, _:UnboundedRange) -> Bool {
-  return true
-}
-public func !=(_:UnboundedRange, _:UnboundedRange) -> Bool {
-  return false
+extension Optional where Wrapped == UnboundedRange {
+  public static func ==(lhs: Optional, rhs: Optional) -> Bool {
+    return (lhs == nil && rhs == nil) || (lhs != nil && rhs != nil)
+  }
+  public static func !=(lhs: Optional, rhs: Optional) -> Bool {
+    return !(lhs == rhs)
+  }
 }
 public func <(_:UnboundedRange, _:UnboundedRange) -> Bool {
   return false
@@ -112,17 +124,21 @@ public func <=(_:UnboundedRange, _:UnboundedRange) -> Bool {
 }
 
 /* ***** Empty Range <=> UnboundedRange ***********************************************************/
-public func ==(_:(), _:UnboundedRange) -> Bool {
-  return false
+extension Optional where Wrapped == Void {
+  public static func ==(lhs: Optional, rhs: UnboundedRange?) -> Bool {
+    return lhs == nil && rhs == nil
+  }
+  public static func !=(lhs: Optional, rhs: UnboundedRange?) -> Bool {
+    return !(lhs == rhs)
+  }
 }
-public func ==(_:UnboundedRange, _:()) -> Bool {
-  return false
-}
-public func !=(_:(), _:UnboundedRange) -> Bool {
-  return true
-}
-public func !=(_:UnboundedRange, _:()) -> Bool {
-  return true
+extension Optional where Wrapped == UnboundedRange {
+  public static func ==(lhs: Optional, rhs: ()?) -> Bool {
+    return rhs == lhs
+  }
+  public static func !=(lhs: Optional, rhs: ()?) -> Bool {
+    return rhs != lhs
+  }
 }
 public func <(_:(), _:UnboundedRange) -> Bool {
   return false
