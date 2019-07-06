@@ -24,6 +24,19 @@ final class AnyRangeTests: XCTestCase {
     let range3 = AnyRange<Int>(1<..)
     XCTAssertEqual(range3.relative(to:[0,1,2,3]), 2..<4)
   }
+  
+  func test_intersection() {
+    func _forceUnbountableRange<R,B>(_ range: R) -> AnyRange<B> where R: GeneralizedRange, R.Bound == B {
+      return AnyRange<B>(range)
+    }
+    
+    XCTAssertEqual(AnyRange<Int>(0..<10).intersection(_forceUnbountableRange(9<..20)),
+                   .empty)
+    XCTAssertEqual(_forceUnbountableRange(0..<10).intersection(AnyRange<Int>(5<..20)),
+                   AnyRange<Int>(5<..<10))
+    XCTAssertEqual(_forceUnbountableRange(0..<10).intersection(.unbounded),
+                   AnyRange<Int>(0..<10))
+  }
 }
 
 

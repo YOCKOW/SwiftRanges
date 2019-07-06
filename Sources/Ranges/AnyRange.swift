@@ -118,3 +118,11 @@ extension AnyRange: Equatable {
 extension AnyRange: Hashable, HashableRange where Bound: Hashable {}
 
 extension AnyRange: CustomStringConvertible, CustomStringConvertibleRange where Bound: CustomStringConvertible {}
+
+extension AnyRange {
+  /// Returns a new range that is an intersection of `self` and `other`.
+  public func intersection(_ other: AnyRange<Bound>) -> AnyRange<Bound> {
+    guard let myBounds = self._bounds, let otherBounds = other._bounds else { return .empty }
+    return AnyRange(_bounds: myBounds.intersection(otherBounds))
+  }
+}
