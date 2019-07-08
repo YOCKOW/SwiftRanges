@@ -8,6 +8,10 @@
 import XCTest
 @testable import Ranges
 
+func _forceUncountableRange<R,B>(_ range: R) -> AnyRange<B> where R: GeneralizedRange, R.Bound == B {
+  return AnyRange<B>(range)
+}
+
 final class AnyRangeTests: XCTestCase {
   func test_asRangeExpression() {
     // Default implementation is in "GeneralizedRange"
@@ -26,16 +30,32 @@ final class AnyRangeTests: XCTestCase {
   }
   
   func test_intersection() {
-    func _forceUnbountableRange<R,B>(_ range: R) -> AnyRange<B> where R: GeneralizedRange, R.Bound == B {
-      return AnyRange<B>(range)
-    }
-    
-    XCTAssertEqual(AnyRange<Int>(0..<10).intersection(_forceUnbountableRange(9<..20)),
+    XCTAssertEqual(AnyRange<Int>(0..<10).intersection(_forceUncountableRange(9<..20)),
                    .empty)
-    XCTAssertEqual(_forceUnbountableRange(0..<10).intersection(AnyRange<Int>(5<..20)),
+    XCTAssertEqual(_forceUncountableRange(0..<10).intersection(AnyRange<Int>(5<..20)),
                    AnyRange<Int>(5<..<10))
-    XCTAssertEqual(_forceUnbountableRange(0..<10).intersection(.unbounded),
+    XCTAssertEqual(_forceUncountableRange(0..<10).intersection(.unbounded),
                    AnyRange<Int>(0..<10))
+  }
+  
+  func test_subtraction() {
+    var result: (AnyRange<Int>, AnyRange<Int>?)
+    
+    result = AnyRange<Int>(0<..<10).subtracting(_forceUncountableRange(1...9))
+    XCTAssertEqual(result.0, .empty)
+    XCTAssertEqual(result.1, nil)
+    
+    result = _forceUncountableRange(0..<10).subtracting(.init(1...9))
+    XCTAssertEqual(result.0, .init(0..<1))
+    XCTAssertEqual(result.1, nil)
+    
+    result = _forceUncountableRange(0..<10).subtracting(.init(1<..<9))
+    XCTAssertEqual(result.0, .init(0...1))
+    XCTAssertEqual(result.1, .init(9..<10))
+    
+    result = AnyRange<Int>(...).subtracting(.init(10...20))
+    XCTAssertEqual(result.0, .init(..<10))
+    XCTAssertEqual(result.1, .init(20<..))
   }
 }
 

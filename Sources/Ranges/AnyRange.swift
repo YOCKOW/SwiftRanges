@@ -10,18 +10,9 @@
 ///
 /// A type-erased range of `Bound`.
 public struct AnyRange<Bound> where Bound:Comparable {
-  private var _bounds: _AnyBounds? = nil
-  private init(_bounds: _AnyBounds?) {
-    self._bounds = _bounds
-  }
-  
-  private init(uncheckedBounds: Bounds<Bound>?, initializer: (Bounds<Bound>) -> _AnyBounds?) {
-    guard let bounds = uncheckedBounds else { self.init(_bounds: nil); return }
-    if bounds.lower == .unbounded && bounds.upper == .unbounded {
-      self.init(_bounds: _AnyBounds._UnboundedBounds())
-    } else {
-      self.init(_bounds: initializer(bounds))
-    }
+  private var _anyBounds: _AnyBounds? = nil
+  private init(_anyBounds: _AnyBounds?) {
+    self._anyBounds = _anyBounds
   }
 }
 
@@ -29,7 +20,7 @@ extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Creates a *countable* range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
   public init(uncheckedBounds: Bounds<Bound>?) {
-    self.init(uncheckedBounds: uncheckedBounds, initializer: _AnyBounds._CountableBounds.init)
+    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds._CountableBounds.init))
   }
 }
 
@@ -37,7 +28,7 @@ extension AnyRange {
   /// Creates a range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
   public init(uncheckedBounds: Bounds<Bound>?) {
-    self.init(uncheckedBounds: uncheckedBounds, initializer: _AnyBounds._UncountableBounds.init)
+    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds._UncountableBounds.init))
   }
 }
 
@@ -48,7 +39,7 @@ extension AnyRange {
   {
     if case let any as AnyRange<Bound> = range {
       // `_bounds` must have been already checked if it is an instance of `AnyRange`.
-      self.init(_bounds: any._bounds)
+      self.init(_anyBounds: any._anyBounds)
     } else {
       self.init(uncheckedBounds:range.bounds)
     }
@@ -58,7 +49,7 @@ extension AnyRange {
   public init<T>(_ range:T) where T:GeneralizedRange, T.Bound == Bound {
     if case let any as AnyRange<Bound> = range {
       // `bounds` must have been already checked if it is an instance of `AnyRange`.
-      self.init(_bounds: any._bounds)
+      self.init(_anyBounds: any._anyBounds)
     } else {
       self.init(uncheckedBounds:range.bounds)
     }
@@ -78,15 +69,21 @@ extension AnyRange {
   }
 }
 
+extension AnyRange where Bound: Strideable, Bound.Stride: SignedInteger {
+  /// Creates a *countable* unbounded range.
+  public init(_: UnboundedRange) {
+    self.init(uncheckedBounds: (lower: .unbounded, upper: .unbounded))
+  }
+}
 extension AnyRange {
   /// Creates an empty range.
   public init() {
-    self.init(_bounds: nil)
+    self.init(_anyBounds: nil)
   }
   
   /// Creates an unbounded range.
-  public init(_:UnboundedRange) {
-    self.init(_bounds: _AnyBounds._UnboundedBounds())
+  public init(_: UnboundedRange) {
+    self.init(uncheckedBounds: (lower: .unbounded, upper: .unbounded))
   }
   
   /// An instance of `AnyRange` representing an empty range.
@@ -98,14 +95,18 @@ extension AnyRange {
 
 extension AnyRange: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
-    return self._bounds?.bounds(type: Bound.self)
+    return self._anyBounds?.bounds(type: Bound.self)
   }
 }
 
 extension AnyRange {
-  public var isEmpty: Bool { return self._bounds == nil }
+  public var isEmpty: Bool {
+    return self._anyBounds == nil
+  }
+  
   public var isUnbounded: Bool {
-    return self._bounds is _AnyBounds._UnboundedBounds
+    let bounds = self.bounds
+    return bounds?.lower == .unbounded && bounds?.upper == .unbounded
   }
 }
 
@@ -122,7 +123,23 @@ extension AnyRange: CustomStringConvertible, CustomStringConvertibleRange where 
 extension AnyRange {
   /// Returns a new range that is an intersection of `self` and `other`.
   public func intersection(_ other: AnyRange<Bound>) -> AnyRange<Bound> {
-    guard let myBounds = self._bounds, let otherBounds = other._bounds else { return .empty }
-    return AnyRange(_bounds: myBounds.intersection(otherBounds))
+    guard let myBounds = self._anyBounds, let otherBounds = other._anyBounds else { return .empty }
+    return AnyRange(_anyBounds: myBounds.intersection(otherBounds))
+  }
+  
+  /// Returns subtracted range(s).
+  /// Under some conditions, `other` divides the range. That is why a tuple is returned.
+  public func subtracting(_ other: AnyRange<Bound>) -> (AnyRange<Bound>, AnyRange<Bound>?) {
+    guard let myBounds = self._anyBounds else { return (.empty, nil) }
+    guard let otherBounds = other._anyBounds else { return (self, nil) }
+    
+    switch myBounds.subtracting(otherBounds) {
+    case (let nilableBounds, nil):
+      return (AnyRange(_anyBounds: nilableBounds), nil)
+    case (let bounds1?, let bounds2?):
+      return (AnyRange(_anyBounds: bounds1), AnyRange(_anyBounds: bounds2))
+    default:
+      fatalError("\(#function): Unexpected result.")
+    }
   }
 }

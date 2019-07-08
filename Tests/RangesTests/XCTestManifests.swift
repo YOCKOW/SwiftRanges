@@ -8,6 +8,7 @@ extension AnyRangeTests {
     static let __allTests__AnyRangeTests = [
         ("test_asRangeExpression", test_asRangeExpression),
         ("test_intersection", test_intersection),
+        ("test_subtraction", test_subtraction),
     ]
 }
 
