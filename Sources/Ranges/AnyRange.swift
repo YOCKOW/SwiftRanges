@@ -127,6 +127,11 @@ extension AnyRange {
     return AnyRange(_anyBounds: myBounds.intersection(otherBounds))
   }
   
+  /// Returns whether the intersection of `self` and `other` is empty or not.
+  public func overlaps(_ other: AnyRange<Bound>) -> Bool {
+    return !self.intersection(other).isEmpty
+  }
+  
   /// Returns subtracted range(s).
   /// Under some conditions, `other` divides the range. That is why a tuple is returned.
   public func subtracting(_ other: AnyRange<Bound>) -> (AnyRange<Bound>, AnyRange<Bound>?) {
