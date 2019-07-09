@@ -29,6 +29,15 @@ final class AnyRangeTests: XCTestCase {
     XCTAssertEqual(range3.relative(to:[0,1,2,3]), 2..<4)
   }
   
+  func test_concatenation() {
+    XCTAssertEqual(AnyRange<Int>(0...10).concatenating(_forceUncountableRange(11...20)),
+                   .init(0...20))
+    XCTAssertEqual(_forceUncountableRange(0...10).concatenating(.init(20...30)),
+                   nil)
+    XCTAssertEqual(_forceUncountableRange(10...20).concatenating(.init(0...30)),
+                   .init(0...30))
+  }
+  
   func test_intersection() {
     XCTAssertEqual(AnyRange<Int>(0..<10).intersection(_forceUncountableRange(9<..20)),
                    .empty)

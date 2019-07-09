@@ -142,4 +142,12 @@ extension AnyRange {
       fatalError("\(#function): Unexpected result.")
     }
   }
+  
+  /// Concatenate two ranges if possible.
+  /// Returns `nil` if the two ranges are apart.
+  public func concatenating(_ other: AnyRange<Bound>) -> AnyRange<Bound>? {
+    guard let myBounds = self._anyBounds else { return other }
+    guard let otherBounds = other._anyBounds else { return self }
+    return myBounds.concatenating(otherBounds).flatMap(AnyRange<Bound>.init)
+  }
 }

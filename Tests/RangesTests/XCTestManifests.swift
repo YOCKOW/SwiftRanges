@@ -7,6 +7,7 @@ extension AnyRangeTests {
     // to regenerate.
     static let __allTests__AnyRangeTests = [
         ("test_asRangeExpression", test_asRangeExpression),
+        ("test_concatenation", test_concatenation),
         ("test_intersection", test_intersection),
         ("test_subtraction", test_subtraction),
     ]

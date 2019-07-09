@@ -15,6 +15,7 @@ internal class _AnyBounds {
   internal func bounds<T>(type: T.Type) -> Bounds<T> { _mustBeOverridden() }
   internal func intersection(_ other: _AnyBounds) -> _AnyBounds? { _mustBeOverridden() }
   internal func subtracting(_ other: _AnyBounds) -> (_AnyBounds?, _AnyBounds?) { _mustBeOverridden() }
+  internal func concatenating(_ other: _AnyBounds) -> _AnyBounds? { _mustBeOverridden() }
 }
 
 extension _AnyBounds {
@@ -51,6 +52,18 @@ extension _AnyBounds {
       default:
         fatalError("Too many ranges.")
       }
+    }
+    
+    /* *** CONCATENATION *** */
+    fileprivate func _isConcatenatable(with other: _SomeBounds<Bound>) -> Bool { _mustBeOverridden() }
+    
+    fileprivate func _concatenating(_ other: _SomeBounds<Bound>) -> Bounds<Bound>? {
+      guard self._isConcatenatable(with: other) else { return nil }
+      
+      let myBounds = self.bounds(type: Bound.self)
+      let otherBounds = other.bounds(type: Bound.self)
+      return (lower: _min(myBounds.lower, otherBounds.lower, side: .lower),
+              upper: _max(myBounds.upper, otherBounds.upper, side: .upper))
     }
   }
   
@@ -108,6 +121,27 @@ extension _AnyBounds {
       
       return result
     }
+    
+    fileprivate override func _isConcatenatable(with other: _SomeBounds<Bound>) -> Bool {
+      guard type(of: other) == _UncountableBounds<Bound>.self else {
+        return other._isConcatenatable(with: self)
+      }
+      
+      let myBounds = self.bounds(type: Bound.self)
+      let otherBounds = other.bounds(type: Bound.self)
+      
+      return myBounds.upper._isConcatenatable(with: otherBounds.lower) &&
+             otherBounds.upper._isConcatenatable(with: myBounds.lower)
+    }
+    
+    internal override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
+      guard case let other as _SomeBounds<Bound> = other else { fatalError("Unexpected type.") }
+      guard type(of: other) == _UncountableBounds<Bound>.self else {
+        return other.concatenating(self)
+      }
+      
+      return self._concatenating(other).flatMap(_UncountableBounds<Bound>.init)
+    }
   }
   
   internal final class _CountableBounds<Bound>: _UncountableBounds<Bound> where Bound: Strideable, Bound.Stride: SignedInteger {
@@ -143,6 +177,19 @@ extension _AnyBounds {
     fileprivate override func _subtracted(from other: _AnyBounds) -> [_AnyBounds] {
       let minuend = _CountableBounds<Bound>(other.bounds(type: Bound.self))!
       return minuend._subtracting(self)
+    }
+    
+    fileprivate override func _isConcatenatable(with other: _SomeBounds<Bound>) -> Bool {
+      let myBounds = self.bounds(type: Bound.self)
+      let otherBounds = other.bounds(type: Bound.self)
+      
+      return myBounds.upper._isConcatenatable(with: otherBounds.lower) &&
+             otherBounds.upper._isConcatenatable(with: myBounds.lower)
+    }
+    
+    internal override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
+      guard case let other as _SomeBounds<Bound> = other else { fatalError("Unexpected type.") }
+      return self._concatenating(other).flatMap(_CountableBounds<Bound>.init)
     }
   }
 }
