@@ -18,8 +18,50 @@ internal class _AnyBounds {
   internal func concatenating(_ other: _AnyBounds) -> _AnyBounds? { _mustBeOverridden() }
 }
 
+private protocol __AnyBounds {}
+extension __AnyBounds {
+  fileprivate init?<T>(_uncountableBounds: Bounds<T>) where T: Comparable {
+    guard let instance = _AnyBounds._UncountableBounds(_uncountableBounds) else { return nil }
+    self = instance as! Self
+  }
+  fileprivate init?<T>(_countableBounds: Bounds<T>) where T: Strideable, T.Stride: SignedInteger {
+    guard let instance = _AnyBounds._CountableBounds(_countableBounds) else { return nil }
+    self = instance as! Self
+  }
+}
+extension _AnyBounds: __AnyBounds {
+  internal convenience init?<T>(uncountableBounds: Bounds<T>) where T: Comparable {
+    self.init(_uncountableBounds: uncountableBounds)
+  }
+  internal convenience init?<T>(countableBounds: Bounds<T>) where T: Strideable, T.Stride: SignedInteger {
+    self.init(_countableBounds: countableBounds)
+  }
+}
+
 extension _AnyBounds {
-  internal class _SomeBounds<Bound>: _AnyBounds where Bound: Comparable{
+  fileprivate class _SomeBounds<Bound>: _AnyBounds where Bound: Comparable{
+    private var _bounds: Bounds<Bound>
+    fileprivate init?(_ bounds: Bounds<Bound>) {
+      guard _validateBounds(bounds) else { return nil }
+      self._bounds = bounds
+      super.init()
+    }
+    
+    fileprivate override func bounds<T>(type: T.Type) -> Bounds<T> {
+      guard case let bounds as Bounds<T> = self._bounds else {
+        fatalError("Mismatched types (\(#function)): Expected type == \(Bound.self), Actual Type ==  \(T.self)")
+      }
+      return bounds
+    }
+    
+    /* *** INTERSECTION *** */
+    fileprivate func _intersection(_ other: _AnyBounds) -> Bounds<Bound> {
+      let otherBounds = other.bounds(type: Bound.self)
+      let lower = _max(self._bounds.lower, otherBounds.lower, side: .lower)
+      let upper = _min(self._bounds.upper, otherBounds.upper, side: .upper)
+      return (lower: lower, upper: upper)
+    }
+    
     /* *** SUBTRACTION *** */
     fileprivate func _mayBeSubtractable(by subtrahend: _AnyBounds) -> Bool {
       let myBounds = self.bounds(type: Bound.self)
@@ -67,34 +109,12 @@ extension _AnyBounds {
     }
   }
   
-  internal class _UncountableBounds<Bound>: _SomeBounds<Bound> where Bound: Comparable {
-    private var _bounds: Bounds<Bound>
-    
-    internal init?(_ bounds: Bounds<Bound>) {
-      guard _validateBounds(bounds) else { return nil }
-      self._bounds = bounds
-      super.init()
-    }
-    
-    internal override func bounds<T>(type: T.Type) -> Bounds<T> {
-      guard case let bounds as Bounds<T> = self._bounds else {
-        fatalError("Mismatched types (\(#function)): Expected type == \(Bound.self), Actual Type ==  \(T.self)")
-      }
-      return bounds
-    }
-    
-    fileprivate func _intersection(_ other: _AnyBounds) -> Bounds<Bound> {
-      let otherBounds = other.bounds(type: Bound.self)
-      let lower = _max(self._bounds.lower, otherBounds.lower, side: .lower)
-      let upper = _min(self._bounds.upper, otherBounds.upper, side: .upper)
-      return (lower: lower, upper: upper)
-    }
-    
-    internal override func intersection(_ other: _AnyBounds) -> _AnyBounds? {
-      guard type(of: other) == _UncountableBounds<Bound>.self else {
+  fileprivate final class _UncountableBounds<Bound>: _SomeBounds<Bound> where Bound: Comparable {
+    fileprivate override func intersection(_ other: _AnyBounds) -> _AnyBounds? {
+      guard case let otherUncountableBounds as _UncountableBounds<Bound> = other else {
         return other.intersection(self)
       }
-      let bounds = self._intersection(other)
+      let bounds = self._intersection(otherUncountableBounds)
       return _UncountableBounds(bounds)
     }
     
@@ -134,7 +154,7 @@ extension _AnyBounds {
              otherBounds.upper._isConcatenatable(with: myBounds.lower)
     }
     
-    internal override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
+    fileprivate override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
       guard case let other as _SomeBounds<Bound> = other else { fatalError("Unexpected type.") }
       guard type(of: other) == _UncountableBounds<Bound>.self else {
         return other.concatenating(self)
@@ -144,13 +164,13 @@ extension _AnyBounds {
     }
   }
   
-  internal final class _CountableBounds<Bound>: _UncountableBounds<Bound> where Bound: Strideable, Bound.Stride: SignedInteger {
-    internal override init?(_ bounds: Bounds<Bound>) {
+  fileprivate final class _CountableBounds<Bound>: _SomeBounds<Bound> where Bound: Strideable, Bound.Stride: SignedInteger {
+    fileprivate override init?(_ bounds: Bounds<Bound>) {
       guard _validateBounds(bounds) else { return nil }
       super.init(bounds)
     }
     
-    internal override func intersection(_ other: _AnyBounds) -> _AnyBounds? {
+    fileprivate override func intersection(_ other: _AnyBounds) -> _AnyBounds? {
       let bounds = self._intersection(other)
       return _CountableBounds(bounds)
     }
@@ -187,7 +207,7 @@ extension _AnyBounds {
              otherBounds.upper._isConcatenatable(with: myBounds.lower)
     }
     
-    internal override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
+    fileprivate override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
       guard case let other as _SomeBounds<Bound> = other else { fatalError("Unexpected type.") }
       return self._concatenating(other).flatMap(_CountableBounds<Bound>.init)
     }

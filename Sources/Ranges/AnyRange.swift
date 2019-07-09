@@ -20,7 +20,7 @@ extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Creates a *countable* range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
   public init(uncheckedBounds: Bounds<Bound>?) {
-    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds._CountableBounds.init))
+    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds.init(countableBounds:)))
   }
 }
 
@@ -28,7 +28,7 @@ extension AnyRange {
   /// Creates a range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
   public init(uncheckedBounds: Bounds<Bound>?) {
-    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds._UncountableBounds.init))
+    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds.init(uncountableBounds:)))
   }
 }
 
