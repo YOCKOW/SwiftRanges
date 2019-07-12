@@ -28,10 +28,10 @@
  
  */
 public struct RangeDictionary<Bound, Value> where Bound: Comparable {
-  private typealias _Pair = (range: AnyRange<Bound>, value: Value)
+  fileprivate typealias _Pair = (range: AnyRange<Bound>, value: Value)
   
   /// Must be always sorted with the ranges.
-  private var _rangesAndValues: [_Pair]
+  fileprivate private(set) var _rangesAndValues: [_Pair]
   private func _validateRanges() -> Bool {
     if self._rangesAndValues.count < 2 { return true }
     for ii in 0..<(self._rangesAndValues.count - 2) {
@@ -41,21 +41,6 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
       guard range0 < range1 && !range0.overlaps(range1) else { return false }
     }
     return true
-  }
-  
-  public struct Index: Comparable {
-    fileprivate let _index: Int
-    fileprivate init(_ index: Int) {
-      self._index = index
-    }
-    
-    public static func == (lhs: Index, rhs: Index) -> Bool {
-      return lhs._index == rhs._index
-    }
-    
-    public static func < (lhs: Index, rhs: Index) -> Bool {
-      return lhs._index < rhs._index
-    }
   }
   
   /// Creates an empty dictionary.
@@ -88,16 +73,6 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
     }
     return _binarySearch(self._rangesAndValues, element)
   }
-  
-  public subscript(_ index: Index) -> Value {
-    get {
-      return self._rangesAndValues[index._index].value
-    }
-    set {
-      self._rangesAndValues[index._index].value = newValue
-    }
-  }
-  
   
   /// Returns the associated value for the element that is included in a range.
   public subscript(_ element: Bound) -> Value? {
@@ -300,5 +275,73 @@ extension RangeDictionary where Value == Void {
     }
     
     self._rangesAndValues = pairs
+  }
+}
+
+extension RangeDictionary: Sequence, Collection {
+  public typealias Element = (AnyRange<Bound>, Value)
+  
+  public struct Index: Comparable {
+    fileprivate let _index: Int
+    fileprivate init(_ index: Int) {
+      self._index = index
+    }
+    
+    public static func == (lhs: Index, rhs: Index) -> Bool {
+      return lhs._index == rhs._index
+    }
+    
+    public static func < (lhs: Index, rhs: Index) -> Bool {
+      return lhs._index < rhs._index
+    }
+  }
+  
+  public struct Iterator: IteratorProtocol {
+    public typealias Element = RangeDictionary<Bound, Value>.Element
+    
+    private var _index: RangeDictionary<Bound, Value>.Index = .init(0)
+    fileprivate var _dictionary: RangeDictionary<Bound, Value>
+    fileprivate init(_ dictionary: RangeDictionary<Bound, Value>) {
+      self._dictionary = dictionary
+    }
+    
+    public mutating func next() -> (AnyRange<Bound>, Value)? {
+      if self._index >= self._dictionary.endIndex { return nil }
+      defer { self._index = self._dictionary.index(after: self._index) }
+      return self._dictionary[self._index]
+    }
+  }
+  
+  public subscript(_ index: Index) -> (AnyRange<Bound>, Value) {
+    return self._rangesAndValues[index._index]
+  }
+  
+  public subscript(_ index: Index) -> Value {
+    get {
+      return self._rangesAndValues[index._index].value
+    }
+    set {
+      self._rangesAndValues[index._index].value = newValue
+    }
+  }
+  
+  public var count: Int {
+    return self._rangesAndValues.count
+  }
+  
+  public func makeIterator() -> Iterator {
+    return .init(self)
+  }
+  
+  public var startIndex: Index {
+    return .init(self._rangesAndValues.startIndex)
+  }
+  
+  public var endIndex: Index {
+    return .init(self._rangesAndValues.endIndex)
+  }
+  
+  public func index(after ii: Index) -> Index {
+    return .init(ii._index + 1)
   }
 }

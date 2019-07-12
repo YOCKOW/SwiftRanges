@@ -93,6 +93,7 @@ extension RangeDictionaryTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__RangeDictionaryTests = [
+        ("test_asCollection", test_asCollection),
         ("test_insertion", test_insertion),
         ("test_removal", test_removal),
         ("test_subscript", test_subscript),

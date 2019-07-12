@@ -76,6 +76,14 @@ final class RangeDictionaryTests: XCTestCase {
     XCTAssertEqual(dic[555], "NEW")
     XCTAssertEqual(dic[10008], "D")
   }
+  
+  func test_asCollection() {
+    let array: [RangeDictionary<Int, String>.Element] = .init(simpleDictionary)
+    XCTAssertTrue(array[0] == (.init(0..<10), "A"))
+    XCTAssertTrue(array[1] == (.init(100..<110), "B"))
+    XCTAssertTrue(array[2] == (.init(1000..<1010), "C"))
+    XCTAssertTrue(array[3] == (.init(10000..<10010), "D"))
+  }
 }
 
 
