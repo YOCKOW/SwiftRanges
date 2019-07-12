@@ -252,3 +252,53 @@ extension RangeDictionary where Value == Void {
     return true
   }
 }
+
+extension RangeDictionary where Value: Equatable {
+  /// Inserts the given value for the range.
+  /// Ranges are concatenated if possible.
+  public mutating func insert(_ value: Value, forRange range: AnyRange<Bound>) {
+    let splitted = self._splitted(by: range)
+    var pairs = Array<_Pair>(splitted.0)
+    
+    if pairs.last?.value == value, let concatenated = pairs.last?.range.concatenating(range) {
+      pairs[pairs.count - 1].range = concatenated
+    } else {
+      pairs.append((range: range, value: value))
+    }
+    
+    if splitted.1.first?.value == pairs.last!.value,
+       let concatenated = splitted.1.first?.range.concatenating(pairs.last!.range)
+    {
+      pairs[pairs.count - 1].range = concatenated
+      pairs.append(contentsOf: splitted.1[(splitted.1.startIndex + 1)..<splitted.1.endIndex])
+    } else {
+      pairs.append(contentsOf: splitted.1)
+    }
+    
+    self._rangesAndValues = pairs
+  }
+}
+
+extension RangeDictionary where Value == Void {
+  /// Inserts the given value for the range.
+  /// Ranges are concatenated if possible.
+  public mutating func insert(range: AnyRange<Bound>) {
+    let splitted = self._splitted(by: range)
+    var pairs = Array<_Pair>(splitted.0)
+    
+    if let concatenated = pairs.last?.range.concatenating(range) {
+      pairs[pairs.count - 1].range = concatenated
+    } else {
+      pairs.append((range: range, value: ()))
+    }
+    
+    if let concatenated = splitted.1.first?.range.concatenating(pairs.last!.range) {
+      pairs[pairs.count - 1].range = concatenated
+      pairs.append(contentsOf: splitted.1[(splitted.1.startIndex + 1)..<splitted.1.endIndex])
+    } else {
+      pairs.append(contentsOf: splitted.1)
+    }
+    
+    self._rangesAndValues = pairs
+  }
+}
