@@ -228,3 +228,27 @@ extension RangeDictionary: ExpressibleByDictionaryLiteral {
     }
   }
 }
+
+extension RangeDictionary: Equatable where Value: Equatable {
+  public static func == (lhs: RangeDictionary, rhs: RangeDictionary) -> Bool {
+    guard lhs._rangesAndValues.count == rhs._rangesAndValues.count else { return false }
+    for ii in 0..<lhs._rangesAndValues.count {
+      let lPair = lhs._rangesAndValues[ii]
+      let rPair = rhs._rangesAndValues[ii]
+      guard lPair.range == rPair.range && lPair.value == rPair.value else { return false }
+    }
+    return true
+  }
+}
+
+extension RangeDictionary where Value == Void {
+  public static func == (lhs: RangeDictionary, rhs: RangeDictionary) -> Bool {
+    guard lhs._rangesAndValues.count == rhs._rangesAndValues.count else { return false }
+    for ii in 0..<lhs._rangesAndValues.count {
+      let lPair = lhs._rangesAndValues[ii]
+      let rPair = rhs._rangesAndValues[ii]
+      guard lPair.range == rPair.range else { return false }
+    }
+    return true
+  }
+}
