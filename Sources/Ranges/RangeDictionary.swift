@@ -191,6 +191,29 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
     self._rangesAndValues.append(contentsOf: splitted.1)
     assert(_validateRanges())
   }
+  
+  /// Returns a new dictionary whose ranges are limited within `range`.
+  public func limited(within range: AnyRange<Bound>) -> RangeDictionary<Bound, Value> {
+    guard
+      !range.isEmpty,
+      case .overlap(first: let first, last: let last) = self._indices(for: range)
+    else {
+      return .init()
+    }
+    
+    var pairs = self._rangesAndValues[first...last]
+    if pairs.isEmpty { return .init() }
+    
+    let firstPair = pairs.first!
+    pairs[pairs.startIndex] = (range: firstPair.range.intersection(range), value: firstPair.value)
+    
+    if pairs.count > 1 {
+      let lastPair = pairs.last!
+      pairs[pairs.endIndex - 1] = (range: lastPair.range.intersection(range), value: lastPair.value)
+    }
+    
+    return .init(carefullySortedRangesAndValues: Array<_Pair>(pairs))
+  }
 }
 
 

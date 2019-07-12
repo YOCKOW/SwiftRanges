@@ -84,6 +84,17 @@ final class RangeDictionaryTests: XCTestCase {
     XCTAssertTrue(array[2] == (.init(1000..<1010), "C"))
     XCTAssertTrue(array[3] == (.init(10000..<10010), "D"))
   }
+  
+  func test_limit() {
+    let limited = simpleDictionary.limited(within: .init(5<..10005))
+    XCTAssertEqual(limited[0], nil)
+    XCTAssertEqual(limited[5], nil)
+    XCTAssertEqual(limited[7], "A")
+    XCTAssertEqual(limited[105], "B")
+    XCTAssertEqual(limited[1005], "C")
+    XCTAssertEqual(limited[10005], "D")
+    XCTAssertEqual(limited[10007], nil)
+  }
 }
 
 

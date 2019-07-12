@@ -95,6 +95,7 @@ extension RangeDictionaryTests {
     static let __allTests__RangeDictionaryTests = [
         ("test_asCollection", test_asCollection),
         ("test_insertion", test_insertion),
+        ("test_limit", test_limit),
         ("test_removal", test_removal),
         ("test_subscript", test_subscript),
     ]
