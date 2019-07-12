@@ -216,6 +216,15 @@ extension RangeDictionary: Equatable where Value: Equatable {
   }
 }
 
+extension RangeDictionary: Hashable where Bound: Hashable, Value: Hashable {
+  public func hash(into hasher: inout Hasher) {
+    for pair in self._rangesAndValues {
+      hasher.combine(pair.range)
+      hasher.combine(pair.value)
+    }
+  }
+}
+
 extension RangeDictionary where Value == Void {
   public static func == (lhs: RangeDictionary, rhs: RangeDictionary) -> Bool {
     guard lhs._rangesAndValues.count == rhs._rangesAndValues.count else { return false }
