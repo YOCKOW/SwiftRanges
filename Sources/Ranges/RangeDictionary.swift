@@ -57,6 +57,15 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
     assert(_validateRanges())
   }
   
+  /// Creates a dictionary with `rangesAndValues`.
+  public init(_ rangesAndValues: [(AnyRange<Bound>, Value)]) {
+    self.init()
+    for pair: _Pair in rangesAndValues {
+      if pair.range.isEmpty { continue }
+      self.insert(pair.value, forRange: pair.range)
+    }
+  }
+  
   private func _index(whereRangeContains element: Bound) -> Int? {
     func _binarySearch<C>(_ collection: C, _ element: Bound) -> Int?
       where C: Collection, C.Index == Int, C.Element == _Pair
@@ -178,6 +187,8 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
   
   /// Let the dictionary return `nil` for `range`.
   public mutating func remove(range: AnyRange<Bound>) {
+    if range.isEmpty { return }
+    
     let splitted = self._splitted(by: range)
     self._rangesAndValues = Array<_Pair>(splitted.0 + splitted.1)
     assert(_validateRanges())
@@ -185,6 +196,8 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
   
   /// Inserts the given value for the range.
   public mutating func insert(_ value: Value, forRange range: AnyRange<Bound>) {
+    if range.isEmpty { return }
+    
     let splitted = self._splitted(by: range)
     self._rangesAndValues = Array<_Pair>(splitted.0)
     self._rangesAndValues.append((range: range, value: value))
@@ -220,10 +233,7 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
 extension RangeDictionary: ExpressibleByDictionaryLiteral {
   public typealias Key = AnyRange<Bound>
   public init(dictionaryLiteral elements: (AnyRange<Bound>, Value)...) {
-    self.init()
-    for pair in elements {
-      self.insert(pair.1, forRange: pair.0)
-    }
+    self.init(elements)
   }
 }
 
