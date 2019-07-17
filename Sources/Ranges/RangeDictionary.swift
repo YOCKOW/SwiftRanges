@@ -32,15 +32,31 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
   
   /// Must be always sorted with the ranges.
   fileprivate private(set) var _rangesAndValues: [_Pair]
+  private func _twoRanges(from index: Int) -> (AnyRange<Bound>, AnyRange<Bound>) {
+    let (pair0, pair1) = self._rangesAndValues._twoElements(from: index)
+    return (pair0.range, pair1.range)
+  }
   private func _validateRanges() -> Bool {
-    if self._rangesAndValues.count < 2 { return true }
-    for ii in 0..<(self._rangesAndValues.count - 2) {
-      let range0 = self._rangesAndValues[ii].range
-      let range1 = self._rangesAndValues[ii + 1].range
-      if range0.isEmpty || range1.isEmpty { return false }
-      guard range0 < range1 && !range0.overlaps(range1) else { return false }
+    let nn = self._rangesAndValues.count
+    switch nn {
+    case 0:
+      return true
+    case 1:
+      return !self._rangesAndValues[0].range.isEmpty
+    default:
+      for ii in 0..<(nn - 1) {
+        let (range0, range1) = self._twoRanges(from: ii)
+        guard !range0.isEmpty && !range1.isEmpty && range0 << range1 else { return false }
+      }
+      return true
     }
-    return true
+  }
+  private var _rangesDescription: String {
+    return "[" + self._rangesAndValues.map({ "\($0.range)" }).joined(separator: ", ") + "]"
+  }
+  
+  public var isEmpty: Bool {
+    return self._rangesAndValues.isEmpty
   }
   
   /// Creates an empty dictionary.
@@ -54,7 +70,7 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
   /// You may not use this initializer usually.
   public init(carefullySortedRangesAndValues rangesAndValues: [(AnyRange<Bound>, Value)]) {
     self._rangesAndValues = rangesAndValues
-    assert(_validateRanges())
+    assert(_validateRanges(), "Invalid range-value pair(s).")
   }
   
   /// Creates a dictionary with `rangesAndValues`.
@@ -97,34 +113,39 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
   }
   private func _indices(for range: AnyRange<Bound>) -> _IndicesForReplacement {
     assert(!range.isEmpty, "\(#function): `range` must not be empty.")
-    if self._rangesAndValues.isEmpty { return .insertable(0) }
     
     let numberOfPairs = self._rangesAndValues.count
     
     var overlap_first: Int? = nil
-    
-    for ii in 0..<numberOfPairs {
-      let targetRange = self._rangesAndValues[ii].range
-      if targetRange.overlaps(range) {
-        overlap_first = ii
-        break
+    determineFirstIndexOfOverlap: do {
+      if self._rangesAndValues.isEmpty {
+        return .insertable(0)
       }
+      if range << self._rangesAndValues.first!.range {
+        return .insertable(0)
+      }
+      if range.overlaps(self._rangesAndValues.first!.range) {
+        overlap_first = 0
+        break determineFirstIndexOfOverlap
+      }
+      if self._rangesAndValues.last!.range << range {
+        return .insertable(numberOfPairs)
+      }
+      assert(numberOfPairs > 1, "Must be already handled if the number of pairs is less than 2.")
       
-      let bounds = range.bounds!
-      if targetRange.bounds!.upper._compare(bounds.lower, side: .upper) == .orderedAscending {
-        func _next() -> _Pair? {
-          if ii == numberOfPairs - 1 { return nil }
-          return self._rangesAndValues[ii + 1]
+      for ii in 0..<(numberOfPairs - 1) {
+        let (range0, range1) = self._twoRanges(from: ii)
+        if range.overlaps(range1) {
+          overlap_first = ii + 1
+          break determineFirstIndexOfOverlap
         }
-        let next = _next()
-        if next == nil || next!.range.bounds!.lower._compare(bounds.upper, side: .lower) == .orderedDescending {
+        if range0 << range && range << range1 {
           return .insertable(ii + 1)
         }
       }
     }
     
-    assert(overlap_first != nil)
-    
+    assert(overlap_first != nil, "First index of overlap must be found.")
     var overlap_last: Int? = nil
     for ii in (overlap_first!..<numberOfPairs).reversed() {
       if self._rangesAndValues[ii].range.overlaps(range) {
@@ -191,7 +212,7 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
     
     let splitted = self._splitted(by: range)
     self._rangesAndValues = Array<_Pair>(splitted.0 + splitted.1)
-    assert(_validateRanges())
+    assert(_validateRanges(), "Invalid range(s): " + self._rangesDescription)
   }
   
   /// Inserts the given value for the range.
@@ -320,7 +341,7 @@ extension RangeDictionary where Value == Void {
   }
 }
 
-extension RangeDictionary: Sequence, Collection {
+extension RangeDictionary: Sequence, Collection, BidirectionalCollection, RandomAccessCollection {
   public typealias Element = (AnyRange<Bound>, Value)
   
   public struct Index: Comparable {
@@ -385,5 +406,9 @@ extension RangeDictionary: Sequence, Collection {
   
   public func index(after ii: Index) -> Index {
     return .init(ii._index + 1)
+  }
+  
+  public func index(before ii: Index) -> Index {
+    return .init(ii._index - 1)
   }
 }

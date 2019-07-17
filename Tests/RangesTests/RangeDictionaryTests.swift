@@ -75,6 +75,26 @@ final class RangeDictionaryTests: XCTestCase {
     XCTAssertEqual(dic[100], "NEW")
     XCTAssertEqual(dic[555], "NEW")
     XCTAssertEqual(dic[10008], "D")
+    
+    do {
+      // For checking MultipleRanges' normalization
+      let range1: PartialRangeUpTo<Int> = ..<15
+      let range2: Range<Int> = 10 ..< 40
+      let range3: ClosedRange<Int> = 60 ... 80
+      let range4: Range<Int> = 90 ..< 100
+      let range5: PartialRangeFrom<Int> = 100...
+      
+      var dic = RangeDictionary<Int, Int>()
+      dic.insert(0, forRange: .init(range5))
+      dic.insert(0, forRange: .init(range4))
+      dic.insert(0, forRange: .init(range3))
+      dic.insert(0, forRange: .init(range2))
+      dic.insert(0, forRange: .init(range1))
+      
+      XCTAssertEqual(dic[dic.startIndex].0, .init(..<40))
+      XCTAssertEqual(dic[dic.index(after: dic.startIndex)].0, .init(60...80))
+      XCTAssertEqual(dic.last?.0, .init(90...))
+    }
   }
   
   func test_asCollection() {

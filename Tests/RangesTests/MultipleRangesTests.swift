@@ -9,6 +9,15 @@ import XCTest
 @testable import Ranges
 
 final class MultipleRangesTests: XCTestCase {
+  func test_ranges() {
+    let multi: MultipleRanges<Int> = [.init(10...20), .init(30...), .init(..<0)]
+    let ranges = multi.ranges
+    XCTAssertEqual(ranges.count, 3)
+    XCTAssertEqual(ranges[0], .init(..<0))
+    XCTAssertEqual(ranges[1], .init(10...20))
+    XCTAssertEqual(ranges[2], .init(30...))
+  }
+  
   func test_normalization() {
     let range1: PartialRangeUpTo<Int> = ..<15
     let range2: Range<Int> = 10 ..< 40

@@ -63,6 +63,7 @@ extension MultipleRangesTests {
         ("test_countableIntersection", test_countableIntersection),
         ("test_intersection", test_intersection),
         ("test_normalization", test_normalization),
+        ("test_ranges", test_ranges),
         ("test_subtraction", test_subtraction),
     ]
 }

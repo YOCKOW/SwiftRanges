@@ -156,3 +156,14 @@ extension AnyRange {
     return myBounds.concatenating(otherBounds).flatMap(AnyRange<Bound>.init)
   }
 }
+
+infix operator <<: ComparisonPrecedence
+infix operator >>: ComparisonPrecedence
+extension AnyRange {
+  internal static func <<(lhs: AnyRange, rhs: AnyRange) -> Bool {
+    return lhs < rhs && !lhs.overlaps(rhs)
+  }
+  internal static func >>(lhs: AnyRange, rhs: AnyRange) -> Bool {
+    return rhs << lhs
+  }
+}
