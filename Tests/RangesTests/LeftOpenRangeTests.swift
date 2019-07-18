@@ -10,7 +10,7 @@ import XCTest
 
 final class LeftOpenRangeTests: XCTestCase {
   func test_asRangeExpression() {
-    let leftOpenRange =  0<..5 // cannot be "0 <..5"
+    let leftOpenRange: LeftOpenRange<Int> =  0<..5 // cannot be "0 <..5"
     let array = [0,1,2,3,4,5,6,7,8,9,10]
     
     XCTAssertFalse(leftOpenRange.contains(0))

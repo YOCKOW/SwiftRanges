@@ -12,9 +12,9 @@
  
  ```
  var dic: RangeDictionary<Int, String> = [
-   .init(1...2): "Index",
-   .init(3...10): "Chapter 01",
-   .init(11...40): "Chapter 02"
+   1....2: "Index",
+   3....10: "Chapter 01",
+   11....40: "Chapter 02"
  ]
  
  print(dic[1]) // Prints "Index"
@@ -22,7 +22,7 @@
  print(dic[15]) // Prints "Chapter 02"
  print(dic[100]) // Prints "nil"
  
- dic.insert("Prologue", forRange: .init(2...5))
+ dic.insert("Prologue", forRange: 2....5)
  print(dic[5]) // Prints "Prologue"
  ```
  

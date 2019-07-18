@@ -10,7 +10,7 @@ import XCTest
 
 final class PartialRangeGreaterThanTests: XCTestCase {
   func test_asRangeExpression() {
-    let partialRangeGreaterThan =  5<.. // cannot be "5 <.."
+    let partialRangeGreaterThan: PartialRangeGreaterThan<Int> =  5<.. // cannot be "5 <.."
     let array = [0,1,2,3,4,5,6,7,8,9,10]
     
     XCTAssertFalse(partialRangeGreaterThan.contains(0))

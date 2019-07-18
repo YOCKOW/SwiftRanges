@@ -10,10 +10,10 @@ import XCTest
 
 final class RangeDictionaryTests: XCTestCase {
   let simpleDictionary: RangeDictionary<Int, String> = [
-    .init(0..<10): "A",
-    .init(100..<110): "B",
-    .init(1000..<1010): "C",
-    .init(10000..<10010): "D"
+        0 ...<    10: "A",
+      100 ...<   110: "B",
+     1000 ...<  1010: "C",
+    10000 ...< 10010: "D"
   ]
   
   func test_subscript() {
@@ -29,7 +29,7 @@ final class RangeDictionaryTests: XCTestCase {
 
   func test_removal() {
     var dic = simpleDictionary
-    dic.remove(range: .init(5<..<10005))
+    dic.remove(range: 5<...<10005)
     XCTAssertEqual(dic[5], "A")
     XCTAssertEqual(dic[6], nil)
     XCTAssertEqual(dic[105], nil)
@@ -38,7 +38,7 @@ final class RangeDictionaryTests: XCTestCase {
     XCTAssertEqual(dic[10005], "D")
     
     dic = simpleDictionary
-    dic.remove(range: .init(105...200))
+    dic.remove(range: 105....200)
     XCTAssertEqual(dic[5], "A")
     XCTAssertEqual(dic[100], "B")
     XCTAssertEqual(dic[105], nil)
@@ -46,7 +46,7 @@ final class RangeDictionaryTests: XCTestCase {
     XCTAssertEqual(dic[10000], "D")
     
     dic = simpleDictionary
-    dic.remove(range: .init(90...105))
+    dic.remove(range: 90....105)
     XCTAssertEqual(dic[5], "A")
     XCTAssertEqual(dic[100], nil)
     XCTAssertEqual(dic[105], nil)
@@ -66,11 +66,11 @@ final class RangeDictionaryTests: XCTestCase {
   
   func test_insertion() {
     var dic = simpleDictionary
-    dic.insert("NEW", forRange: .init(Int.min...Int.max))
+    dic.insert("NEW", forRange: Int.min....Int.max)
     XCTAssertEqual(dic[Int.random(in: Int.min...Int.max)], "NEW")
     
     dic = simpleDictionary
-    dic.insert("NEW", forRange: .init(5<..<10005))
+    dic.insert("NEW", forRange: 5<...<10005)
     XCTAssertEqual(dic[3], "A")
     XCTAssertEqual(dic[100], "NEW")
     XCTAssertEqual(dic[555], "NEW")
@@ -91,22 +91,22 @@ final class RangeDictionaryTests: XCTestCase {
       dic.insert(0, forRange: .init(range2))
       dic.insert(0, forRange: .init(range1))
       
-      XCTAssertEqual(dic[dic.startIndex].0, .init(..<40))
-      XCTAssertEqual(dic[dic.index(after: dic.startIndex)].0, .init(60...80))
-      XCTAssertEqual(dic.last?.0, .init(90...))
+      XCTAssertEqual(dic[dic.startIndex].0, ...<40)
+      XCTAssertEqual(dic[dic.index(after: dic.startIndex)].0, 60....80)
+      XCTAssertEqual(dic.last?.0, 90....)
     }
   }
   
   func test_asCollection() {
     let array: [RangeDictionary<Int, String>.Element] = .init(simpleDictionary)
-    XCTAssertTrue(array[0] == (.init(0..<10), "A"))
-    XCTAssertTrue(array[1] == (.init(100..<110), "B"))
-    XCTAssertTrue(array[2] == (.init(1000..<1010), "C"))
-    XCTAssertTrue(array[3] == (.init(10000..<10010), "D"))
+    XCTAssertTrue(array[0] == (0...<10, "A"))
+    XCTAssertTrue(array[1] == (100...<110, "B"))
+    XCTAssertTrue(array[2] == (1000...<1010, "C"))
+    XCTAssertTrue(array[3] == (10000...<10010, "D"))
   }
   
   func test_limit() {
-    let limited = simpleDictionary.limited(within: .init(5<..10005))
+    let limited = simpleDictionary.limited(within: 5<...10005)
     XCTAssertEqual(limited[0], nil)
     XCTAssertEqual(limited[5], nil)
     XCTAssertEqual(limited[7], "A")
