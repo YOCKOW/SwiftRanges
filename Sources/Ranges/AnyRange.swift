@@ -1,6 +1,6 @@
 /***************************************************************************************************
  AnyRange.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -10,60 +10,25 @@
 ///
 /// A type-erased range of `Bound`.
 public struct AnyRange<Bound> where Bound:Comparable {
-  private let _bounds: Bounds<Bound>?
-  
-  private init(checkedBounds:Bounds<Bound>?) {
-    // `checkedBounds` must have been checked for its validity before this initializer is called.
-    self._bounds = checkedBounds
-  }
-  
-  private init(_uncheckedBounds:Bounds<Bound>?) {
-    guard let lower = _uncheckedBounds?.lower, let upper = _uncheckedBounds?.upper else {
-      // Not required to be checked for its emptiness.
-      self.init(checkedBounds:_uncheckedBounds)
-      return
-    }
-    
-    guard lower.bound <= upper.bound else {
-      self.init(checkedBounds:nil)
-      return
-    }
-    
-    if lower.bound == upper.bound {
-      guard lower.isIncluded && upper.isIncluded else {
-        self.init(checkedBounds:nil)
-        return
-      }
-    }
-    
-    // true is...
-    // `lower.bound < upper.bound` or
-    // `lower.bound == upper.bound && lower.isIncluded && upper.isIncluded`
-    self.init(checkedBounds:_uncheckedBounds)
+  private var _anyBounds: _AnyBounds? = nil
+  private init(_anyBounds: _AnyBounds?) {
+    self._anyBounds = _anyBounds
   }
 }
 
 extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Creates a *countable* range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
-  public init(uncheckedBounds bounds:Bounds<Bound>?) {
-    // Emptiness of Open Range depends on countability.
-    if let lower = bounds?.lower, let upper = bounds?.upper, !lower.isIncluded, !upper.isIncluded {
-      // It is OpenRange<Bound>.
-      if OpenRange<Bound>(uncheckedBounds:(lower:lower.bound, upper:upper.bound)).isEmpty {
-        self.init(uncheckedBounds:nil)
-        return
-      }
-    }
-    self.init(_uncheckedBounds:bounds)
+  public init(uncheckedBounds: Bounds<Bound>?) {
+    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds.init(countableBounds:)))
   }
 }
 
 extension AnyRange {
   /// Creates a range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
-  public init(uncheckedBounds bounds: Bounds<Bound>?) {
-    self.init(_uncheckedBounds:bounds)
+  public init(uncheckedBounds: Bounds<Bound>?) {
+    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds.init(uncountableBounds:)))
   }
 }
 
@@ -73,8 +38,8 @@ extension AnyRange {
     where T:GeneralizedRange, T.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
     if case let any as AnyRange<Bound> = range {
-      // `bounds` must have been already checked if it is an instance of `AnyRange`.
-      self.init(checkedBounds:any.bounds)
+      // `_bounds` must have been already checked if it is an instance of `AnyRange`.
+      self.init(_anyBounds: any._anyBounds)
     } else {
       self.init(uncheckedBounds:range.bounds)
     }
@@ -84,29 +49,41 @@ extension AnyRange {
   public init<T>(_ range:T) where T:GeneralizedRange, T.Bound == Bound {
     if case let any as AnyRange<Bound> = range {
       // `bounds` must have been already checked if it is an instance of `AnyRange`.
-      self.init(checkedBounds:any.bounds)
+      self.init(_anyBounds: any._anyBounds)
     } else {
       self.init(uncheckedBounds:range.bounds)
     }
   }
 }
 
+extension AnyRange where Bound: Strideable, Bound.Stride: SignedInteger {
+  /// Creates a *countable* range that contains only the indicated value.
+  public init(singleValue: Bound) {
+    self.init(singleValue...singleValue)
+  }
+}
 extension AnyRange {
   /// Creates a range that contains only the indicated value.
-  public init(singleValue:Bound) {
+  public init(singleValue: Bound) {
     self.init(singleValue...singleValue)
   }
 }
 
+extension AnyRange where Bound: Strideable, Bound.Stride: SignedInteger {
+  /// Creates a *countable* unbounded range.
+  public init(_: UnboundedRange) {
+    self.init(uncheckedBounds: (lower: .unbounded, upper: .unbounded))
+  }
+}
 extension AnyRange {
   /// Creates an empty range.
   public init() {
-    self.init(checkedBounds:nil)
+    self.init(_anyBounds: nil)
   }
   
   /// Creates an unbounded range.
-  public init(_:UnboundedRange) {
-    self.init(checkedBounds:(lower:nil, upper:nil))
+  public init(_: UnboundedRange) {
+    self.init(uncheckedBounds: (lower: .unbounded, upper: .unbounded))
   }
   
   /// An instance of `AnyRange` representing an empty range.
@@ -118,15 +95,18 @@ extension AnyRange {
 
 extension AnyRange: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
-    return self._bounds
+    return self._anyBounds?.bounds(type: Bound.self)
   }
 }
 
 extension AnyRange {
-  public var isEmpty: Bool { return self._bounds == nil }
+  public var isEmpty: Bool {
+    return self._anyBounds == nil
+  }
+  
   public var isUnbounded: Bool {
-    guard let bounds = self._bounds else { return false }
-    return bounds.lower == nil && bounds.upper == nil
+    let bounds = self.bounds
+    return bounds?.lower == .unbounded && bounds?.upper == .unbounded
   }
 }
 
@@ -139,3 +119,51 @@ extension AnyRange: Equatable {
 extension AnyRange: Hashable, HashableRange where Bound: Hashable {}
 
 extension AnyRange: CustomStringConvertible, CustomStringConvertibleRange where Bound: CustomStringConvertible {}
+
+extension AnyRange {
+  /// Returns a new range that is an intersection of `self` and `other`.
+  public func intersection(_ other: AnyRange<Bound>) -> AnyRange<Bound> {
+    guard let myBounds = self._anyBounds, let otherBounds = other._anyBounds else { return .empty }
+    return AnyRange(_anyBounds: myBounds.intersection(otherBounds))
+  }
+  
+  /// Returns whether the intersection of `self` and `other` is empty or not.
+  public func overlaps(_ other: AnyRange<Bound>) -> Bool {
+    return !self.intersection(other).isEmpty
+  }
+  
+  /// Returns subtracted range(s).
+  /// Under some conditions, `other` divides the range. That is why a tuple is returned.
+  public func subtracting(_ other: AnyRange<Bound>) -> (AnyRange<Bound>, AnyRange<Bound>?) {
+    guard let myBounds = self._anyBounds else { return (.empty, nil) }
+    guard let otherBounds = other._anyBounds else { return (self, nil) }
+    
+    switch myBounds.subtracting(otherBounds) {
+    case (let nilableBounds, nil):
+      return (AnyRange(_anyBounds: nilableBounds), nil)
+    case (let bounds1?, let bounds2?):
+      return (AnyRange(_anyBounds: bounds1), AnyRange(_anyBounds: bounds2))
+    default:
+      fatalError("\(#function): Unexpected result.")
+    }
+  }
+  
+  /// Concatenate two ranges if possible.
+  /// Returns `nil` if the two ranges are apart.
+  public func concatenating(_ other: AnyRange<Bound>) -> AnyRange<Bound>? {
+    guard let myBounds = self._anyBounds else { return other }
+    guard let otherBounds = other._anyBounds else { return self }
+    return myBounds.concatenating(otherBounds).flatMap(AnyRange<Bound>.init)
+  }
+}
+
+infix operator <<: ComparisonPrecedence
+infix operator >>: ComparisonPrecedence
+extension AnyRange {
+  internal static func <<(lhs: AnyRange, rhs: AnyRange) -> Bool {
+    return lhs < rhs && !lhs.overlaps(rhs)
+  }
+  internal static func >>(lhs: AnyRange, rhs: AnyRange) -> Bool {
+    return rhs << lhs
+  }
+}

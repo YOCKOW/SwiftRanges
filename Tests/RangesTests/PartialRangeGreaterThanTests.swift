@@ -1,6 +1,6 @@
 /***************************************************************************************************
  PartialRangeGreaterThanTests.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -9,8 +9,8 @@ import XCTest
 @testable import Ranges
 
 final class PartialRangeGreaterThanTests: XCTestCase {
-  func testAsRangeExpression() {
-    let partialRangeGreaterThan =  5<.. // cannot be "5 <.."
+  func test_asRangeExpression() {
+    let partialRangeGreaterThan: PartialRangeGreaterThan<Int> =  5<.. // cannot be "5 <.."
     let array = [0,1,2,3,4,5,6,7,8,9,10]
     
     XCTAssertFalse(partialRangeGreaterThan.contains(0))
@@ -21,20 +21,13 @@ final class PartialRangeGreaterThanTests: XCTestCase {
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
-  func testAsGeneralizedRange() {
+  func test_asGeneralizedRange() {
     let bounds = (0<..).bounds
     
     XCTAssertNotNil(bounds)
-    XCTAssertNotNil(bounds?.lower)
-    XCTAssertEqual(bounds?.lower?.bound, 0)
-    XCTAssertEqual(bounds?.lower?.isIncluded, false)
-    XCTAssertNil(bounds?.upper)
+    XCTAssertEqual(bounds?.lower, .excluded(0))
+    XCTAssertEqual(bounds?.upper, .unbounded)
   }
-  
-  static var allTests = [
-    ("testAsRangeExpression", testAsRangeExpression),
-    ("testAsGeneralizedRange", testAsGeneralizedRange),
-  ]
 }
 
 

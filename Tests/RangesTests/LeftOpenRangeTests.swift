@@ -1,6 +1,6 @@
 /***************************************************************************************************
  LeftOpenRangeTests.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -9,8 +9,8 @@ import XCTest
 @testable import Ranges
 
 final class LeftOpenRangeTests: XCTestCase {
-  func testAsRangeExpression() {
-    let leftOpenRange =  0<..5 // cannot be "0 <..5"
+  func test_asRangeExpression() {
+    let leftOpenRange: LeftOpenRange<Int> =  0<..5 // cannot be "0 <..5"
     let array = [0,1,2,3,4,5,6,7,8,9,10]
     
     XCTAssertFalse(leftOpenRange.contains(0))
@@ -20,21 +20,12 @@ final class LeftOpenRangeTests: XCTestCase {
     XCTAssertEqual(rel, rel.relative(to:array))
   }
   
-  func testAsGeneralizedRange() {
+  func test_asGeneralizedRange() {
     let bounds = (0<..5).bounds
     
     XCTAssertNotNil(bounds)
-    XCTAssertNotNil(bounds?.lower)
-    XCTAssertEqual(bounds?.lower?.bound, 0)
-    XCTAssertEqual(bounds?.lower?.isIncluded, false)
-    XCTAssertNotNil(bounds?.upper)
-    XCTAssertEqual(bounds?.upper?.bound, 5)
-    XCTAssertEqual(bounds?.upper?.isIncluded, true)
+    XCTAssertEqual(bounds?.lower, .excluded(0))
+    XCTAssertEqual(bounds?.upper, .included(5))
   }
-  
-  static var allTests = [
-    ("testAsRangeExpression", testAsRangeExpression),
-    ("testAsGeneralizedRange", testAsGeneralizedRange),
-  ]
 }
 

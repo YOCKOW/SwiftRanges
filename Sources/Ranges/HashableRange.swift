@@ -1,6 +1,6 @@
 /***************************************************************************************************
  HashableRange.swift
-   © 2018 YOCKOW.
+   © 2018-2019 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -14,7 +14,6 @@ extension HashableRange  {
     return lhs.compare(rhs) == .orderedSame
   }
   
-  #if compiler(>=4.2)
   public func hash(into hasher:inout Hasher) {
     hasher.combine(0)
     if let bounds = self.bounds {
@@ -22,14 +21,4 @@ extension HashableRange  {
       hasher.combine(bounds.upper)
     }
   }
-  #else
-  public var hashValue: Int {
-    var hh: Int = 0
-    if let bounds = self.bounds {
-      hh ^= bounds.lower?.hashValue ?? Int.min
-      hh ^= bounds.upper?.hashValue ?? Int.max
-    }
-    return hh
-  }
-  #endif
 }
