@@ -75,6 +75,16 @@ final class MultipleRangesTests: XCTestCase {
     XCTAssertTrue(multi.contains(Int.max))
   }
   
+  func test_nomarlization_UInt32() {
+    // https://github.com/YOCKOW/SwiftRanges/issues/20
+    var multi = MultipleRanges<UInt32>()
+    multi.insert(UInt32(0x00)...UInt32(0x1F))
+    multi.insert(UInt32(0x20)...UInt32(0x2F))
+    multi.insert(UInt32(0x40)...UInt32(0x4F))
+    let ranges = multi.ranges
+    XCTAssertEqual(ranges, [0x00....0x2F, 0x40....0x4F])
+  }
+  
   func test_subtraction() {
     var multi: MultipleRanges<Int> = [...<20, 30<...<40, 50<...60, 70...<80, 80....]
     
