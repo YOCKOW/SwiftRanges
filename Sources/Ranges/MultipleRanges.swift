@@ -126,10 +126,9 @@ extension MultipleRanges: Equatable {
 
 // INSERT
 extension MultipleRanges {
-  private mutating func _insert<R>(_ newRange:R) where R:GeneralizedRange, R.Bound == Bound {
-    let anyRange = AnyRange<Bound>(newRange)
-    if anyRange.isEmpty { return }
-    self._rangeDictionary.insert(range: anyRange)
+  private mutating func _insert(_ newRange: AnyRange<Bound>) {
+    if newRange.isEmpty { return }
+    self._rangeDictionary.insert(range: newRange)
   }
   
   /// Inserts the given *countable* range.
@@ -138,13 +137,13 @@ extension MultipleRanges {
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
     guard let bounds = newRange.bounds, _validateBounds(bounds) else { return }
-    self._insert(newRange)
+    self._insert(AnyRange(uncheckedBounds: bounds))
   }
   
   /// Inserts the given range.
   /// The range may be concatenated with other ranges included the receiver.
   public mutating func insert<R>(_ newRange:R) where R:GeneralizedRange, R.Bound == Bound {
-    self._insert(newRange)
+    self._insert(AnyRange(uncheckedBounds: newRange.bounds))
   }
   
   /// Inserts an empty range.
@@ -161,13 +160,13 @@ extension MultipleRanges {
 extension MultipleRanges where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Inserts a single *countable* value
   public mutating func insert(singleValue value:Bound) {
-    self._insert(value...value)
+    self.insert(value...value)
   }
 }
 extension MultipleRanges {
   /// Inserts a single value
   public mutating func insert(singleValue value:Bound) {
-    self._insert(value...value)
+    self.insert(value...value)
   }
 }
 
