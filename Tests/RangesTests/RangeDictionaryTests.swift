@@ -16,6 +16,15 @@ final class RangeDictionaryTests: XCTestCase {
     10000 ...< 10010: "D"
   ]
   
+  func test_normalizationInInit() {
+    let dic = RangeDictionary<Int, String>([
+      (0....9, "A"),
+      (10....19, "A"),
+      (20....29, "B"),
+    ])
+    XCTAssertEqual(dic.count, 2)
+  }
+  
   func test_subscript() {
     XCTAssertEqual(simpleDictionary[0], "A")
     XCTAssertEqual(simpleDictionary[105], "B")

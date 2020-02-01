@@ -315,6 +315,15 @@ extension RangeDictionary where Value: Equatable {
     
     self._rangesAndValues = pairs
   }
+  
+  /// Creates a dictionary with `rangesAndValues`.
+  public init(_ rangesAndValues: [(AnyRange<Bound>, Value)]) {
+    self.init()
+    for pair: _Pair in rangesAndValues {
+      if pair.range.isEmpty { continue }
+      self.insert(pair.value, forRange: pair.range)
+    }
+  }
 }
 
 extension RangeDictionary where Value == Void {

@@ -63,6 +63,7 @@ extension MultipleRangesTests {
     static let __allTests__MultipleRangesTests = [
         ("test_countableIntersection", test_countableIntersection),
         ("test_intersection", test_intersection),
+        ("test_nomarlization_UInt32", test_nomarlization_UInt32),
         ("test_normalization", test_normalization),
         ("test_ranges", test_ranges),
         ("test_subtraction", test_subtraction),
@@ -98,6 +99,7 @@ extension RangeDictionaryTests {
         ("test_asCollection", test_asCollection),
         ("test_insertion", test_insertion),
         ("test_limit", test_limit),
+        ("test_normalizationInInit", test_normalizationInInit),
         ("test_removal", test_removal),
         ("test_subscript", test_subscript),
     ]
