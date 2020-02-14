@@ -16,6 +16,7 @@ public struct ExcludedLowerBound<Bound> where Bound: Comparable {
 
 postfix operator <
 /// Create an instance of `ExcludedLowerBound`
+@inlinable
 public postfix func < <T>(_ lowerBound:T) -> ExcludedLowerBound<T> where T: Comparable {
   return ExcludedLowerBound<T>(lowerBound)
 }
