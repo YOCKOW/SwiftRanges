@@ -97,6 +97,10 @@ extension AnyRange: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     return self._anyBounds?.bounds(type: Bound.self)
   }
+  
+  public func contains(_ element: Bound) -> Bool {
+    return self._anyBounds?.contains(element) ?? false
+  }
 }
 
 extension AnyRange {
