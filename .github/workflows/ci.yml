@@ -2,12 +2,12 @@ name: CI
 on:
   push:
     branches:
-      - '*'
+      - '**'
     tags:
-      - '!*'
+      - '!**'
   pull_request:
     branches:
-      - '*'
+      - '**'
 jobs:
   test:
     strategy:
@@ -21,23 +21,19 @@ jobs:
           - '4'
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/setup-python@v1
-      with:
-        python-version: '3.8'
     - uses: actions/checkout@v2
     - name: Use a cache for ".build" directory.
       uses: actions/cache@v1
       with:
         path: .build
-        key: build-${{ runner.os }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('Package.*') }}-${{ hashFiles('Sources/**/*.swift') }}
+        key: build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('Package.*') }}
         restore-keys: |
-          build-${{ runner.os }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('Package.*') }}-
-          build-${{ runner.os }}-${{ matrix.swift-compat-ver }}-
-          build-${{ runner.os }}-
-          build-
+          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-compat-ver }}-
+          build-${{ github.workspace }}-${{ runner.os }}-
+          build-${{ github.workspace }}-
     - uses: YOCKOW/Action-setup-swift@master
       with:
-        swift-version: '5.1.3'
+        swift-version: '5.1.4'
     - name: Test with debug mode.
       run: swift test --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
     - name: Test with release mode.
