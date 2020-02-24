@@ -33,11 +33,17 @@ final class AnyRangeTests: XCTestCase {
     
     let range2: AnyRange<Int> = 0<...<1
     XCTAssertTrue(range2.isEmpty)
+    XCTAssertFalse(range2.contains(0))
     let range2_1: AnyRange<Double> = 0<...<1
     XCTAssertFalse(range2_1.isEmpty)
+    XCTAssertTrue(range2_1.contains(0.5))
     
     let range3: AnyRange<Int> = 1<...
     XCTAssertEqual(range3.relative(to:[0,1,2,3]), 2..<4)
+    
+    let range4: AnyRange<Int> = 100....100
+    XCTAssertTrue(range4.contains(100))
+    XCTAssertFalse(range4.contains(1000))
   }
   
   func test_concatenation() {

@@ -46,19 +46,22 @@ internal func _validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool
   return __validateBounds(uncheckedBounds)
 }
 
+internal func _contains<T>(bounds: Bounds<T>?, element: T) -> Bool where T: Comparable {
+  guard let bounds = bounds else { return false }
+  
+  let lowerComparison = bounds.lower._compare(element, side: .lower)
+  let upperComparison = bounds.upper._compare(element, side: .upper)
+  return (
+    (lowerComparison == .orderedSame || lowerComparison == .orderedAscending)
+    &&
+    (upperComparison == .orderedSame || upperComparison == .orderedDescending)
+  )
+}
 
 // Default implementation for functions that are required by `RangeExpression`
 extension GeneralizedRange {
   public func contains(_ element:Bound) -> Bool {
-    guard let bounds = self.bounds else { return false }
-    
-    let lowerComparison = bounds.lower._compare(element, side: .lower)
-    let upperComparison = bounds.upper._compare(element, side: .upper)
-    return (
-      (lowerComparison == .orderedSame || lowerComparison == .orderedAscending)
-      &&
-      (upperComparison == .orderedSame || upperComparison == .orderedDescending)
-    )
+    return _contains(bounds: self.bounds, element: element)
   }
   
   public func relative<C>(to collection: C) -> Range<Bound> where C:Collection, Bound == C.Index {
