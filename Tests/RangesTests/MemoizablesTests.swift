@@ -16,6 +16,7 @@ final class MemoizablesTests: XCTestCase {
     XCTAssertTrue(ranges.contains(555))
     XCTAssertFalse(ranges.contains(5555))
     XCTAssertTrue(ranges.contains(5)) // again
+    XCTAssertTrue(ranges.contains(7)) // near
   }
   
   func test_dictionary() {
@@ -30,5 +31,6 @@ final class MemoizablesTests: XCTestCase {
     XCTAssertEqual(dictionary[25], "20")
     XCTAssertEqual(dictionary[10000], nil)
     XCTAssertEqual(dictionary[5], "0") // again
+    XCTAssertEqual(dictionary[7], "0") // near
   }
 }

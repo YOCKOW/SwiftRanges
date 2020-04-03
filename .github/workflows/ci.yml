@@ -26,15 +26,32 @@ jobs:
       uses: actions/cache@v1
       with:
         path: .build
-        key: build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('Package.*') }}
+        key: build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('Package.*') }}-${{ hashFiles('Sources/**/*.swift') }}
         restore-keys: |
+          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('Package.*') }}-
           build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-compat-ver }}-
           build-${{ github.workspace }}-${{ runner.os }}-
           build-${{ github.workspace }}-
     - uses: YOCKOW/Action-setup-swift@master
       with:
-        swift-version: '5.1.4'
+        swift-version: '5.2'
+    - name: Try to build products with debug mode.
+      run: |
+        swift build --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+        if [ $? != 0 ]; then
+          echo "Failed to build products with debug mode."
+          rm -rf $(cd .build/debug && pwd -P)
+        fi
+      continue-on-error: true
     - name: Test with debug mode.
       run: swift test --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+    - name: Try to build products with release mode.
+      run: |
+        swift build --configuration release -Xswiftc -enable-testing -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+        if [ $? != 0 ]; then
+          echo "Failed to build products with release mode."
+          rm -rf $(cd .build/release && pwd -P)
+        fi
+      continue-on-error: true
     - name: Test with release mode.
       run: swift test --configuration release -Xswiftc -enable-testing -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
