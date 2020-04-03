@@ -17,7 +17,7 @@ private func _bitCastArrayNoneToVoid<T>(_ array: Array<AnyRange<T>>) -> Array<(A
 
 /// Represents multiple ranges.
 public struct MultipleRanges<Bound> where Bound: Comparable {
-  private var _rangeDictionary: RangeDictionary<Bound, Void>
+  internal var _rangeDictionary: RangeDictionary<Bound, Void>
   
   private init(_ rangeDictionary: RangeDictionary<Bound, Void>) {
     self._rangeDictionary = rangeDictionary

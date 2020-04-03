@@ -28,10 +28,10 @@
  
  */
 public struct RangeDictionary<Bound, Value> where Bound: Comparable {
-  fileprivate typealias _Pair = (range: AnyRange<Bound>, value: Value)
+  internal typealias _Pair = (range: AnyRange<Bound>, value: Value)
   
   /// Must be always sorted with the ranges.
-  fileprivate private(set) var _rangesAndValues: [_Pair]
+  internal private(set) var _rangesAndValues: [_Pair]
   private func _twoRanges(from index: Int) -> (AnyRange<Bound>, AnyRange<Bound>) {
     let (pair0, pair1) = self._rangesAndValues._twoElements(from: index)
     return (pair0.range, pair1.range)
@@ -82,7 +82,7 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
     }
   }
   
-  private func _index(whereRangeContains element: Bound) -> Int? {
+  internal func _index(whereRangeContains element: Bound) -> Int? {
     func _binarySearch<C>(_ collection: C, _ element: Bound) -> Int?
       where C: Collection, C.Index == Int, C.Element == _Pair
     {
