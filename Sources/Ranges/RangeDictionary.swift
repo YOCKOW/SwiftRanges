@@ -46,7 +46,9 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
     default:
       for ii in 0..<(nn - 1) {
         let (range0, range1) = self._twoRanges(from: ii)
-        guard !range0.isEmpty && !range1.isEmpty && range0 << range1 else { return false }
+        guard !range0.isEmpty && !range1.isEmpty && range0._isLessThanAndApartFrom(range1) else {
+          return false
+        }
       }
       return true
     }
@@ -121,14 +123,14 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
       if self._rangesAndValues.isEmpty {
         return .insertable(0)
       }
-      if range << self._rangesAndValues.first!.range {
+      if range._isLessThanAndApartFrom(self._rangesAndValues.first!.range) {
         return .insertable(0)
       }
       if range.overlaps(self._rangesAndValues.first!.range) {
         overlap_first = 0
         break determineFirstIndexOfOverlap
       }
-      if self._rangesAndValues.last!.range << range {
+      if self._rangesAndValues.last!.range._isLessThanAndApartFrom(range) {
         return .insertable(numberOfPairs)
       }
       assert(numberOfPairs > 1, "Must be already handled if the number of pairs is less than 2.")
@@ -139,7 +141,7 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
           overlap_first = ii + 1
           break determineFirstIndexOfOverlap
         }
-        if range0 << range && range << range1 {
+        if range0._isLessThanAndApartFrom(range) && range._isLessThanAndApartFrom(range1) {
           return .insertable(ii + 1)
         }
       }
