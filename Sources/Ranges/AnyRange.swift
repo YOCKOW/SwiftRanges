@@ -161,13 +161,12 @@ extension AnyRange {
   }
 }
 
-infix operator <<: ComparisonPrecedence
-infix operator >>: ComparisonPrecedence
 extension AnyRange {
-  internal static func <<(lhs: AnyRange, rhs: AnyRange) -> Bool {
-    return lhs < rhs && !lhs.overlaps(rhs)
+  internal func _isLessThanAndApartFrom(_ other: AnyRange) -> Bool {
+    return self < other && !self.overlaps(other)
   }
-  internal static func >>(lhs: AnyRange, rhs: AnyRange) -> Bool {
-    return rhs << lhs
+  
+  internal func _isGreaterThanAndApartFrom(_ other: AnyRange) -> Bool {
+    return other._isLessThanAndApartFrom(self)
   }
 }
