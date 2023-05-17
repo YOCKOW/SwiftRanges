@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  MemoizableMultipleRangesTests.swift
-   © 2020 YOCKOW.
+   © 2020,2023 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -33,4 +33,27 @@ final class MemoizablesTests: XCTestCase {
     XCTAssertEqual(dictionary[5], "0") // again
     XCTAssertEqual(dictionary[7], "0") // near
   }
+
+  #if swift(>=5.5)
+  func test_concurrency() async {
+    var normalRanges = MultipleRanges<Int>()
+    for ii in 0..<1000 {
+      normalRanges.insert((ii * 10)..<(ii * 10 + 5))
+    }
+    let ranges = MemoizableMultipleRanges<Int>(normalRanges)
+
+    await withTaskGroup(of: Void.self) { group in
+      for _ in 0..<1000 {
+        group.addTask {
+          let value = Int.random(in: 0..<(1000 * 10))
+          if value % 10 < 5 {
+            XCTAssertTrue(ranges.contains(value), "\(value) must be contained.")
+          } else {
+            XCTAssertFalse(ranges.contains(value), "\(value) must not be contained.")
+          }
+        }
+      }
+    }
+  }
+  #endif
 }
