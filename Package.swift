@@ -19,6 +19,6 @@ let package = Package(
     .target(name: "Ranges", dependencies: []),
     .testTarget(name: "RangesTests", dependencies: ["Ranges"]),
   ],
-  swiftLanguageVersions:[.v4, .v4_2, .v5]
+  swiftLanguageVersions:[.v4, .v4_2, .v5, .version("6")]
 )
 

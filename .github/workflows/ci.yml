@@ -21,18 +21,38 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macOS-13
+          - ubuntu-24.04
+          - macOS-14
+          - macOS-15
         swift-version:
-          - '5.8'
+          - '6.0.1'
+          - '5.10.1'
+          - '5.10'
         swift-compat-ver:
+          - '6'
           - '5'
           - '4.2'
           - '4'
+        exclude:
+          - os: ubuntu-22.04
+            swift-version: '5.10'
+          - os: ubuntu-24.04
+            swift-version: '5.10'
+          - os: macOS-14
+            swift-version: '5.10.1'
+          - os: macOS-15
+            swift-version: '5.10.1'
+          - os: macOS-15
+            swift-version: '5.10'
+          - swift-version: '5.10.1'
+            swift-compat-ver: '6'
+          - swift-version: '5.10'
+            swift-compat-ver: '6'
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use a cache for ".build" directory.
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: .build
         key: build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-version }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('**/*.swift') }}

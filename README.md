@@ -25,7 +25,7 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 # Requirements
 
-- Swift 4.1, 4.2, 5(recommended)
+- Swift 4.2, 5, 6
 - macOS or Linux
 
 # Usage

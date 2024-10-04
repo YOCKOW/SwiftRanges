@@ -9,7 +9,7 @@ import Foundation
 
 /// Immutable range-dictionary.
 /// Results can be memoized.
-public final class MemoizableRangeDictionary<Bound, Value> where Bound: Comparable & Hashable {
+public final class MemoizableRangeDictionary<Bound, Value>: @unchecked Sendable where Bound: Comparable & Hashable {
   private let _queue = DispatchQueue(
     label: "jp.YOCKOW.Ranges.MemoizableRangeDictionary.\(UUID().description)",
     attributes: .concurrent
@@ -66,7 +66,7 @@ public final class MemoizableRangeDictionary<Bound, Value> where Bound: Comparab
 
 /// Immutable multiple ranges.
 /// Results can be memoized.
-public final class MemoizableMultipleRanges<Bound> where Bound: Comparable & Hashable {
+public final class MemoizableMultipleRanges<Bound>: @unchecked Sendable where Bound: Comparable & Hashable {
   private var _memoized: MemoizableRangeDictionary<Bound, Void>
   
   public init(_ ranges: MultipleRanges<Bound>) {
