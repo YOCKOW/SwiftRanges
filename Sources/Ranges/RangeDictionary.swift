@@ -252,6 +252,7 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
   }
 }
 
+extension RangeDictionary: Sendable where Bound: Sendable, Value: Sendable {}
 
 extension RangeDictionary: ExpressibleByDictionaryLiteral {
   public typealias Key = AnyRange<Bound>

@@ -43,6 +43,8 @@ public struct MultipleRanges<Bound> where Bound: Comparable {
   }
 }
 
+extension MultipleRanges: Sendable where Bound: Sendable {}
+
 public typealias MultipleCountableRanges<Bound> =
   MultipleRanges<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
 
