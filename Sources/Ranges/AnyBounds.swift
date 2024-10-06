@@ -18,7 +18,7 @@ private func _typeMismatch<T, U>(expected: T.Type, actual: U.Type,
 
 /// A type erasure for bounds.
 /// Exists to determine its "countability" at the time of initialization of `AnyRange`.
-internal class _AnyBounds {
+internal class _AnyBounds: @unchecked Sendable {
   internal func bounds<T>(type: T.Type) -> Bounds<T> { _mustBeOverridden() }
   internal func contains<T>(_ element: T) -> Bool where T: Comparable { _mustBeOverridden() }
   internal func intersection(_ other: _AnyBounds) -> _AnyBounds? { _mustBeOverridden() }
@@ -47,7 +47,7 @@ extension _AnyBounds: __AnyBounds {
 }
 
 extension _AnyBounds {
-  fileprivate class _SomeBounds<Bound>: _AnyBounds where Bound: Comparable{
+  fileprivate class _SomeBounds<Bound>: _AnyBounds, @unchecked Sendable where Bound: Comparable{
     private let _bounds: Bounds<Bound>
     private let _containsClosure: (Bound) -> Bool
     
@@ -134,7 +134,7 @@ extension _AnyBounds {
     }
   }
   
-  fileprivate final class _UncountableBounds<Bound>: _SomeBounds<Bound> where Bound: Comparable {
+  fileprivate final class _UncountableBounds<Bound>: _SomeBounds<Bound>, @unchecked Sendable where Bound: Comparable {
     override func intersection(_ other: _AnyBounds) -> _AnyBounds? {
       guard case let otherUncountableBounds as _UncountableBounds<Bound> = other else {
         return other.intersection(self)
@@ -189,7 +189,7 @@ extension _AnyBounds {
     }
   }
   
-  fileprivate final class _CountableBounds<Bound>: _SomeBounds<Bound> where Bound: Strideable, Bound.Stride: SignedInteger {
+  fileprivate final class _CountableBounds<Bound>: _SomeBounds<Bound>, @unchecked Sendable where Bound: Strideable, Bound.Stride: SignedInteger {
     override init?(_ bounds: Bounds<Bound>) {
       guard _validateBounds(bounds) else { return nil }
       super.init(bounds)

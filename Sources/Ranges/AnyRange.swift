@@ -9,12 +9,14 @@
 /// # AnyRange<Bound>
 ///
 /// A type-erased range of `Bound`.
-public struct AnyRange<Bound> where Bound:Comparable {
+public struct AnyRange<Bound> where Bound: Comparable {
   private var _anyBounds: _AnyBounds? = nil
   private init(_anyBounds: _AnyBounds?) {
     self._anyBounds = _anyBounds
   }
 }
+
+extension AnyRange: Sendable where Bound: Sendable {}
 
 extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Creates a *countable* range.
