@@ -1,6 +1,6 @@
 /***************************************************************************************************
  GeneralizedRange+Comparison.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2025 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -51,7 +51,9 @@ extension Optional where Wrapped: GeneralizedRange {
   public static func ==<R>(lhs: Optional, rhs: R?) -> Bool
     where R: GeneralizedRange, Wrapped.Bound == R.Bound
   {
-    guard let range1 = lhs, let range2 = rhs else { return lhs == nil && rhs == nil }
+    guard let range1 = lhs, let range2 = rhs else {
+      return lhs == Optional<Wrapped>.none && rhs == Optional<R>.none
+    }
     return range1.compare(range2) == .orderedSame
   }
   

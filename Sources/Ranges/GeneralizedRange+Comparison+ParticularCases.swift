@@ -1,6 +1,6 @@
 /***************************************************************************************************
  GeneralizedRange+Comparison+ParticularCases.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2025 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -9,7 +9,9 @@
 /* ***** GeneralizedRange <=> Empty Range *********************************************************/
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==(lhs: Optional, rhs: ()?) -> Bool {
-    guard let range = lhs, let _ = rhs else { return lhs == nil && rhs == nil }
+    guard let range = lhs, let _ = rhs else {
+      return lhs == Optional<Wrapped>.none && rhs == nil
+    }
     return range.bounds == nil
   }
   public static func !=(lhs: Optional, rhs: ()?) -> Bool {
@@ -57,7 +59,9 @@ public func <= <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
 /* ***** GeneralizedRange <=> UnboundedRange ******************************************************/
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==(lhs: Optional, rhs: UnboundedRange?) -> Bool {
-    guard let range = lhs, let _ = rhs else { return lhs == nil && rhs == nil }
+    guard let range = lhs, let _ = rhs else {
+      return lhs == Optional<Wrapped>.none && rhs == nil
+    }
     return range.bounds?.lower == .unbounded  && range.bounds?.upper == .unbounded
   }
   public static func !=(lhs: Optional, rhs: UnboundedRange?) -> Bool {
@@ -126,7 +130,10 @@ public func <=(_:UnboundedRange, _:UnboundedRange) -> Bool {
 /* ***** Empty Range <=> UnboundedRange ***********************************************************/
 extension Optional where Wrapped == Void {
   public static func ==(lhs: Optional, rhs: UnboundedRange?) -> Bool {
-    return lhs == nil && rhs == nil
+    switch (lhs, rhs) {
+    case (nil, nil): return true
+    default: return false
+    }
   }
   public static func !=(lhs: Optional, rhs: UnboundedRange?) -> Bool {
     return !(lhs == rhs)

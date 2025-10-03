@@ -1,6 +1,6 @@
 /***************************************************************************************************
  AnyRange.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2025 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -22,7 +22,11 @@ extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Creates a *countable* range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
   public init(uncheckedBounds: Bounds<Bound>?) {
-    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds.init(countableBounds:)))
+    if let bounds = uncheckedBounds {
+      self.init(_anyBounds: _AnyBounds(countableBounds: bounds))
+    } else {
+      self.init(_anyBounds: nil)
+    }
   }
 }
 
@@ -30,7 +34,11 @@ extension AnyRange {
   /// Creates a range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
   public init(uncheckedBounds: Bounds<Bound>?) {
-    self.init(_anyBounds: uncheckedBounds.flatMap(_AnyBounds.init(uncountableBounds:)))
+    if let bounds = uncheckedBounds {
+      self.init(_anyBounds: _AnyBounds.init(uncountableBounds: bounds))
+    } else {
+      self.init(_anyBounds: nil)
+    }
   }
 }
 
@@ -159,7 +167,8 @@ extension AnyRange {
   public func concatenating(_ other: AnyRange<Bound>) -> AnyRange<Bound>? {
     guard let myBounds = self._anyBounds else { return other }
     guard let otherBounds = other._anyBounds else { return self }
-    return myBounds.concatenating(otherBounds).flatMap(AnyRange<Bound>.init)
+    guard let concatenated = myBounds.concatenating(otherBounds) else { return nil }
+    return AnyRange<Bound>(_anyBounds: concatenated)
   }
 }
 
