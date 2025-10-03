@@ -7,10 +7,14 @@ on:
       - '**'
     paths:
       - '**/*.swift'
+      - '**/*.c'
+      - '**/*.h'
       - '.github/workflows/*.yml'
   pull_request:
     paths:
       - '**/*.swift'
+      - '**/*.c'
+      - '**/*.h'
       - '.github/workflows/*.yml'
 jobs:
   test:
@@ -20,34 +24,22 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
           - ubuntu-24.04
-          - macOS-14
-          - macOS-15
+          - macOS-26
         swift-version:
-          - '6.0.1'
-          - '5.10.1'
-          - '5.10'
+          - '6.2'
+          - '6.1.3'
+          - '6.0.3'
         swift-compat-ver:
           - '6'
           - '5'
           - '4.2'
           - '4'
         exclude:
-          - os: ubuntu-22.04
-            swift-version: '5.10'
-          - os: ubuntu-24.04
-            swift-version: '5.10'
-          - os: macOS-14
-            swift-version: '5.10.1'
-          - os: macOS-15
-            swift-version: '5.10.1'
-          - os: macOS-15
-            swift-version: '5.10'
-          - swift-version: '5.10.1'
-            swift-compat-ver: '6'
-          - swift-version: '5.10'
-            swift-compat-ver: '6'
+          - os: macOS-26
+            swift-version: '6.1.3'
+          - os: macOS-26
+            swift-version: '6.0.3'
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -55,16 +47,26 @@ jobs:
       uses: actions/cache@v4
       with:
         path: .build
-        key: build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-version }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('**/*.swift') }}
+        key: build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.os }}-${{ matrix.swift-version }}-${{ matrix.swift-compat-ver }}-${{ hashFiles('**/*.swift') }}
         restore-keys: |
-          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-version }}-${{ matrix.swift-compat-ver }}-
-          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.swift-version }}-
+          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.os }}-${{ matrix.swift-version }}-${{ matrix.swift-compat-ver }}-
+          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.os }}-${{ matrix.swift-version }}-
+          build-${{ github.workspace }}-${{ runner.os }}-${{ matrix.os }}-
           build-${{ github.workspace }}-${{ runner.os }}-
           build-${{ github.workspace }}-
     - uses: YOCKOW/Action-setup-swift@main
       with:
         swift-version: ${{ matrix.swift-version }}
+    ## NEEDS WORKAROUND FOR https://github.com/swiftlang/swift-package-manager/issues/8064
     # DEBUG mode
+    - name: Build with debug mode.
+      id: debug_build
+      run: swift build --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+      continue-on-error: true
+    - name: Retry build with debug mode if necessary
+      if: steps.debug_build.outcome == 'failure'
+      run: swift build --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+      continue-on-error: true
     - name: Test with debug mode.
       id: debug_test
       run: swift test --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
@@ -75,6 +77,14 @@ jobs:
         rm -rf $(cd .build/debug && pwd -P)
         swift test --configuration debug -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
     # RELEASE mode
+    - name: Build with release mode.
+      id: release_build
+      run: swift build --configuration release -Xswiftc -enable-testing -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+      continue-on-error: true
+    - name: Retry build with release mode if necessary
+      if: steps.release_build.outcome == 'failure'
+      run: swift build --configuration release -Xswiftc -enable-testing -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}
+      continue-on-error: true
     - name: Test with release mode.
       id: release_test
       run: swift test --configuration release -Xswiftc -enable-testing -Xswiftc -swift-version -Xswiftc ${{ matrix.swift-compat-ver }}

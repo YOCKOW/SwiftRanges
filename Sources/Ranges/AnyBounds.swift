@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  AnyBounds.swift
-   © 2019 YOCKOW.
+   © 2019,2025 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -184,8 +184,10 @@ extension _AnyBounds {
       guard type(of: other) == _UncountableBounds<Bound>.self else {
         return other.concatenating(self)
       }
-      
-      return self._concatenating(other).flatMap(_UncountableBounds<Bound>.init)
+      guard let concatenated = self._concatenating(other) else {
+        return nil
+      }
+      return _UncountableBounds<Bound>(concatenated)
     }
   }
   
@@ -234,7 +236,10 @@ extension _AnyBounds {
     
     override func concatenating(_ other: _AnyBounds) -> _AnyBounds? {
       guard case let other as _SomeBounds<Bound> = other else { fatalError("Unexpected type.") }
-      return self._concatenating(other).flatMap(_CountableBounds<Bound>.init)
+      guard let concatenated = self._concatenating(other) else {
+        return nil
+      }
+      return _CountableBounds<Bound>(concatenated)
     }
   }
 }
