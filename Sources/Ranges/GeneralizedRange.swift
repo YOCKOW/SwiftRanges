@@ -1,14 +1,16 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  GeneralizedRange.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
 
 
 /// Represents a set of a lower bound and an upper bound.
-public typealias Bounds<Bound> =
-  (lower: Boundary<Bound>, upper: Boundary<Bound>) where Bound: Comparable
+public typealias Bounds<Bound> = (
+  lower: GeneralizedRangeBound<Bound>,
+  upper: GeneralizedRangeBound<Bound>
+) where Bound: Comparable
 
 /// A protocol for all ranges.
 public protocol GeneralizedRange: RangeExpression {

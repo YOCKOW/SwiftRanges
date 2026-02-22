@@ -1,6 +1,6 @@
 /***************************************************************************************************
  PartialRangeGreaterThanTests.swift
-   © 2018-2019,2024-2025 YOCKOW.
+   © 2018-2019,2024-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -10,17 +10,17 @@ import Testing
 
 @Suite struct BoundaryTests {
   @Test func initialization() {
-    let boundary1: Boundary<Character> = .included("A")
-    let boundary2: Boundary<Character> = .included("Z")
+    let boundary1: GeneralizedRangeBound<Character> = .included("A")
+    let boundary2: GeneralizedRangeBound<Character> = .included("Z")
 
     #expect(boundary1 != boundary2)
   }
 
   @Test func comparison() {
-    let boundary1: Boundary<Int> = .included(0)
-    let boundary2: Boundary<Int> = .excluded(0)
-    let boundary3: Boundary<Int> = .included(1)
-    let boundary4: Boundary<Int> = .excluded(1)
+    let boundary1: GeneralizedRangeBound<Int> = .included(0)
+    let boundary2: GeneralizedRangeBound<Int> = .excluded(0)
+    let boundary3: GeneralizedRangeBound<Int> = .included(1)
+    let boundary4: GeneralizedRangeBound<Int> = .excluded(1)
 
     #expect(boundary1._compare(boundary1, side: .lower) == .orderedSame)
     #expect(boundary1._compare(boundary2, side: .lower) == .orderedAscending)
