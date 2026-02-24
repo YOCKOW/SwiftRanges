@@ -1,20 +1,26 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  GeneralizedRange.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
 
 
 /// Represents a set of a lower bound and an upper bound.
-public typealias Bounds<Bound> =
-  (lower: Boundary<Bound>, upper: Boundary<Bound>) where Bound: Comparable
+public typealias Bounds<Bound> = (
+  lower: GeneralizedRangeBound<Bound>,
+  upper: GeneralizedRangeBound<Bound>
+) where Bound: Comparable
 
 /// A protocol for all ranges.
-public protocol GeneralizedRange: RangeExpression {
+public protocol GeneralizedRange<Bound>: RangeExpression {
   /// Retunrs a set of a lower bound and an upper bound, or returns `nil` if the range is empty.
   var bounds: Bounds<Bound>? { get }
 }
+
+/// A generalized range whose `Bound` is countable.
+public protocol GeneralizedCountableRange<Bound>: GeneralizedRange where Bound: Strideable,
+                                                                         Bound.Stride: SignedInteger {}
 
 internal func __validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
   switch (uncheckedBounds.lower, uncheckedBounds.upper) {
@@ -84,5 +90,51 @@ extension GeneralizedRange {
     })(bounds.upper)
     
     return start..<end
+  }
+}
+
+extension GeneralizedRange {
+  @inline(__always)
+  var _wellknownRange: any GeneralizedRange<Bound> {
+    switch self {
+    case _ as ClosedRange<Bound>,
+         _ as EmptyRange<Bound>,
+         _ as LeftOpenRange<Bound>,
+         _ as OpenRange<Bound>,
+         _ as PartialRangeFrom<Bound>,
+         _ as PartialRangeGreaterThan<Bound>,
+         _ as PartialRangeThrough<Bound>,
+         _ as PartialRangeUpTo<Bound>,
+         _ as Range<Bound>,
+         _ as TangibleUnboundedRange<Bound>:
+      return self
+    default:
+      break
+    }
+
+    guard let bounds = self.bounds else {
+      return EmptyRange<Bound>()
+    }
+
+    switch bounds {
+    case (.included(let lower), .included(let upper)):
+      return ClosedRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+    case (.excluded(let lower), .included(let upper)):
+      return LeftOpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+    case (.excluded(let lower), .excluded(let upper)):
+      return OpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+    case (.included(let lower), .unbounded):
+      return PartialRangeFrom<Bound>(lower)
+    case (.excluded(let lower), .unbounded):
+      return PartialRangeGreaterThan<Bound>(lower)
+    case (.unbounded, .included(let upper)):
+      return PartialRangeThrough<Bound>(upper)
+    case (.unbounded, .excluded(let upper)):
+      return PartialRangeUpTo<Bound>(upper)
+    case (.included(let lower), .excluded(let upper)):
+      return Range<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+    case (.unbounded, .unbounded):
+      return TangibleUnboundedRange<Bound>()
+    }
   }
 }

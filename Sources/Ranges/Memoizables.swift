@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  Memoizables.swift
-   © 2020,2023 YOCKOW.
+   © 2020,2023,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -66,10 +66,10 @@ public final class MemoizableRangeDictionary<Bound, Value>: @unchecked Sendable 
 
 /// Immutable multiple ranges.
 /// Results can be memoized.
-public final class MemoizableMultipleRanges<Bound>: @unchecked Sendable where Bound: Comparable & Hashable {
+public final class MemoizableGeneralizedRangeSet<Bound>: @unchecked Sendable where Bound: Comparable & Hashable {
   private var _memoized: MemoizableRangeDictionary<Bound, Void>
   
-  public init(_ ranges: MultipleRanges<Bound>) {
+  public init(_ ranges: GeneralizedRangeSet<Bound>) {
     self._memoized = .init(ranges._rangeDictionary)
   }
   

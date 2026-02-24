@@ -1,6 +1,6 @@
 /***************************************************************************************************
  ClosedRange+GeneralizedRange.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -11,3 +11,6 @@ extension ClosedRange: GeneralizedRange {
     return (lower: .included(self.lowerBound), upper: .included(self.upperBound))
   }
 }
+
+extension ClosedRange: GeneralizedCountableRange where Bound: Strideable,
+                                                       Bound.Stride: SignedInteger {}

@@ -1,20 +1,20 @@
 /***************************************************************************************************
- Boundary+Comparison.swift
-   © 2018-2019 YOCKOW.
+ GeneralizedRangeBound+Comparison.swift
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
 
 import Foundation
 
-extension Boundary {
+extension GeneralizedRangeBound {
   internal enum _Side {
     case lower, upper
   }
 }
 
-extension Boundary {
-  internal func _compare(_ other: Boundary<Value>, side: _Side) -> ComparisonResult {
+extension GeneralizedRangeBound {
+  internal func _compare(_ other: GeneralizedRangeBound<Value>, side: _Side) -> ComparisonResult {
     if self == other { return .orderedSame }
     
     // from here, self != other
@@ -59,24 +59,26 @@ extension Boundary {
   }
 }
 
-internal func _max<Bound>(_ firstBoundary: Boundary<Bound>,
-                          _ otherBoundaries: Boundary<Bound>...,
-                          side: Boundary<Bound>._Side) -> Boundary<Bound> where Bound: Comparable
-{
-  var max: Boundary<Bound> = firstBoundary
-  for boundary in otherBoundaries {
+internal func _max<Bound>(
+  _ firstBound: GeneralizedRangeBound<Bound>,
+  _ otherBounds: GeneralizedRangeBound<Bound>...,
+  side: GeneralizedRangeBound<Bound>._Side
+) -> GeneralizedRangeBound<Bound> where Bound: Comparable {
+  var max: GeneralizedRangeBound<Bound> = firstBound
+  for boundary in otherBounds {
     if boundary == .unbounded && side == .upper { return .unbounded }
     if max._compare(boundary, side: side) == .orderedAscending { max = boundary }
   }
   return max
 }
 
-internal func _min<Bound>(_ firstBoundary: Boundary<Bound>,
-                          _ otherBoundaries: Boundary<Bound>...,
-                          side:Boundary<Bound>._Side) -> Boundary<Bound> where Bound: Comparable
-{
-  var min: Boundary<Bound> = firstBoundary
-  for boundary in otherBoundaries {
+internal func _min<Bound>(
+  _ firstBounds: GeneralizedRangeBound<Bound>,
+  _ otherBounds: GeneralizedRangeBound<Bound>...,
+  side:GeneralizedRangeBound<Bound>._Side
+) -> GeneralizedRangeBound<Bound> where Bound: Comparable {
+  var min: GeneralizedRangeBound<Bound> = firstBounds
+  for boundary in otherBounds {
     if boundary == .unbounded && side == .lower { return .unbounded }
     if min._compare(boundary, side: side) == .orderedDescending { min = boundary }
   }

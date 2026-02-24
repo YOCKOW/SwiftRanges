@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  MultipleRanges.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -16,7 +16,7 @@ private func _bitCastArrayNoneToVoid<T>(_ array: Array<AnyRange<T>>) -> Array<(A
 }
 
 /// Represents multiple ranges.
-public struct MultipleRanges<Bound> where Bound: Comparable {
+public struct GeneralizedRangeSet<Bound> where Bound: Comparable {
   internal var _rangeDictionary: RangeDictionary<Bound, Void>
   
   private init(_ rangeDictionary: RangeDictionary<Bound, Void>) {
@@ -43,16 +43,22 @@ public struct MultipleRanges<Bound> where Bound: Comparable {
   }
 }
 
-extension MultipleRanges: Sendable where Bound: Sendable {}
+@available(*, deprecated, renamed: "GeneralizedRangeSet")
+public typealias MultipleRanges = GeneralizedRangeSet
 
-public typealias MultipleCountableRanges<Bound> =
-  MultipleRanges<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
+extension GeneralizedRangeSet: Sendable where Bound: Sendable {}
 
-extension MultipleRanges {
+public typealias GeneralizedCountableRangeSet<Bound> =
+  GeneralizedRangeSet<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
+
+@available(*, deprecated, renamed: "GeneralizedCountableRangeSet")
+public typealias MultipleCountableRanges = GeneralizedCountableRangeSet
+
+extension GeneralizedRangeSet {
   public var isEmpty:Bool { return self._rangeDictionary.isEmpty }
 }
 
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   public var ranges: [AnyRange<Bound>] {
     get {
       return _bitCastArrayVoidToNone(Array<(AnyRange<Bound>, Void)>(self._rangeDictionary))
@@ -67,11 +73,11 @@ extension MultipleRanges {
   }
 }
 
-extension MultipleRanges: Sequence {
+extension GeneralizedRangeSet: Sequence {
   public typealias Element = AnyRange<Bound>
   
   public struct Iterator: IteratorProtocol {
-    public typealias Element = MultipleRanges.Element
+    public typealias Element = GeneralizedRangeSet.Element
     private var _rangeDictionaryIterator: RangeDictionary<Bound, Void>.Iterator
     fileprivate init(_ rangeDictionaryIterator: RangeDictionary<Bound, Void>.Iterator) {
       self._rangeDictionaryIterator = rangeDictionaryIterator
@@ -82,12 +88,12 @@ extension MultipleRanges: Sequence {
     }
   }
   
-  public func makeIterator() -> MultipleRanges<Bound>.Iterator {
+  public func makeIterator() -> GeneralizedRangeSet<Bound>.Iterator {
     return .init(self._rangeDictionary.makeIterator())
   }
 }
 
-extension MultipleRanges: Collection, BidirectionalCollection, RandomAccessCollection {
+extension GeneralizedRangeSet: Collection, BidirectionalCollection, RandomAccessCollection {
   public typealias Index = RangeDictionary<Bound, Void>.Index
   
   public subscript(_ index: Index) -> AnyRange<Bound> {
@@ -112,7 +118,7 @@ extension MultipleRanges: Collection, BidirectionalCollection, RandomAccessColle
 }
 
 // Array Literal
-extension MultipleRanges: ExpressibleByArrayLiteral {
+extension GeneralizedRangeSet: ExpressibleByArrayLiteral {
   public typealias ArrayLiteralElement = AnyRange<Bound>
   public init(arrayLiteral elements: AnyRange<Bound>...) {
     self.init(elements)
@@ -120,14 +126,14 @@ extension MultipleRanges: ExpressibleByArrayLiteral {
 }
 
 // Equatable
-extension MultipleRanges: Equatable {
-  public static func ==(lhs:MultipleRanges<Bound>, rhs:MultipleRanges<Bound>) -> Bool {
+extension GeneralizedRangeSet: Equatable {
+  public static func ==(lhs:GeneralizedRangeSet<Bound>, rhs:GeneralizedRangeSet<Bound>) -> Bool {
     return lhs._rangeDictionary == rhs._rangeDictionary
   }
 }
 
 // INSERT
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   private mutating func _insert(_ newRange: AnyRange<Bound>) {
     if newRange.isEmpty { return }
     self._rangeDictionary.insert(range: newRange)
@@ -159,13 +165,13 @@ extension MultipleRanges {
   }
 }
 
-extension MultipleRanges where Bound: Strideable, Bound.Stride: SignedInteger {
+extension GeneralizedRangeSet where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Inserts a single *countable* value
   public mutating func insert(singleValue value:Bound) {
     self.insert(value...value)
   }
 }
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   /// Inserts a single value
   public mutating func insert(singleValue value:Bound) {
     self.insert(value...value)
@@ -173,7 +179,7 @@ extension MultipleRanges {
 }
 
 // CONTAINS
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   /// Returns a Boolean value that indicates
   /// whether one of ranges in the receiver contains the value or not.
   public func contains(_ value:Bound) -> Bool {
@@ -181,35 +187,35 @@ extension MultipleRanges {
   }
 }
 
-extension MultipleRanges: Hashable where Bound: Hashable {
+extension GeneralizedRangeSet: Hashable where Bound: Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(self.ranges)
   }
 }
 
 // INTERSECTION
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   /// Update the ranges to be the intersection of each ranges
   /// in the receiver and the given instance.
-  public mutating func formIntersection(_ other:MultipleRanges<Bound>) {
+  public mutating func formIntersection(_ other:GeneralizedRangeSet<Bound>) {
     self = self.intersection(other)
   }
   
   /// Returns a new instance with the ranges that are the intersection of each ranges
   /// in the receiver and the given instance.
-  public func intersection(_ other:MultipleRanges<Bound>) -> MultipleRanges<Bound> {
+  public func intersection(_ other:GeneralizedRangeSet<Bound>) -> GeneralizedRangeSet<Bound> {
     var newDic: RangeDictionary<Bound, Void> = .init()
     for otherRange in other {
       for (newRange, _) in self._rangeDictionary.limited(within: otherRange) {
         newDic.insert(range: newRange)
       }
     }
-    return MultipleRanges(newDic)
+    return GeneralizedRangeSet(newDic)
   }
 }
 
 // SUBTRACT
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   /// Subtract `range` from each range in the receiver.
   /// They will be treated as countable ranges.
   public mutating func subtract<R>(_ range: R)
@@ -227,7 +233,7 @@ extension MultipleRanges {
   
   /// Returns a new instance with the ranges subtracting `range` from each range in the receiver.
   /// They will be treated as countable ranges.
-  public func subtracting<R>(_ range: R) -> MultipleRanges<Bound>
+  public func subtracting<R>(_ range: R) -> GeneralizedRangeSet<Bound>
     where R: GeneralizedRange, R.Bound == Bound, Bound: Strideable, Bound.Stride: SignedInteger
   {
     var newRanges = self
@@ -236,7 +242,7 @@ extension MultipleRanges {
   }
   
   /// Returns a new instance with the ranges subtracting `range` from each range in the receiver.
-  public func subtracting<R>(_ range:R) -> MultipleRanges<Bound>
+  public func subtracting<R>(_ range:R) -> GeneralizedRangeSet<Bound>
     where R:GeneralizedRange, R.Bound == Bound
   {
     var newRanges = self
@@ -245,7 +251,7 @@ extension MultipleRanges {
   }
   
   /// Subtract the ranges in `other` from each range in the receiver.
-  public mutating func subtract(_ other: MultipleRanges<Bound>) {
+  public mutating func subtract(_ other: GeneralizedRangeSet<Bound>) {
     for otherRange in other {
       self.subtract(otherRange)
     }
@@ -253,7 +259,7 @@ extension MultipleRanges {
   
   /// Returns a new instance with the ranges subtracting each range in `other` from
   /// each range in the receiver.
-  public func subtracting(_ other: MultipleRanges<Bound>) -> MultipleRanges<Bound> {
+  public func subtracting(_ other: GeneralizedRangeSet<Bound>) -> GeneralizedRangeSet<Bound> {
     var newRanges = self
     newRanges.subtract(other)
     return newRanges
@@ -265,22 +271,22 @@ extension MultipleRanges {
   }
   
   /// Returns a new instance with subtracting the single value.
-  public func subtracting(singleValue value:Bound) -> MultipleRanges<Bound> {
+  public func subtracting(singleValue value:Bound) -> GeneralizedRangeSet<Bound> {
     return self.subtracting(value...value)
   }
 }
 
 // SYMMETRIC DIFFERENCE
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   /// Same as formUnion but not including intersection.
-  public mutating func formSymmetricDifference(_ other: MultipleRanges<Bound>) {
+  public mutating func formSymmetricDifference(_ other: GeneralizedRangeSet<Bound>) {
     let intersection = self.intersection(other)
     self.formUnion(other)
     self.subtract(intersection)
   }
   
   /// Same as `self.union(other).subtracting(self.intersection(other))`.
-  public func symmetricDifference(_ other: MultipleRanges<Bound>) -> MultipleRanges<Bound> {
+  public func symmetricDifference(_ other: GeneralizedRangeSet<Bound>) -> GeneralizedRangeSet<Bound> {
     var newRanges = self
     newRanges.formSymmetricDifference(other)
     return newRanges
@@ -288,10 +294,10 @@ extension MultipleRanges {
 }
 
 // UNION
-extension MultipleRanges {
+extension GeneralizedRangeSet {
   /// Adds the ranges in the given instance.
   /// Ranges will be concatenated if possible.
-  public mutating func formUnion(_ other: MultipleRanges<Bound>) {
+  public mutating func formUnion(_ other: GeneralizedRangeSet<Bound>) {
     for otherRange in other {
       self._rangeDictionary.insert(range: otherRange)
     }
@@ -299,7 +305,7 @@ extension MultipleRanges {
   
   /// Returns a new instance with the ranges of both this and the given instance.
   /// Ranges will be concatenated if possible.
-  public func union(_ other: MultipleRanges<Bound>) -> MultipleRanges<Bound> {
+  public func union(_ other: GeneralizedRangeSet<Bound>) -> GeneralizedRangeSet<Bound> {
     var newRanges = self
     newRanges.formUnion(other)
     return newRanges

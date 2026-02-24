@@ -10,8 +10,8 @@ import Testing
 
 @Suite struct MemoizablesTests {
   @Test func ranges() {
-    let normalRanges = MultipleRanges<Int>([0...<10, 100...<1000])
-    let ranges = MemoizableMultipleRanges<Int>(normalRanges)
+    let normalRanges = GeneralizedRangeSet<Int>([0...<10, 100...<1000])
+    let ranges = MemoizableGeneralizedRangeSet<Int>(normalRanges)
     #expect(ranges.contains(5))
     #expect(ranges.contains(555))
     #expect(!ranges.contains(5555))
@@ -35,11 +35,11 @@ import Testing
   }
 
   @Test func concurrency() async {
-    var normalRanges = MultipleRanges<Int>()
+    var normalRanges = GeneralizedRangeSet<Int>()
     for ii in 0..<1000 {
       normalRanges.insert((ii * 10)..<(ii * 10 + 5))
     }
-    let ranges = MemoizableMultipleRanges<Int>(normalRanges)
+    let ranges = MemoizableGeneralizedRangeSet<Int>(normalRanges)
 
     await withTaskGroup(of: Void.self) { group in
       for _ in 0..<1000 {

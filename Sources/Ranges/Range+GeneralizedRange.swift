@@ -1,10 +1,10 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  Range+GeneralizedRange.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
- 
+ ************************************************************************************************ */
+
 extension Range: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     if self.isEmpty { return nil }
@@ -12,3 +12,5 @@ extension Range: GeneralizedRange {
   }
 }
 
+extension Range: GeneralizedCountableRange where Bound: Strideable,
+                                                 Bound.Stride: SignedInteger {}
