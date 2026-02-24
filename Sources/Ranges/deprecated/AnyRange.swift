@@ -1,14 +1,15 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  AnyRange.swift
-   © 2018-2019,2025 YOCKOW.
+   © 2018-2019,2025-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
- 
+ ************************************************************************************************ */
+
 
 /// # AnyRange<Bound>
 ///
 /// A type-erased range of `Bound`.
+@available(*, deprecated, message: "Use `any GeneralizedRange<Bound>` instead.")
 public struct AnyRange<Bound> where Bound: Comparable {
   private var _anyBounds: _AnyBounds? = nil
   private init(_anyBounds: _AnyBounds?) {
@@ -16,8 +17,10 @@ public struct AnyRange<Bound> where Bound: Comparable {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange: Sendable where Bound: Sendable {}
 
+@available(*, deprecated)
 extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   /// Creates a *countable* range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
@@ -30,6 +33,7 @@ extension AnyRange where Bound:Strideable, Bound.Stride:SignedInteger {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange {
   /// Creates a range.
   /// Pass `nil` if you want to create a instance that represents an empty range.
@@ -42,6 +46,7 @@ extension AnyRange {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange {
   /// Creates a *countable* range from `range`.
   public init<T>(_ range:T)
@@ -66,12 +71,15 @@ extension AnyRange {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Creates a *countable* range that contains only the indicated value.
   public init(singleValue: Bound) {
     self.init(singleValue...singleValue)
   }
 }
+
+@available(*, deprecated)
 extension AnyRange {
   /// Creates a range that contains only the indicated value.
   public init(singleValue: Bound) {
@@ -79,12 +87,15 @@ extension AnyRange {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange where Bound: Strideable, Bound.Stride: SignedInteger {
   /// Creates a *countable* unbounded range.
   public init(_: UnboundedRange) {
     self.init(uncheckedBounds: (lower: .unbounded, upper: .unbounded))
   }
 }
+
+@available(*, deprecated)
 extension AnyRange {
   /// Creates an empty range.
   public init() {
@@ -103,6 +114,7 @@ extension AnyRange {
   public static var unbounded: AnyRange<Bound> { return AnyRange<Bound>(...) }
 }
 
+@available(*, deprecated)
 extension AnyRange: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     return self._anyBounds?.bounds(type: Bound.self)
@@ -113,6 +125,7 @@ extension AnyRange: GeneralizedRange {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange {
   public var isEmpty: Bool {
     return self._anyBounds == nil
@@ -124,16 +137,20 @@ extension AnyRange {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange: Equatable {
   public static func ==(lhs:AnyRange, rhs:AnyRange) -> Bool {
     return lhs.compare(rhs) == .orderedSame
   }
 }
 
+@available(*, deprecated)
 extension AnyRange: Hashable, HashableRange where Bound: Hashable {}
 
+@available(*, deprecated)
 extension AnyRange: CustomStringConvertible, CustomStringConvertibleRange where Bound: CustomStringConvertible {}
 
+@available(*, deprecated)
 extension AnyRange {
   /// Returns a new range that is an intersection of `self` and `other`.
   public func intersection(_ other: AnyRange<Bound>) -> AnyRange<Bound> {
@@ -172,6 +189,7 @@ extension AnyRange {
   }
 }
 
+@available(*, deprecated)
 extension AnyRange {
   internal func _isLessThanAndApartFrom(_ other: AnyRange) -> Bool {
     return self < other && !self.overlaps(other)
