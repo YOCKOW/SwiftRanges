@@ -1,9 +1,9 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  OpenRange.swift
-   © 2017-2019 YOCKOW.
+   © 2017-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
  
 /// # OpenRange
 ///
@@ -77,6 +77,9 @@ extension OpenRange: GeneralizedRange {
     return (lower: .excluded(self.lowerBound), upper: .excluded(self.upperBound))
   }
 }
+
+extension OpenRange: GeneralizedCountableRange where Bound: Strideable,
+                                                     Bound.Stride: SignedInteger {}
 
 extension OpenRange: Hashable, HashableRange where Bound: Hashable {}
 

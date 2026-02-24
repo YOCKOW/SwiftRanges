@@ -1,9 +1,9 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  LefOpenRange.swift
-   © 2017-2019 YOCKOW.
+   © 2017-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
 
 
 /// # LeftOpenRange
@@ -58,6 +58,9 @@ extension LeftOpenRange: GeneralizedRange {
     return (lower: .excluded(self.lowerBound), upper: .included(self.upperBound))
   }
 }
+
+extension LeftOpenRange: GeneralizedCountableRange where Bound: Strideable,
+                                                         Bound.Stride: SignedInteger {}
 
 extension LeftOpenRange: Hashable, HashableRange where Bound: Hashable {}
 
