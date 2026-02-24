@@ -1,16 +1,16 @@
-/***************************************************************************************************
- MultipleRangesTests.swift
-   © 2018-2019,2024-2025 YOCKOW.
+/* *************************************************************************************************
+ GeneralizedRangeSetTests.swift
+   © 2018-2019,2024-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
  
 import Testing
 @testable import Ranges
 
 @Suite struct MultipleRangesTests {
   @Test func ranges() {
-    let multi: MultipleRanges<Int> = [10....20, 30...., ...<0]
+    let multi: GeneralizedRangeSet<Int> = [10....20, 30...., ...<0]
     let ranges = multi.ranges
     #expect(ranges.count == 3)
     #expect(ranges[0] == .init(..<0))
@@ -25,7 +25,7 @@ import Testing
     let range4: Range<Int> = 90 ..< 100
     let range5: PartialRangeFrom<Int> = 100...
 
-    var multi = MultipleRanges<Int>()
+    var multi = GeneralizedRangeSet<Int>()
     multi.insert(range5)
     multi.insert(range4)
     multi.insert(range3)
@@ -77,7 +77,7 @@ import Testing
 
   @Test func nomarlization_UInt32() {
     // https://github.com/YOCKOW/SwiftRanges/issues/20
-    var multi = MultipleRanges<UInt32>()
+    var multi = GeneralizedRangeSet<UInt32>()
     multi.insert(UInt32(0x00)...UInt32(0x1F))
     multi.insert(UInt32(0x20)...UInt32(0x2F))
     multi.insert(UInt32(0x40)...UInt32(0x4F))
@@ -86,7 +86,7 @@ import Testing
   }
 
   @Test func subtraction() {
-    var multi: MultipleRanges<Int> = [...<20, 30<...<40, 50<...60, 70...<80, 80....]
+    var multi: GeneralizedRangeSet<Int> = [...<20, 30<...<40, 50<...60, 70...<80, 80....]
 
     multi.subtract(35....55)
     #expect(multi.ranges.count == 4)
@@ -103,7 +103,7 @@ import Testing
     #expect(multi.ranges[3] == (70...<90))
     #expect(multi.ranges[4] == (90<...))
 
-    let multi2: MultipleRanges<Int> = [....10, 80<...]
+    let multi2: GeneralizedRangeSet<Int> = [....10, 80<...]
 
     let multi3 = multi.subtracting(multi2)
 
@@ -119,8 +119,8 @@ import Testing
   }
 
   @Test func intersection() {
-    let multi1: MultipleRanges<Int> = [...<20, 30<...<40, 50<...60, 70...<80, 80....]
-    let multi2: MultipleRanges<Int> = [15....55, 60<...79, 90<...]
+    let multi1: GeneralizedRangeSet<Int> = [...<20, 30<...<40, 50<...60, 70...<80, 80....]
+    let multi2: GeneralizedRangeSet<Int> = [15....55, 60<...79, 90<...]
 
     let intersections = multi1.intersection(multi2).ranges
     guard intersections.count == 5 else {
@@ -135,8 +135,8 @@ import Testing
   }
 
   @Test func countableIntersection() {
-    let multi1: MultipleRanges<Int> = [...<10]
-    let multi2: MultipleRanges<Int> = [9<...]
+    let multi1: GeneralizedRangeSet<Int> = [...<10]
+    let multi2: GeneralizedRangeSet<Int> = [9<...]
     #expect(multi1.intersection(multi2).isEmpty)
   }
 }

@@ -1,9 +1,9 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  PartialRangeGreaterThan.swift
-   © 2017-2019 YOCKOW.
+   © 2017-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
  
 
 /// # PartialRangeGreaterThan
@@ -55,3 +55,6 @@ extension PartialRangeGreaterThan: GeneralizedRange {
     return (lower: .excluded(self.lowerBound), upper: .unbounded)
   }
 }
+
+extension PartialRangeGreaterThan: GeneralizedCountableRange where Bound: Strideable,
+                                                                   Bound.Stride: SignedInteger {}

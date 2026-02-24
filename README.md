@@ -94,12 +94,12 @@ print(dic[5]) // Prints "Prologue"
 ```
 
 
-## `MultipleRanges`
+## `GeneralizedRangeSet`
 
 ```Swift
 import Ranges
 
-var multi = MultipleRanges<Int>()
+var multi = GeneralizedRangeSet<Int>()
 multi.insert(10...20) 
 multi.insert(30...40)
 print(multi.contains(15)) // -> true
@@ -111,7 +111,7 @@ print(multi.ranges) // -> [10..<15, 35<..40]
 
 ```
 
-Other methods like `Set` are also implemented in `MultipleRanges`:
+Other methods like `Set` are also implemented in `GeneralizedRangeSet`:
 * `intersection(_:)`
 * `union(_:)`
 * `symmetricDifference(_:)`

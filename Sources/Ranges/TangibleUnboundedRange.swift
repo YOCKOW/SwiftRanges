@@ -1,9 +1,9 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  TangibleUnboundedRange.swift
-   © 2018-2019 YOCKOW.
+   © 2018-2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
 
 /// # TangibleUnboundedRange
 ///
@@ -50,3 +50,5 @@ extension TangibleUnboundedRange: GeneralizedRange {
   }
 }
 
+extension TangibleUnboundedRange: GeneralizedCountableRange where Bound: Strideable,
+                                                                  Bound.Stride: SignedInteger {}
