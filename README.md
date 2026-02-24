@@ -21,7 +21,7 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 * `AnyRange`: A type-erased range.
 * `RangeDictionary`: A collection like `Dictionary` whose key is a range.
-* `MultipleRanges`: A set that can contain multiple types of ranges.
+* `GeneralizedRangeSet`: A set that can contain multiple types of ranges.
 
 # Requirements
 
