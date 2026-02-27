@@ -22,7 +22,9 @@ public protocol GeneralizedRange<Bound>: RangeExpression {
 public protocol GeneralizedCountableRange<Bound>: GeneralizedRange where Bound: Strideable,
                                                                          Bound.Stride: SignedInteger {}
 
-internal func __validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
+// MARK: - Validation
+
+private func __validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
   switch (uncheckedBounds.lower, uncheckedBounds.upper) {
   case (.unbounded, _), (_, .unbounded):
     return true
@@ -35,22 +37,96 @@ internal func __validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool 
   }
 }
 
+/// - Returns: `nil` if given bounds is not open; `true` if bounds are valid; otherwise `false`.
+private func __validateCountableOpenBounds<Bound>(
+  _ uncheckedBounds: Bounds<Bound>
+) -> Bool? where Bound: Strideable, Bound.Stride: SignedInteger {
+  guard case .excluded(let lower) = uncheckedBounds.lower,
+        case .excluded(let upper) = uncheckedBounds.upper else {
+    return nil
+  }
+  return lower.distance(to: upper) > 1
+}
+
 /// Returns true if the range represented by the bounds is not empty.
-internal func _validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
+internal func _validateUncountableBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
   return __validateBounds(uncheckedBounds)
 }
 
 /// Returns true if the **countable** range represented by the bounds is not empty.
-internal func _validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool
+internal func _validateCountableBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool
   where Bound: Strideable, Bound.Stride: SignedInteger
 {
-  if case .excluded(let lower) = uncheckedBounds.lower,
-     case .excluded(let upper) = uncheckedBounds.upper
-  {
-    return lower.distance(to: upper) > 1
+  if let isValidOpenBounds = __validateCountableOpenBounds(uncheckedBounds) {
+    return isValidOpenBounds
   }
   return __validateBounds(uncheckedBounds)
 }
+
+private extension GeneralizedCountableRange {
+  var _isValidOpenRange: Bool {
+    assert(self is OpenRange<Bound>, "Not an OpenRange?!")
+    return __validateCountableOpenBounds(self.bounds!)!
+  }
+}
+
+
+// MARK: - Creation
+
+private func __makeRange<Bound>(
+  _ uncheckedBounds: Bounds<Bound>
+) -> any GeneralizedRange<Bound> where Bound: Comparable {
+  assert(_validateUncountableBounds(uncheckedBounds), "Bounds not validated?!")
+
+  switch uncheckedBounds {
+  case (.included(let lower), .included(let upper)):
+    return ClosedRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.excluded(let lower), .included(let upper)):
+    return LeftOpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.excluded(let lower), .excluded(let upper)):
+    let openRange = OpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+    if case let countableOpenRange as any GeneralizedCountableRange = openRange {
+      guard countableOpenRange._isValidOpenRange else {
+        return EmptyRange<Bound>()
+      }
+    }
+    return openRange
+  case (.included(let lower), .unbounded):
+    return PartialRangeFrom<Bound>(lower)
+  case (.excluded(let lower), .unbounded):
+    return PartialRangeGreaterThan<Bound>(lower)
+  case (.unbounded, .included(let upper)):
+    return PartialRangeThrough<Bound>(upper)
+  case (.unbounded, .excluded(let upper)):
+    return PartialRangeUpTo<Bound>(upper)
+  case (.included(let lower), .excluded(let upper)):
+    return Range<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.unbounded, .unbounded):
+    return TangibleUnboundedRange<Bound>()
+  }
+}
+
+internal func _makeUncountableRange<Bound>(
+  _ uncheckedBounds: Bounds<Bound>
+) -> any GeneralizedRange<Bound> where Bound: Comparable {
+  guard _validateUncountableBounds(uncheckedBounds) else {
+    return EmptyRange<Bound>()
+  }
+  return __makeRange(uncheckedBounds)
+}
+
+internal func _makeCountableRange<Bound>(
+  _ uncheckedBounds: Bounds<Bound>
+) -> any GeneralizedCountableRange<Bound> where Bound: Strideable,
+                                                Bound.Stride: SignedInteger
+{
+  guard _validateCountableBounds(uncheckedBounds) else {
+    return EmptyRange<Bound>()
+  }
+  return __makeRange(uncheckedBounds) as! any GeneralizedCountableRange<Bound>
+}
+
+// MARK: - Containment
 
 internal func _contains<T>(bounds: Bounds<T>?, element: T) -> Bool where T: Comparable {
   guard let bounds = bounds else { return false }
@@ -63,6 +139,8 @@ internal func _contains<T>(bounds: Bounds<T>?, element: T) -> Bool where T: Comp
     (upperComparison == .orderedSame || upperComparison == .orderedDescending)
   )
 }
+
+// MARK: - Extensions
 
 // Default implementation for functions that are required by `RangeExpression`
 extension GeneralizedRange {
@@ -115,26 +193,6 @@ extension GeneralizedRange {
     guard let bounds = self.bounds else {
       return EmptyRange<Bound>()
     }
-
-    switch bounds {
-    case (.included(let lower), .included(let upper)):
-      return ClosedRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.excluded(let lower), .included(let upper)):
-      return LeftOpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.excluded(let lower), .excluded(let upper)):
-      return OpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.included(let lower), .unbounded):
-      return PartialRangeFrom<Bound>(lower)
-    case (.excluded(let lower), .unbounded):
-      return PartialRangeGreaterThan<Bound>(lower)
-    case (.unbounded, .included(let upper)):
-      return PartialRangeThrough<Bound>(upper)
-    case (.unbounded, .excluded(let upper)):
-      return PartialRangeUpTo<Bound>(upper)
-    case (.included(let lower), .excluded(let upper)):
-      return Range<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.unbounded, .unbounded):
-      return TangibleUnboundedRange<Bound>()
-    }
+    return _makeUncountableRange(bounds)
   }
 }
