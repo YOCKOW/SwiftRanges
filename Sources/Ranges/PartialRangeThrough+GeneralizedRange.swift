@@ -9,6 +9,10 @@ extension PartialRangeThrough: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     return (lower: .unbounded, upper: .included(self.upperBound))
   }
+
+  public var isEmpty: Bool {
+    return false
+  }
 }
 
 extension PartialRangeThrough: GeneralizedCountableRange where Bound: Strideable,

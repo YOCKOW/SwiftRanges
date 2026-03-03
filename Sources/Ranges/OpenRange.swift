@@ -11,28 +11,20 @@
 public struct OpenRange<Bound> where Bound: Comparable {
   public let lowerBound: Bound
   public let upperBound: Bound
-  internal let _isEmpty: Bool // emptiness depends on its countability
+
+  public init(uncheckedBounds bounds: (lower:Bound, upper:Bound)) {
+    self.lowerBound = bounds.lower
+    self.upperBound = bounds.upper
+  }
+
+  internal var _uncheckedBounds: Bounds<Bound> {
+    return (lower: .excluded(self.lowerBound), upper: .excluded(self.upperBound))
+  }
 }
 
 /// "Countable" OpenRange
 public typealias CountableOpenRange<Bound> =
   OpenRange<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
-
-extension OpenRange where Bound:Strideable, Bound.Stride:SignedInteger {
-  public init(uncheckedBounds bounds:(lower:Bound, upper:Bound)) {
-    self.lowerBound = bounds.lower
-    self.upperBound = bounds.upper
-    self._isEmpty = bounds.lower.distance(to:bounds.upper) <= 1
-  }
-}
-
-extension OpenRange {
-  public init(uncheckedBounds bounds:(lower:Bound, upper:Bound)) {
-    self.lowerBound = bounds.lower
-    self.upperBound = bounds.upper
-    self._isEmpty = bounds.lower >= bounds.upper
-  }
-}
 
 
 /// Make "lower<..<upper" available
@@ -51,7 +43,12 @@ public func ..< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpe
 }
 
 extension OpenRange  {
-  public var isEmpty: Bool { return self._isEmpty }
+  public var isEmpty: Bool {
+    if case let countableOpenRange as any GeneralizedCountableRange<Bound> = self {
+      return countableOpenRange._isValidOpenRange == false
+    }
+    return lowerBound >= upperBound
+  }
 }
 
 extension OpenRange: Equatable {
@@ -74,7 +71,7 @@ extension OpenRange: RangeExpression {
 extension OpenRange: GeneralizedRange {
   public var bounds:Bounds<Bound>? {
     if self.isEmpty { return nil }
-    return (lower: .excluded(self.lowerBound), upper: .excluded(self.upperBound))
+    return _uncheckedBounds
   }
 }
 

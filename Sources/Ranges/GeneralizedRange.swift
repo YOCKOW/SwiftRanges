@@ -16,6 +16,9 @@ public typealias Bounds<Bound> = (
 public protocol GeneralizedRange<Bound>: RangeExpression {
   /// Retunrs a set of a lower bound and an upper bound, or returns `nil` if the range is empty.
   var bounds: Bounds<Bound>? { get }
+
+  /// A Boolean value indicating whether the range contains no elements.
+  var isEmpty: Bool { get }
 }
 
 /// A generalized range whose `Bound` is countable.
@@ -63,10 +66,12 @@ internal func _validateCountableBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) 
   return __validateBounds(uncheckedBounds)
 }
 
-private extension GeneralizedCountableRange {
-  var _isValidOpenRange: Bool {
-    assert(self is OpenRange<Bound>, "Not an OpenRange?!")
-    return __validateCountableOpenBounds(self.bounds!)!
+extension GeneralizedCountableRange {
+  internal var _isValidOpenRange: Bool {
+    guard case let selfAsOpenRange as OpenRange<Bound> = self else {
+      fatalError("Not an OpenRange?!")
+    }
+    return __validateCountableOpenBounds(selfAsOpenRange._uncheckedBounds)!
   }
 }
 
@@ -173,7 +178,8 @@ extension GeneralizedRange {
 
 extension GeneralizedRange {
   @inline(__always)
-  var _wellknownRange: any GeneralizedRange<Bound> {
+  @usableFromInline
+  internal var _wellknownRange: any GeneralizedRange<Bound> {
     switch self {
     case _ as ClosedRange<Bound>,
          _ as EmptyRange<Bound>,
@@ -194,5 +200,12 @@ extension GeneralizedRange {
       return EmptyRange<Bound>()
     }
     return _makeUncountableRange(bounds)
+  }
+
+  /// Default implementation of `var isEmpty { get }`.
+  /// A Boolean value indicating whether the range contains no elements.
+  @inlinable
+  public var isEmpty: Bool {
+    return _wellknownRange.isEmpty
   }
 }

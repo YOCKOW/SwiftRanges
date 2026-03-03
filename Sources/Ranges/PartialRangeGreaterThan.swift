@@ -54,6 +54,10 @@ extension PartialRangeGreaterThan: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     return (lower: .excluded(self.lowerBound), upper: .unbounded)
   }
+
+  public var isEmpty: Bool {
+    return false
+  }
 }
 
 extension PartialRangeGreaterThan: GeneralizedCountableRange where Bound: Strideable,
