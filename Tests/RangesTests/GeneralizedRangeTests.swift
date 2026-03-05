@@ -144,25 +144,25 @@ import Testing
     #expect((...400).concatenating(100...) == (...))
   }
 
-  @Test func subtraction() {
+  @Test func subtraction() throws {
     var subtracted = (0...100).subtracting(20...80)
-    #expect(subtracted.0 == 0..<20)
-    #expect(subtracted.1 == (80<..100))
+    #expect(subtracted.0.isEqual(to: 0..<20))
+    #expect(try #require(subtracted.1).isEqual(to: (80<..100)))
 
     subtracted = TangibleUnboundedRange<Int>().subtracting(20<..<80)
-    #expect(subtracted.0 == ...20)
-    #expect(subtracted.1 == 80...)
+    #expect(subtracted.0.isEqual(to: ...20))
+    #expect(try #require(subtracted.1).isEqual(to: 80...))
 
     subtracted = (10<..<20).subtracting(11...19)
-    #expect(subtracted.0 == .empty)
+    #expect(subtracted.0.isEmpty)
     #expect(subtracted.1 == nil)
 
     subtracted = (..<20).subtracting(35...55)
-    #expect(subtracted.0 == ..<20)
+    #expect(subtracted.0.isEqual(to: ..<20))
     #expect(subtracted.1 == nil)
 
     subtracted = (10<..<20).subtracting(0..<11)
-    #expect(subtracted.0 == 11..<20)
+    #expect(subtracted.0.isEqual(to: 11..<20))
     #expect(subtracted.1 == nil)
   }
 }
