@@ -106,17 +106,16 @@ import Testing
   }
 
   @Test func comparison() {
-    #expect(EmptyRange<Double>() != TangibleUnboundedRange<Double>())
-    #expect(EmptyRange<Int>() > TangibleUnboundedRange<Int>())
-    #expect(0...10 > 0..<10)
+    #expect(!EmptyRange<Double>().isEqual(to: TangibleUnboundedRange<Double>()))
+    #expect(EmptyRange<Int>().compare(TangibleUnboundedRange<Int>()) == .orderedDescending)
+    #expect((0...10).compare(0..<10) == .orderedDescending)
+    #expect(TangibleUnboundedRange<Int>().compare(100...200) == .orderedAscending)
+    #expect(EmptyRange<Int>().compare(...) == .orderedDescending)
 
-    #expect(EmptyRange<Double>() == ())
-    #expect(() == EmptyRange<Int>())
-    #expect(10..<20 < ())
-    #expect((...) <= 100...200)
-    #expect((...) < ())
-
-    // TODO: Add more test cases
+    #expect(EmptyRange<Double>().isEqual(to:  ()))
+    #expect(!(10..<20).isEqual(to: 10...19))
+    #expect((10..<20).isEquivalent(to: 10...19))
+    #expect((99<..<201).isEquivalent(to: 100...200))
   }
 
   @Test func intersection() {

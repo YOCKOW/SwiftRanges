@@ -1,12 +1,13 @@
 /***************************************************************************************************
  GeneralizedRange+Comparison+ParticularCases.swift
-   © 2018-2019,2025 YOCKOW.
+   © 2018-2019,2025-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
  
  
 /* ***** GeneralizedRange <=> Empty Range *********************************************************/
+@available(*, deprecated)
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==(lhs: Optional, rhs: ()?) -> Bool {
     guard let range = lhs, let _ = rhs else {
@@ -18,6 +19,8 @@ extension Optional where Wrapped: GeneralizedRange {
     return !(lhs == rhs)
   }
 }
+
+@available(*, deprecated)
 extension GeneralizedRange {
   public static func <(lhs:Self, _:()) -> Bool {
     if lhs == () { return false }
@@ -34,6 +37,7 @@ extension GeneralizedRange {
   }
 }
 
+@available(*, deprecated)
 extension Optional where Wrapped == Void {
   public static func ==<R>(lhs: Optional, rhs: R?) -> Bool where R: GeneralizedRange {
     return rhs == lhs
@@ -42,21 +46,30 @@ extension Optional where Wrapped == Void {
     return rhs != lhs
   }
 }
+
+@available(*, deprecated)
 public func < <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
   return rhs > ()
 }
+
+@available(*, deprecated)
 public func >= <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
   return rhs <= ()
 }
+
+@available(*, deprecated)
 public func > <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
   return rhs < ()
 }
+
+@available(*, deprecated)
 public func <= <R>(_:(), rhs:R) -> Bool where R:GeneralizedRange {
   return rhs >= ()
 }
 
 
 /* ***** GeneralizedRange <=> UnboundedRange ******************************************************/
+@available(*, deprecated)
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==(lhs: Optional, rhs: UnboundedRange?) -> Bool {
     guard let range = lhs, let _ = rhs else {
@@ -68,6 +81,8 @@ extension Optional where Wrapped: GeneralizedRange {
     return !(lhs == rhs)
   }
 }
+
+@available(*, deprecated)
 extension GeneralizedRange {
   public static func <(lhs:Self, _:UnboundedRange) -> Bool {
     return false
@@ -84,6 +99,7 @@ extension GeneralizedRange {
   }
 }
 
+@available(*, deprecated)
 extension Optional where Wrapped == UnboundedRange {
   public static func ==<R>(lhs: Optional, rhs: R?) -> Bool where R: GeneralizedRange {
     return rhs == lhs
@@ -92,20 +108,29 @@ extension Optional where Wrapped == UnboundedRange {
     return rhs != lhs
   }
 }
+
+@available(*, deprecated)
 public func < <R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
   return rhs > (...)
 }
+
+@available(*, deprecated)
 public func >= <R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
   return rhs <= (...)
 }
+
+@available(*, deprecated)
 public func > <R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
   return rhs < (...)
 }
+
+@available(*, deprecated)
 public func <= <R>(_:UnboundedRange, rhs:R) -> Bool where R:GeneralizedRange {
   return rhs >= (...)
 }
 
 /* ***** UnboundedRange <=> UnboundedRange ********************************************************/
+@available(*, deprecated)
 extension Optional where Wrapped == UnboundedRange {
   public static func ==(lhs: Optional, rhs: Optional) -> Bool {
     return (lhs == nil && rhs == nil) || (lhs != nil && rhs != nil)
@@ -114,20 +139,29 @@ extension Optional where Wrapped == UnboundedRange {
     return !(lhs == rhs)
   }
 }
+
+@available(*, deprecated)
 public func <(_:UnboundedRange, _:UnboundedRange) -> Bool {
   return false
 }
+
+@available(*, deprecated)
 public func >=(_:UnboundedRange, _:UnboundedRange) -> Bool {
   return true
 }
+
+@available(*, deprecated)
 public func >(_:UnboundedRange, _:UnboundedRange) -> Bool {
   return false
 }
+
+@available(*, deprecated)
 public func <=(_:UnboundedRange, _:UnboundedRange) -> Bool {
   return true
 }
 
 /* ***** Empty Range <=> UnboundedRange ***********************************************************/
+@available(*, deprecated)
 extension Optional where Wrapped == Void {
   public static func ==(lhs: Optional, rhs: UnboundedRange?) -> Bool {
     switch (lhs, rhs) {
@@ -139,6 +173,8 @@ extension Optional where Wrapped == Void {
     return !(lhs == rhs)
   }
 }
+
+@available(*, deprecated)
 extension Optional where Wrapped == UnboundedRange {
   public static func ==(lhs: Optional, rhs: ()?) -> Bool {
     return rhs == lhs
@@ -147,27 +183,43 @@ extension Optional where Wrapped == UnboundedRange {
     return rhs != lhs
   }
 }
+
+@available(*, deprecated)
 public func <(_:(), _:UnboundedRange) -> Bool {
   return false
 }
+
+@available(*, deprecated)
 public func <(_:UnboundedRange, _:()) -> Bool {
   return true
 }
+
+@available(*, deprecated)
 public func >=(_:(), _:UnboundedRange) -> Bool {
   return true
 }
+
+@available(*, deprecated)
 public func >=(_:UnboundedRange, _:()) -> Bool {
   return false
 }
+
+@available(*, deprecated)
 public func >(_:(), _:UnboundedRange) -> Bool {
   return true
 }
+
+@available(*, deprecated)
 public func >(_:UnboundedRange, _:()) -> Bool {
   return false
 }
+
+@available(*, deprecated)
 public func <=(_:(), _:UnboundedRange) -> Bool {
   return false
 }
+
+@available(*, deprecated)
 public func <=(_:UnboundedRange, _:()) -> Bool {
   return true
 }

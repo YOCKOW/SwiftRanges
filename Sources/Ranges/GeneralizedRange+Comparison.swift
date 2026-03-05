@@ -1,6 +1,6 @@
 /***************************************************************************************************
  GeneralizedRange+Comparison.swift
-   © 2018-2019,2025 YOCKOW.
+   © 2018-2019,2025-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  **************************************************************************************************/
@@ -45,9 +45,58 @@ extension GeneralizedRange {
     }
     return myBounds.upper._compare(otherBounds.upper, side: .upper).foundationComparisonResult
   }
+
+  @inlinable
+  public func compare(_: ()) -> ComparisonResult {
+    return self.compare(EmptyRange<Bound>())
+  }
+
+  @inlinable
+  public func compare(_: UnboundedRange) -> ComparisonResult {
+    return self.compare(TangibleUnboundedRange<Bound>())
+  }
 }
 
-@available(*, deprecated, message: "Comparison operators are deprecated. Use `.compare(_:)` instead.")
+extension GeneralizedRange {
+  /// Returns a Boolean value indicating whether the range is equal to `other`.
+  /// Countability is not considered.
+  public func isEqual<R>(to other: R) -> Bool where R: GeneralizedRange, R.Bound == Bound {
+    return self.compare(other) == .orderedSame
+  }
+
+  public func isEqual(to: ()) -> Bool {
+    return self.isEmpty
+  }
+
+  public func isEqual(to: UnboundedRange) -> Bool {
+    guard let bounds = self.bounds else {
+      return false
+    }
+    return bounds.lower == .unbounded && bounds.upper == .unbounded
+  }
+
+  /// Returns a Boolean value indicating whether the range can be considered equivalent to `other`.
+  /// Countability is considered so that `(0..<100).isEquivalent(to: 0...99)` returns `true`.
+  public func isEquivalent<R>(to other: R) -> Bool where R: GeneralizedRange, R.Bound == Bound {
+    guard let myBounds = self.bounds, let otherBounds = other.bounds else {
+      return self.isEqual(to: other)
+    }
+
+    let lowerComparison = myBounds.lower._compare(otherBounds.lower, side: .lower)
+    let upperComparison = myBounds.upper._compare(otherBounds.upper, side: .upper)
+    return (
+      lowerComparison == .orderedAscendingButConsideredEquivalent ||
+      lowerComparison == .definitelyOrderedSame ||
+      lowerComparison == .orderedDescendingButConsideredEquivalent
+    ) && (
+      upperComparison == .orderedAscendingButConsideredEquivalent ||
+      upperComparison == .definitelyOrderedSame ||
+      upperComparison == .orderedDescendingButConsideredEquivalent
+    )
+  }
+}
+
+@available(*, deprecated, message: "Comparison operators are deprecated. Use `.isEqual(to:)` instead.")
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==<R>(lhs: Optional, rhs: R?) -> Bool
     where R: GeneralizedRange, Wrapped.Bound == R.Bound
