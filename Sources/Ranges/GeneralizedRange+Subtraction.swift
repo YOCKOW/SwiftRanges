@@ -5,7 +5,6 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-#if swift(>=6.1)
 @available(
   *, unavailable,
   message: "Use `subtracting(_:) -> any GeneralizedRange<Bound>` instead."
@@ -28,7 +27,6 @@ extension GeneralizedRange {
     return AnyRange<Bound>(self).subtracting(AnyRange<Bound>(other))
   }
 }
-#endif
 
 extension GeneralizedRange {
   fileprivate func _subtracting<R>(_ other: R) -> (

@@ -5,7 +5,6 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-#if swift(>=6.1)
 @available(
   *, unavailable,
   message: "Use `intersection(_:) -> {any|some} GeneralizedRange<Bound>` instead."
@@ -39,7 +38,6 @@ extension GeneralizedRange {
     return AnyRange<Bound>(self)
   }
 }
-#endif
 
 extension GeneralizedRange {
   fileprivate func _intersectionBounds<R>(
