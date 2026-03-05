@@ -13,6 +13,7 @@ extension GeneralizedRange {
   /// Returns subtracted range(s).
   /// Under some conditions, `other` divides the range. That is why a tuple is returned.
   /// They are handled as countable ranges.
+  @available(*, deprecated)
   public func subtracting<R>(_ other:R) -> (AnyRange<Bound>, AnyRange<Bound>?)
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
@@ -21,6 +22,7 @@ extension GeneralizedRange {
   
   /// Returns subtracted range(s).
   /// Under some conditions, `other` divides the range. That is why a tuple is returned.
+  @available(*, deprecated)
   public func subtracting<R>(_ other:R) -> (AnyRange<Bound>, AnyRange<Bound>?)
     where R:GeneralizedRange, R.Bound == Bound
   {
