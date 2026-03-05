@@ -5,9 +5,13 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-@available(*, deprecated)
+@available(
+  *, unavailable,
+   message: "Use `intersection(_:) -> {any|some} GeneralizedRange<Bound>` instead."
+)
 extension GeneralizedRange {
   /// Returns a new *countable* range that is an intersection of `self` and `other`.
+  @available(*, deprecated)
   public func intersection<R>(_ other:R) -> AnyRange<Bound>
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
@@ -15,6 +19,7 @@ extension GeneralizedRange {
   }
   
   /// Returns a new range that is an intersection of `self` and `other`.
+  @available(*, deprecated)
   public func intersection<R>(_ other:R) -> AnyRange<Bound>
     where R:GeneralizedRange, R.Bound == Bound
   {
@@ -22,11 +27,13 @@ extension GeneralizedRange {
   }
   
   /// Returns `.empty`.
+  @available(*, deprecated)
   public func intersection(_:()) -> AnyRange<Bound> {
     return .empty
   }
   
   /// Returns `AnyRange<Bound>(self)`
+  @available(*, deprecated)
   public func intersection(_:UnboundedRange) -> AnyRange<Bound> {
     return AnyRange<Bound>(self)
   }

@@ -119,14 +119,14 @@ import Testing
   }
 
   @Test func intersection() {
-    #expect((0..<10).intersection(5<..15) == 5<..<10)
-    #expect((0..<10).intersection(10..<15) == EmptyRange<Int>())
-    #expect((0...).intersection(..<15) == 0..<15)
-    #expect((..<100).intersection(90<..) == 90<..<100)
-    #expect((..<100).intersection(99<..) == .empty)
+    #expect((0..<10).intersection(5<..15).isEqual(to: 5<..<10))
+    #expect((0..<10).intersection(10..<15).isEqual(to: EmptyRange<Int>()))
+    #expect((0...).intersection(..<15).isEqual(to: 0..<15))
+    #expect((..<100).intersection(90<..).isEqual(to: 90<..<100))
+    #expect((..<100).intersection(99<..).isEmpty)
 
-    #expect((0...100).intersection(()) == .empty)
-    #expect((0...100).intersection((...)) == 0...100)
+    #expect((0...100).intersection(()).isEmpty)
+    #expect((0...100).intersection((...)).isEqual(to: 0...100))
   }
 
   @Test func overlaps() {
