@@ -40,13 +40,14 @@ extension GeneralizedRange {
     let otherBounds = otherNilableBounds!
     
     let lowerComparison = myBounds.lower._compare(otherBounds.lower, side: .lower)
-    if lowerComparison != .orderedSame { return lowerComparison }
-    return myBounds.upper._compare(otherBounds.upper, side: .upper)
+    if lowerComparison != .definitelyOrderedSame {
+      return lowerComparison.foundationComparisonResult
+    }
+    return myBounds.upper._compare(otherBounds.upper, side: .upper).foundationComparisonResult
   }
-  
 }
 
-
+@available(*, deprecated, message: "Comparison operators are deprecated. Use `.compare(_:)` instead.")
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==<R>(lhs: Optional, rhs: R?) -> Bool
     where R: GeneralizedRange, Wrapped.Bound == R.Bound
@@ -64,6 +65,7 @@ extension Optional where Wrapped: GeneralizedRange {
   }
 }
 
+@available(*, deprecated, message: "Comparison operators are deprecated. Use `.compare(_:)` instead.")
 extension GeneralizedRange {
   public static func < <T>(lhs:Self, rhs:T) -> Bool where T:GeneralizedRange, T.Bound == Self.Bound {
     return lhs.compare(rhs) == .orderedAscending
