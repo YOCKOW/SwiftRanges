@@ -5,7 +5,11 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-@available(*, unavailable)
+#if swift(>=6.1)
+@available(
+  *, unavailable,
+  message: "Use `subtracting(_:) -> any GeneralizedRange<Bound>` instead."
+)
 extension GeneralizedRange {
   /// Returns subtracted range(s).
   /// Under some conditions, `other` divides the range. That is why a tuple is returned.
@@ -24,6 +28,7 @@ extension GeneralizedRange {
     return AnyRange<Bound>(self).subtracting(AnyRange<Bound>(other))
   }
 }
+#endif
 
 extension GeneralizedRange {
   fileprivate func _subtracting<R>(_ other: R) -> (
