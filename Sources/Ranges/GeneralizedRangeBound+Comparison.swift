@@ -51,10 +51,18 @@ private protocol _CountableBoundProtocol<Value> where Value: Strideable,
                                                       Value.Stride: SignedInteger {
   associatedtype Value
   var value: Value? { get }
+  var _valueIsIncluded: Bool { get }
 }
 
 extension GeneralizedRangeBound: _CountableBoundProtocol where Value: Strideable,
-                                                               Value.Stride: SignedInteger {}
+                                                               Value.Stride: SignedInteger {
+  var _valueIsIncluded: Bool {
+    switch self {
+    case .included: true
+    default: false
+    }
+  }
+}
 
 extension _CountableBoundProtocol {
   var nextValue: Value {
@@ -173,4 +181,53 @@ internal func _min<Bound>(
   return min
 }
 
+extension GeneralizedRangeBound {
+  /// Returns whether the two points are concatenatable or not.
+  ///
+  /// - parameter otherLowerBound:
+  ///     The lower bound of another range.
+  /// - Warning:
+  ///     **`self` must be upper bound.**
+  private func __isConcatenatable(with otherLowerBound: GeneralizedRangeBound<Value>) -> Bool {
+    // always concatenatable when self or the lower bound is .unbounded
+    guard let myValue = self.value, let otherLowerValue = otherLowerBound.value else {
+      return true
+    }
 
+    // Check if
+    // ------/
+    //    /-------
+    if myValue < otherLowerValue { return false }
+    if myValue > otherLowerValue { return true }
+
+    // if myValue == otherLowerValue
+    assert(myValue == otherLowerValue)
+    if case (.excluded, .excluded) = (self, otherLowerBound) { return false }
+    return true
+  }
+
+  /// Returns whether the two points are concatenatable or not.
+  ///
+  /// - Warning: **`self` must be upper bound.**
+  ///
+  /// - parameter otherLowerBound:
+  ///     The lower bound of another range.
+  internal func _isConcatenatable(with otherLowerBound: GeneralizedRangeBound<Value>) -> Bool {
+    if case let countableSelf as any _CountableBoundProtocol<Value> = self,
+       countableSelf._valueIsIncluded,
+       case let countableOther as any _CountableBoundProtocol<Value> = otherLowerBound,
+       countableOther._valueIsIncluded {
+
+      // NOTE: Work around for https://github.com/swiftlang/swift/issues/87711
+      func __concatenatable<T, U>(myUpper: T, otherLower: U) -> Bool where T: _CountableBoundProtocol,
+                                                                           U: _CountableBoundProtocol,
+                                                                           T.Value == U.Value
+      {
+        assert(T.self == U.self)
+        return myUpper.value!.distance(to: otherLower.value!) <= 1
+      }
+      return __concatenatable(myUpper: countableSelf, otherLower: countableOther)
+    }
+    return self.__isConcatenatable(with: otherLowerBound)
+  }
+}

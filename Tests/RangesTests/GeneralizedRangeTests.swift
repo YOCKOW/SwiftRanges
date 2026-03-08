@@ -136,12 +136,13 @@ import Testing
     #expect(!(0...100).overlaps(100<..<200))
   }
 
-  @Test func concatenation() {
+  @Test func concatenation() throws {
     #expect((0..<100).concatenating(100<..200) == nil)
-    #expect((0..<100).concatenating(100..<200) == 0..<200)
-    #expect((...400).concatenating(100..<200) == ...400)
-    #expect((0<..<10).concatenating(()) == 0<..<10)
-    #expect((...400).concatenating(100...) == (...))
+    #expect(try #require((0..<100).concatenating(100..<200)).isEqual(to: 0..<200))
+    #expect(try #require((0...99).concatenating(100..<200)).isEqual(to: 0..<200)) // Countable!
+    #expect(try #require((...400).concatenating(100..<200)).isEqual(to: ...400))
+    #expect(try #require((0<..<10).concatenating(())).isEqual(to: 0<..<10))
+    #expect(try #require((...400).concatenating(100...)).isEqual(to: ...))
   }
 
   @Test func subtraction() throws {
