@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  RangeDictionary.swift
-   © 2019 YOCKOW.
+   © 2019,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -253,6 +253,9 @@ public struct RangeDictionary<Bound, Value> where Bound: Comparable {
 }
 
 extension RangeDictionary: Sendable where Bound: Sendable, Value: Sendable {}
+
+public typealias CountableRangeDictionary<Bound, Value> =
+  RangeDictionary<Bound, Value> where Bound: Strideable, Bound.Stride: SignedInteger
 
 extension RangeDictionary: ExpressibleByDictionaryLiteral {
   public typealias Key = AnyRange<Bound>
