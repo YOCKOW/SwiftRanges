@@ -22,6 +22,8 @@ public enum GeneralizedRangeBound<Value> where Value: Comparable {
   }
 }
 
+extension GeneralizedRangeBound: Sendable where Value: Sendable {}
+
 @available(*, deprecated, renamed: "GeneralizedRangeBound")
 public typealias Boundary<Value> = GeneralizedRangeBound<Value> where Value: Comparable
 
