@@ -14,6 +14,8 @@ public struct PartialRangeGreaterThan<Bound> where Bound: Comparable {
   public init(_ lowerBound: Bound) { self.lowerBound = lowerBound }
 }
 
+extension PartialRangeGreaterThan: Sendable where Bound: Sendable {}
+
 /// "Countable" PartialRangeGreaterThan
 public typealias CountablePartialRangeGreaterThan<Bound> =
   PartialRangeGreaterThan<Bound> where Bound:Strideable, Bound.Stride:SignedInteger

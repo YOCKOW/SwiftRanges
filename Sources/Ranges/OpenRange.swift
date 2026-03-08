@@ -22,6 +22,8 @@ public struct OpenRange<Bound> where Bound: Comparable {
   }
 }
 
+extension OpenRange: Sendable where Bound: Sendable {}
+
 /// "Countable" OpenRange
 public typealias CountableOpenRange<Bound> =
   OpenRange<Bound> where Bound:Strideable, Bound.Stride:SignedInteger

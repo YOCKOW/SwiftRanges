@@ -13,6 +13,8 @@ public struct EmptyRange<Bound> where Bound:Comparable {
   public init() {}
 }
 
+extension EmptyRange: Sendable {} // Always sendable.
+
 public typealias CountableEmptyRange<Bound> =
   EmptyRange<Bound> where Bound: Strideable, Bound.Stride: SignedInteger
 
