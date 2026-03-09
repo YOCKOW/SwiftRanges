@@ -28,15 +28,15 @@ jobs:
           - macOS-26
         swift-version:
           - '6.2.4'
-          - '6.1.3'
+          # - '6.1.3'
         swift-compat-ver:
           - '6'
           - '5'
           - '4.2'
           - '4'
-        exclude:
-          - os: macOS-26
-            swift-version: '6.1.3'
+        # exclude:
+        #   - os: macOS-26
+        #     swift-version: '6.1.3'
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
