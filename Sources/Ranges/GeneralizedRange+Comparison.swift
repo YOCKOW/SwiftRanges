@@ -96,6 +96,12 @@ extension GeneralizedRange {
   }
 }
 
+internal extension GeneralizedRange {
+  func _isLessThanAndApartFrom(_ other: any GeneralizedRange<Bound>) -> Bool {
+    return self.compare(other) == .orderedAscending && !self.overlaps(other) 
+  }
+}
+
 @available(*, deprecated, message: "Comparison operators are deprecated. Use `.isEqual(to:)` instead.")
 extension Optional where Wrapped: GeneralizedRange {
   public static func ==<R>(lhs: Optional, rhs: R?) -> Bool

@@ -26,6 +26,9 @@ import Testing
     #expect(ranges.count == 3)
     #expect(ranges.range(at: 1).isEqual(to: 100...199))
     #expect(ranges.index(whereRangeContains: 0) == 0)
+    #expect(ranges._storage.indices(for: ..<(-1)) == .insertable(0))
+    #expect(ranges._storage.indices(for: 20...30) == .insertable(1))
+    #expect(ranges._storage.indices(for: 5...10000) == .overlap(first: 0, last: 2))
   }
 
   let simpleDictionary: RangeDictionary<Int, String> = [

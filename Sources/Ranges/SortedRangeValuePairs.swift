@@ -12,7 +12,8 @@ internal struct _SortedRangeValuePairs<Bound, Value> where Bound: Comparable {
     case ranges([any GeneralizedRange<Bound> & Sendable])
   }
 
-  private var _storage: _Storage
+  /// Storage for an array.
+  internal private(set) var _storage: _Storage
 
   init(carefullySortedPairs pairs: [(range: any GeneralizedRange<Bound> & Sendable, value: Value)]) {
     self._storage = .pairs(pairs)
@@ -86,8 +87,7 @@ extension _SortedRangeValuePairs._Storage {
       guard (
         !range0.isEmpty &&
         !range1.isEmpty &&
-        range0.compare(range1) == .orderedAscending &&
-        !range0.overlaps(range1)
+        range0._isLessThanAndApartFrom(range1)
       ) else {
         return false
       }
@@ -113,6 +113,59 @@ extension _SortedRangeValuePairs._Storage {
       return nil
     }
     return __binarySearch(indexRange: 0..<self.count)
+  }
+
+  enum _IndicesForReplacement: Equatable {
+    /// There are ranges which overlap the range to be replaced with.
+    case overlap(first: Int, last: Int)
+
+    /// No overlaps. The range can be simply inserted at the index.
+    case insertable(Int)
+  }
+
+  func indices(for range: any GeneralizedRange<Bound>) -> _IndicesForReplacement {
+    assert(!range.isEmpty, "\(#function): Empty range?!")
+
+    let count = self.count
+    if count < 1 || range._isLessThanAndApartFrom(self.range(at: 0)) {
+      return .insertable(0)
+    }
+    if self.range(at: count - 1)._isLessThanAndApartFrom(range) {
+      return .insertable(count)
+    }
+
+    var firstIndexWhereOverlaps: Int? = nil
+    DETERMINE_FIRST_INDEX: do {
+      assert(count > 0)
+      if range.overlaps(self.range(at: 0)) {
+        firstIndexWhereOverlaps = 0
+        break DETERMINE_FIRST_INDEX
+      }
+
+      assert(count > 1, "Must be already handled if `count` == 1")
+      for ii in 0..<(count - 1) {
+        let range0 = self.range(at: ii)
+        let range1 = self.range(at: ii + 1)
+        if range.overlaps(range0) {
+          firstIndexWhereOverlaps = ii + 1
+          break DETERMINE_FIRST_INDEX
+        }
+        if range0._isLessThanAndApartFrom(range) && range._isLessThanAndApartFrom(range1) {
+          return .insertable(ii + 1)
+        }
+      }
+    }
+
+    assert(firstIndexWhereOverlaps != nil, "First Index Not Found?!")
+    var lastIndexWhereOverlaps: Int? = nil
+    for ii in (firstIndexWhereOverlaps!..<count).reversed() {
+      if self.range(at: ii).overlaps(range) {
+        lastIndexWhereOverlaps = ii
+        break
+      }
+    }
+
+    return .overlap(first: firstIndexWhereOverlaps!, last: lastIndexWhereOverlaps!)
   }
 }
 
