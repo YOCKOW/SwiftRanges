@@ -44,6 +44,11 @@ extension _SortedRangeValuePairs._Storage {
   }
 
   @inlinable
+  var isEmpty: Bool {
+    return self.count == 0
+  }
+
+  @inlinable
   func range(at index: Int) -> any GeneralizedRange<Bound> & Sendable {
     switch self {
     case .pairs(let pairs):
@@ -89,6 +94,26 @@ extension _SortedRangeValuePairs._Storage {
     }
     return true
   }
+
+  func index(whereRangeContains bound: Bound) -> Int? {
+    func __binarySearch(indexRange: Range<Int>) -> Int? {
+      if indexRange.isEmpty {
+        return nil
+      }
+      let middleIndex = indexRange.lowerBound + ((indexRange.upperBound - indexRange.lowerBound) / 2)
+      let middleRange = self.range(at: middleIndex)
+      if middleRange.contains(bound) {
+        return middleIndex
+      }
+      if middleRange.bounds!.lower._compare(bound, side: .lower) == .orderedDescending {
+        return __binarySearch(indexRange: indexRange.lowerBound..<middleIndex)
+      } else if middleIndex < indexRange.upperBound - 1 {
+        return __binarySearch(indexRange: (middleIndex + 1)..<indexRange.upperBound)
+      }
+      return nil
+    }
+    return __binarySearch(indexRange: 0..<self.count)
+  }
 }
 
 extension _SortedRangeValuePairs {
@@ -96,8 +121,21 @@ extension _SortedRangeValuePairs {
   var count: Int { _storage.count }
 
   @inlinable
+  var isEmpty: Bool { _storage.isEmpty }
+
+  @inlinable
   func range(at index: Int) -> any GeneralizedRange<Bound> & Sendable { _storage.range(at: index) }
 
   @inlinable
   func value(at index: Int) -> Value? { _storage.value(at: index) }
+
+  @inlinable
+  func index(whereRangeContains bound: Bound) -> Int? { _storage.index(whereRangeContains: bound) }
+
+  subscript(_ bound: Bound) -> Value? {
+    guard let index = self.index(whereRangeContains: bound) else {
+      return nil
+    }
+    return self.value(at: index)
+  }
 }

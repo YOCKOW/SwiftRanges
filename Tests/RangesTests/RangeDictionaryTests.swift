@@ -19,10 +19,13 @@ import Testing
     )
     #expect(pairs.count == 3)
     #expect(pairs.value(at: 1) == "zero")
+    #expect(pairs.index(whereRangeContains: 10) == 2)
+    #expect(pairs[-1] == "negative")
 
     let ranges = _SortedRanges<Int>(carefullySortedRanges: [0..<10, 100...199, 999...])
     #expect(ranges.count == 3)
     #expect(ranges.range(at: 1).isEqual(to: 100...199))
+    #expect(ranges.index(whereRangeContains: 0) == 0)
   }
 
   let simpleDictionary: RangeDictionary<Int, String> = [
