@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  RangeDictionaryTests.swift
-   © 2019,2024-2025 YOCKOW.
+   © 2019,2024-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -9,6 +9,22 @@ import Testing
 @testable import Ranges
 
 @Suite struct RangeDictionaryTests {
+  @Test func sortedRangePairs() {
+    let pairs = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: ..<0, value: "negative"),
+        (range: 0...0, value: "zero"),
+        (range: 1..., value: "positive")
+      ]
+    )
+    #expect(pairs.count == 3)
+    #expect(pairs.value(at: 1) == "zero")
+
+    let ranges = _SortedRanges<Int>(carefullySortedRanges: [0..<10, 100...199, 999...])
+    #expect(ranges.count == 3)
+    #expect(ranges.range(at: 1).isEqual(to: 100...199))
+  }
+
   let simpleDictionary: RangeDictionary<Int, String> = [
         0 ...<    10: "A",
       100 ...<   110: "B",
