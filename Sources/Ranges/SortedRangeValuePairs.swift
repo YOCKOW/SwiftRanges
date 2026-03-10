@@ -13,6 +13,7 @@ internal struct _SortedRangeValuePairs<Bound, Value> where Bound: Comparable {
   enum _Storage {
     case pairs([_Pair])
     case ranges([any GeneralizedRange<Bound>])
+    case separated(ranges: [any GeneralizedRange<Bound>], values: [Value])
   }
 
   /// Storage for an array.
@@ -25,6 +26,10 @@ internal struct _SortedRangeValuePairs<Bound, Value> where Bound: Comparable {
 
   init(carefullySortedPairs pairs: [_Pair]) {
     self.init(_storage: .pairs(pairs))
+  }
+
+  init(carefullySortedRanges ranges: [any GeneralizedRange<Bound>], values: [Value]) {
+    self.init(_storage: .separated(ranges: ranges, values: values))
   }
 }
 
@@ -45,6 +50,8 @@ extension _SortedRangeValuePairs where Bound: Sendable {
     case .pairs(let pairs):
       assert(pairs.allSatisfy({ $0.range is any SendableGeneralizedRange }), assertionMessage)
     case .ranges(let ranges):
+      assert(ranges.allSatisfy({ $0 is any SendableGeneralizedRange }), assertionMessage)
+    case .separated(ranges: let ranges, values: _):
       assert(ranges.allSatisfy({ $0 is any SendableGeneralizedRange }), assertionMessage)
     }
   }
@@ -86,7 +93,7 @@ extension _SortedRangeValuePairs._Storage {
     switch self {
     case .pairs(let pairs):
       return pairs.count
-    case .ranges(let ranges):
+    case .ranges(let ranges), .separated(ranges: let ranges, values: _):
       return ranges.count
     }
   }
@@ -101,7 +108,7 @@ extension _SortedRangeValuePairs._Storage {
     switch self {
     case .pairs(let pairs):
       return pairs[index].range
-    case .ranges(let ranges):
+    case .ranges(let ranges), .separated(ranges: let ranges, values: _):
       return ranges[index]
     }
   }
@@ -113,10 +120,18 @@ extension _SortedRangeValuePairs._Storage {
       return pairs[index].value
     case .ranges:
       return nil
+    case .separated(ranges: _, values: let values):
+      return values[index]
     }
   }
 
   func validateRanges() -> Bool {
+    if case .separated(let ranges, let values) = self {
+      guard ranges.count == values.count else {
+        return false
+      }
+    }
+
     let count = self.count
     switch count {
     case 0:
