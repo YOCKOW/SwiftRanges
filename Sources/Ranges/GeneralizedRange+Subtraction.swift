@@ -62,7 +62,7 @@ extension GeneralizedRange {
         lower: myBounds.lower,
         upper: ~otherBounds.lower
       )
-      let lowerRange = _makeUncountableRange(lowerRangeBounds)
+      let lowerRange = _makeRange(uncheckedBounds: lowerRangeBounds)
       if !lowerRange.isEmpty {
         subtracted.append(lowerRange)
       }
@@ -78,7 +78,7 @@ extension GeneralizedRange {
         lower: ~otherBounds.upper,
         upper: myBounds.upper
       )
-      let upperRange = _makeUncountableRange(upperRangeBounds)
+      let upperRange = _makeRange(uncheckedBounds: upperRangeBounds)
       if !upperRange.isEmpty {
         subtracted.append(upperRange)
       }
@@ -116,7 +116,10 @@ extension GeneralizedCountableRange {
     func __forceCountable(_ range: any GeneralizedRange<Bound>) -> any GeneralizedCountableRange<Bound> {
       return (
         (range as? any GeneralizedCountableRange<Bound>) ??
-        range._wellknownRange as! any GeneralizedCountableRange<Bound>
+        range.bounds.map({
+          _makeRange(uncheckedBounds: $0) as! any GeneralizedCountableRange<Bound>
+        })  ??
+        EmptyRange<Bound>()
       )
     }
 

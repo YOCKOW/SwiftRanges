@@ -52,7 +52,7 @@ extension _AnyBounds {
     private let _containsClosure: (Bound) -> Bool
     
     init?(_ bounds: Bounds<Bound>) {
-      guard _validateUncountableBounds(bounds) else { return nil }
+      guard _validateBounds(bounds) else { return nil }
       self._bounds = bounds
       
       switch bounds {
@@ -193,7 +193,7 @@ extension _AnyBounds {
   
   fileprivate final class _CountableBounds<Bound>: _SomeBounds<Bound>, @unchecked Sendable where Bound: Strideable, Bound.Stride: SignedInteger {
     override init?(_ bounds: Bounds<Bound>) {
-      guard _validateCountableBounds(bounds) else { return nil }
+      guard _validateBounds(bounds) else { return nil }
       super.init(bounds)
     }
     

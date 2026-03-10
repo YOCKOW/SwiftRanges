@@ -144,7 +144,7 @@ extension GeneralizedRangeSet {
   public mutating func insert<R>(_ newRange:R)
     where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
   {
-    guard let bounds = newRange.bounds, _validateCountableBounds(bounds) else { return }
+    guard let bounds = newRange.bounds, _validateBounds(bounds) else { return }
     self._insert(AnyRange(uncheckedBounds: bounds))
   }
   

@@ -58,7 +58,7 @@ extension GeneralizedRange {
     guard let intersectionBounds = self._intersectionBounds(other) else {
       return EmptyRange<Bound>()
     }
-    return _makeUncountableRange(intersectionBounds)
+    return _makeRange(uncheckedBounds: intersectionBounds)
   }
 
   /// Returns an empty range.
@@ -80,7 +80,7 @@ extension GeneralizedCountableRange {
     guard let intersectionBounds = self._intersectionBounds(other) else {
       return EmptyRange<Bound>()
     }
-    return _makeCountableRange(intersectionBounds)
+    return _makeRange(uncheckedBounds: intersectionBounds) as! any GeneralizedCountableRange<Bound>
   }
 
   /// Returns an empty range.

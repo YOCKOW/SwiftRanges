@@ -23,7 +23,7 @@ import Testing
       sourceLocation: SourceLocation = #_sourceLocation
     ) where R: GeneralizedRange, R.Bound == B {
       #expect(
-        Swift.type(of: _makeUncountableRange((lower: lower, upper: upper))) == type,
+        Swift.type(of: _makeRange(uncheckedBounds: (lower: lower, upper: upper))) == type,
         comment(),
         sourceLocation: sourceLocation
       )
@@ -37,7 +37,7 @@ import Testing
       sourceLocation: SourceLocation = #_sourceLocation
     ) where B: Strideable, B.Stride: SignedInteger, R: GeneralizedCountableRange, R.Bound == B {
       #expect(
-        Swift.type(of: _makeCountableRange((lower: lower, upper: upper))) == type,
+        Swift.type(of: _makeRange(uncheckedBounds: (lower: lower, upper: upper))) == type,
         comment(),
         sourceLocation: sourceLocation
       )
@@ -46,7 +46,6 @@ import Testing
     UNCOUNTABLE: do {
       let a: Unicode.Scalar = "a"
       let b: Unicode.Scalar = "b"
-
 
       __check(lower: .included(a), upper: .included(a), type: ClosedRange<Unicode.Scalar>.self)
       __check(lower: .excluded(a), upper: .included(a), type: EmptyRange<Unicode.Scalar>.self)
@@ -81,33 +80,6 @@ import Testing
       __check(lower: .included(one), upper: .excluded(two), type: Range<Int>.self)
       __check(lower: .unbounded, upper: .unbounded, type: TangibleUnboundedRange<Int>.self)
     }
-  }
-
-  @Test func wellknownRange() {
-    struct MyRange<Bound>: GeneralizedRange where Bound: Comparable {
-      var bounds: Bounds<Bound>?
-      init(bounds: Bounds<Bound>?) {
-        self.bounds = bounds
-      }
-      init(lower: GeneralizedRangeBound<Bound>, upper: GeneralizedRangeBound<Bound>) {
-        self.init(bounds: (lower: lower, upper: upper))
-      }
-      init<R>(range: R) where R: GeneralizedRange, R.Bound == Bound {
-        self.init(bounds: range.bounds)
-      }
-    }
-
-    let myScalarRange1 = MyRange<Unicode.Scalar>(lower: .excluded("A"), upper: .excluded("B"))
-    #expect(myScalarRange1._wellknownRange is OpenRange<Unicode.Scalar>)
-
-    let myScalarRange2 = MyRange<Unicode.Scalar>(lower: .excluded("C"), upper: .excluded("C"))
-    #expect(myScalarRange2._wellknownRange is EmptyRange<Unicode.Scalar>)
-
-    let myIntRange1 = MyRange<Int>(range: 0..<100)
-    #expect(myIntRange1._wellknownRange is Range<Int>)
-
-    let myIntRange2 = MyRange<Int>(lower: .excluded(0), upper: .excluded(1))
-    #expect(myIntRange2._wellknownRange is EmptyRange<Int>) // Because `Int` is `Strideable`!
   }
 
   @Test func comparison() {

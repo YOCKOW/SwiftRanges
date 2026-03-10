@@ -46,10 +46,7 @@ public func ..< <T>(lhs:ExcludedCountableLowerBound<T>, upper:T) -> CountableOpe
 
 extension OpenRange  {
   public var isEmpty: Bool {
-    if case let countableOpenRange as any GeneralizedCountableRange<Bound> = self {
-      return countableOpenRange._isValidOpenRange == false
-    }
-    return lowerBound >= upperBound
+    return !_validateBounds(self._uncheckedBounds)
   }
 }
 

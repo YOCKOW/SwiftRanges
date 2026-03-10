@@ -59,8 +59,8 @@ extension GeneralizedRange {
     ) else {
       return nil
     }
-    return _makeUncountableRange(
-      (
+    return _makeRange(
+      uncheckedBounds: (
         lower: _min(myBounds.lower, otherBounds.lower, side: .lower),
         upper: _max(myBounds.upper, otherBounds.upper, side: .upper)
       )
