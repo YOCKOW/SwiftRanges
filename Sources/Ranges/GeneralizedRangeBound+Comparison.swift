@@ -47,35 +47,6 @@ extension GeneralizedRangeBound {
   }
 }
 
-private protocol _CountableBoundProtocol<Value> where Value: Strideable,
-                                                      Value.Stride: SignedInteger {
-  associatedtype Value
-  var value: Value? { get }
-  var _valueIsIncluded: Bool { get }
-}
-
-extension GeneralizedRangeBound: _CountableBoundProtocol where Value: Strideable,
-                                                               Value.Stride: SignedInteger {
-  var _valueIsIncluded: Bool {
-    switch self {
-    case .included: true
-    default: false
-    }
-  }
-}
-
-extension _CountableBoundProtocol {
-  var nextValue: Value {
-    guard let value = self.value else { fatalError("Unbounded?!") }
-    return value.advanced(by: 1)
-  }
-
-  var previousValue: Value {
-    guard let value = self.value else { fatalError("Unbounded?!") }
-    return value.advanced(by: -1)
-  }
-}
-
 extension GeneralizedRangeBound {
   internal func _compare(_ other: GeneralizedRangeBound<Value>, side: _Side) -> _ComparisonResult {
     if self == other {
