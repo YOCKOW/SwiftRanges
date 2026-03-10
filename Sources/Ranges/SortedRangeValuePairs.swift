@@ -7,31 +7,78 @@
 
 
 internal struct _SortedRangeValuePairs<Bound, Value> where Bound: Comparable {
+  typealias _Pair = (range: any GeneralizedRange<Bound>, value: Value)
+  typealias _SendablePair = (range: any GeneralizedRange<Bound> & Sendable, value: Value)
+
   enum _Storage {
-    case pairs([(range: any GeneralizedRange<Bound> & Sendable, value: Value)])
-    case ranges([any GeneralizedRange<Bound> & Sendable])
+    case pairs([_Pair])
+    case ranges([any GeneralizedRange<Bound>])
   }
 
   /// Storage for an array.
   internal private(set) var _storage: _Storage
 
-  init(carefullySortedPairs pairs: [(range: any GeneralizedRange<Bound> & Sendable, value: Value)]) {
-    self._storage = .pairs(pairs)
+  private init(_storage storage: _Storage) {
+    self._storage = storage
     assert(self._storage.validateRanges())
+  }
+
+  init(carefullySortedPairs pairs: [_Pair]) {
+    self.init(_storage: .pairs(pairs))
+  }
+}
+
+extension _SortedRangeValuePairs._Storage: @unchecked Sendable where Bound: Sendable,
+                                                                     Value: Sendable {}
+
+extension _SortedRangeValuePairs: Sendable where Bound: Sendable, Value: Sendable {}
+
+extension _SortedRangeValuePairs where Bound: Sendable {
+  @inline(__always)
+  func _assertSendableGeneralizedRangeProtocolConformances() {
+    var assertionMessage: String {
+      "All ranges must conform to `SendableGeneralizedRange`. " +
+      "The protocol is currently internal because of [#87737](https://github.com/swiftlang/swift/issues/87737). " +
+      "That means that all ranges passed to this function must be defined in Standard Library or SwiftRanges Module."
+    }
+    switch self._storage {
+    case .pairs(let pairs):
+      assert(pairs.allSatisfy({ $0.range is any SendableGeneralizedRange }), assertionMessage)
+    case .ranges(let ranges):
+      assert(ranges.allSatisfy({ $0 is any SendableGeneralizedRange }), assertionMessage)
+    }
+  }
+}
+
+extension _SortedRangeValuePairs where Bound: Sendable, Value: Sendable {
+  init(carefullySortedPairs pairs: [_SendablePair]) {
+    self.init(_storage: .pairs(pairs))
+  }
+
+  init(carefullySortedSendablePairs pairs: [_Pair]) {
+    self.init(_storage: .pairs(pairs))
+    _assertSendableGeneralizedRangeProtocolConformances()
   }
 }
 
 typealias _SortedRanges<Bound> = _SortedRangeValuePairs<Bound, Never> where Bound: Comparable
 
 extension _SortedRangeValuePairs where Value == Never {
-  init(carefullySortedRanges ranges: [any GeneralizedRange<Bound> & Sendable]) {
-    self._storage = .ranges(ranges)
-    assert(self._storage.validateRanges())
+  init(carefullySortedRanges ranges: [any GeneralizedRange<Bound>]) {
+    self.init(_storage: .ranges(ranges))
   }
 }
 
-extension _SortedRangeValuePairs._Storage: Sendable where Value: Sendable {}
-extension _SortedRangeValuePairs: Sendable where Value: Sendable {}
+extension _SortedRangeValuePairs where Bound: Sendable, Value == Never {
+  init(carefullySortedRanges ranges: [any GeneralizedRange<Bound> & Sendable]) {
+    self.init(_storage: .ranges(ranges))
+  }
+
+  init(carefullySortedSendableRanges ranges: [any GeneralizedRange<Bound>]) {
+    self.init(_storage: .ranges(ranges))
+    _assertSendableGeneralizedRangeProtocolConformances()
+  }
+}
 
 extension _SortedRangeValuePairs._Storage {
   @inlinable
@@ -50,7 +97,7 @@ extension _SortedRangeValuePairs._Storage {
   }
 
   @inlinable
-  func range(at index: Int) -> any GeneralizedRange<Bound> & Sendable {
+  func range(at index: Int) -> any GeneralizedRange<Bound> {
     switch self {
     case .pairs(let pairs):
       return pairs[index].range
@@ -177,7 +224,7 @@ extension _SortedRangeValuePairs {
   var isEmpty: Bool { _storage.isEmpty }
 
   @inlinable
-  func range(at index: Int) -> any GeneralizedRange<Bound> & Sendable { _storage.range(at: index) }
+  func range(at index: Int) -> any GeneralizedRange<Bound> { _storage.range(at: index) }
 
   @inlinable
   func value(at index: Int) -> Value? { _storage.value(at: index) }

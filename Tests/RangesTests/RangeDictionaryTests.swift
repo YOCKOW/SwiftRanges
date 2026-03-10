@@ -11,7 +11,7 @@ import Testing
 @Suite struct RangeDictionaryTests {
   @Test func sortedRangePairs() {
     let pairs = _SortedRangeValuePairs<Int, String>(
-      carefullySortedPairs: [
+      carefullySortedSendablePairs: [
         (range: ..<0, value: "negative"),
         (range: 0...0, value: "zero"),
         (range: 1..., value: "positive")
@@ -22,7 +22,7 @@ import Testing
     #expect(pairs.index(whereRangeContains: 10) == 2)
     #expect(pairs[-1] == "negative")
 
-    let ranges = _SortedRanges<Int>(carefullySortedRanges: [0..<10, 100...199, 999...])
+    let ranges = _SortedRanges<Int>(carefullySortedSendableRanges: [0..<10, 100...199, 999...])
     #expect(ranges.count == 3)
     #expect(ranges.range(at: 1).isEqual(to: 100...199))
     #expect(ranges.index(whereRangeContains: 0) == 0)

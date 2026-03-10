@@ -14,3 +14,5 @@ extension ClosedRange: GeneralizedRange {
 
 extension ClosedRange: GeneralizedCountableRange where Bound: Strideable,
                                                        Bound.Stride: SignedInteger {}
+
+extension ClosedRange: SendableGeneralizedRange {}

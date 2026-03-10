@@ -17,6 +17,8 @@ public struct TangibleUnboundedRange<Bound> where Bound:Comparable {
 
 extension TangibleUnboundedRange: Sendable {} // It's always sendable.
 
+extension TangibleUnboundedRange: SendableGeneralizedRange {}
+
 extension TangibleUnboundedRange  {
   public var isEmpty: Bool { return false }
 }

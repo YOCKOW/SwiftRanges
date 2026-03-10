@@ -14,6 +14,26 @@ import Testing
     #expect((0..<1)._isCountable)
   }
 
+  @Test func sendability() {
+    #expect(((0..<1) as any GeneralizedRange) is any SendableGeneralizedRange)
+    #expect(
+      ([
+        EmptyRange<Int>(),
+        1...2,
+        1<..2,
+        1<..<2,
+        1..<2,
+        1...,
+        1<..,
+        ...2,
+        ..<2,
+        TangibleUnboundedRange<Int>(),
+      ] as [any GeneralizedRange<Int>]).allSatisfy({
+        $0 is any SendableGeneralizedRange
+      })
+    )
+  }
+
   @Test func makeRange() {
     func __check<B, R>(
       lower: GeneralizedRangeBound<B>,

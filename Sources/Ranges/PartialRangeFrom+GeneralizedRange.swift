@@ -17,3 +17,5 @@ extension PartialRangeFrom: GeneralizedRange {
 
 extension PartialRangeFrom: GeneralizedCountableRange where Bound: Strideable,
                                                             Bound.Stride: SignedInteger {}
+
+extension PartialRangeFrom: SendableGeneralizedRange {}

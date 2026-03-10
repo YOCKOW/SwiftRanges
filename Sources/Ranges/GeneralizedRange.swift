@@ -18,6 +18,14 @@ public protocol GeneralizedRange<Bound>: RangeExpression {
 public protocol GeneralizedCountableRange<Bound>: GeneralizedRange where Bound: Strideable,
                                                                          Bound.Stride: SignedInteger {}
 
+
+/// A `Sendable` generalized range.
+///
+/// - Note: The reason why this protocol is `internal` is
+///         [#87737](https://github.com/swiftlang/swift/issues/87737).
+internal protocol SendableGeneralizedRange<Bound>: Sendable,
+                                                   GeneralizedRange where Bound: Sendable {}
+
 // MARK: - Contability
 
 internal extension GeneralizedRange {
