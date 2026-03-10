@@ -9,6 +9,11 @@ import Testing
 @testable import Ranges
 
 @Suite struct GeneralizedRangeTests {
+  @Test func countability() {
+    #expect(!(0.00..<1.0)._isCountable)
+    #expect((0..<1)._isCountable)
+  }
+
   @Test func makeRange() {
     func __check<B, R>(
       lower: GeneralizedRangeBound<B>,

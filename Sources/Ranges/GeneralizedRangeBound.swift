@@ -24,6 +24,12 @@ public enum GeneralizedRangeBound<Value> where Value: Comparable {
 
 extension GeneralizedRangeBound: Sendable where Value: Sendable {}
 
+/// Represents a set of a lower bound and an upper bound.
+public typealias Bounds<Bound> = (
+  lower: GeneralizedRangeBound<Bound>,
+  upper: GeneralizedRangeBound<Bound>
+) where Bound: Comparable
+
 @available(*, deprecated, renamed: "GeneralizedRangeBound")
 public typealias Boundary<Value> = GeneralizedRangeBound<Value> where Value: Comparable
 
@@ -91,6 +97,7 @@ internal protocol _CountableBoundProtocol<Value> where Value: Strideable,
 
 extension GeneralizedRangeBound: _CountableBoundProtocol where Value: Strideable,
                                                                Value.Stride: SignedInteger {
+  @inlinable
   var _valueIsIncluded: Bool {
     switch self {
     case .included: true
@@ -109,4 +116,24 @@ extension _CountableBoundProtocol {
     guard let value = self.value else { fatalError("Unbounded?!") }
     return value.advanced(by: -1)
   }
+}
+
+extension GeneralizedRangeBound {
+  @usableFromInline
+  var _isCountable: Bool {
+    return self is any _CountableBoundProtocol
+  }
+}
+
+@inlinable
+internal func _boundIsCountable<T>(
+  _ optionalBound: Optional<GeneralizedRangeBound<T>>
+) -> Bool where T: Comparable {
+  return (optionalBound ?? .unbounded)._isCountable
+}
+
+@inlinable
+internal func _boundsAreCountable<T>(
+  _ optionalBounds: Optional<Bounds<T>>) -> Bool where T: Comparable {
+  return _boundIsCountable(optionalBounds?.lower)
 }

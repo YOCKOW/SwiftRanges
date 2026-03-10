@@ -5,13 +5,6 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-
-/// Represents a set of a lower bound and an upper bound.
-public typealias Bounds<Bound> = (
-  lower: GeneralizedRangeBound<Bound>,
-  upper: GeneralizedRangeBound<Bound>
-) where Bound: Comparable
-
 /// A protocol for all ranges.
 public protocol GeneralizedRange<Bound>: RangeExpression {
   /// Retunrs a set of a lower bound and an upper bound, or returns `nil` if the range is empty.
@@ -24,6 +17,23 @@ public protocol GeneralizedRange<Bound>: RangeExpression {
 /// A generalized range whose `Bound` is countable.
 public protocol GeneralizedCountableRange<Bound>: GeneralizedRange where Bound: Strideable,
                                                                          Bound.Stride: SignedInteger {}
+
+// MARK: - Contability
+
+internal extension GeneralizedRange {
+  @inlinable
+  var _isCountable: Bool {
+    return self is any GeneralizedCountableRange || _boundsAreCountable(self.bounds)
+  }
+}
+
+internal extension GeneralizedCountableRange {
+  @inlinable
+  var _isCountable: Bool {
+    return true
+  }
+}
+
 
 // MARK: - Validation
 

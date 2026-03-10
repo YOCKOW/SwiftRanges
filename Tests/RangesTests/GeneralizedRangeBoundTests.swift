@@ -1,19 +1,30 @@
-/***************************************************************************************************
- PartialRangeGreaterThanTests.swift
+/* *************************************************************************************************
+ GeneralizedRangeBoundTests.swift
    © 2018-2019,2024-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
  
 import Testing
 @testable import Ranges
 
-@Suite struct BoundaryTests {
+@Suite struct GeneralizedRangeBoundTests {
   @Test func initialization() {
     let boundary1: GeneralizedRangeBound<Character> = .included("A")
     let boundary2: GeneralizedRangeBound<Character> = .included("Z")
 
     #expect(boundary1 != boundary2)
+  }
+
+  @Test func countability() {
+    #expect(!_boundIsCountable(GeneralizedRangeBound<Double>.included(1.0)))
+    #expect(_boundIsCountable(GeneralizedRangeBound<Int>.excluded(1)))
+    #expect(_boundIsCountable(Optional<GeneralizedRangeBound<Int>>.none))
+
+    #expect(!_boundsAreCountable((0.00..<2.0).bounds))
+    #expect(_boundsAreCountable((0..<2).bounds))
+    #expect(!_boundsAreCountable(EmptyRange<Character>().bounds))
+    #expect(_boundsAreCountable(EmptyRange<Int>().bounds))
   }
 
   @Test func comparison() {
