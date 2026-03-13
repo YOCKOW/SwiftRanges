@@ -50,6 +50,26 @@ import Testing
     #expect(!ranges.contains(789))
     #expect(!ranges.contains(1050))
     #expect(ranges.contains(1051))
+
+    test_limited: do {
+      let pairs = _SortedRangeValuePairs<Int, String>(
+        carefullySortedPairs: [
+          (range: 0..<10, value: "a"),
+          (range: 100..<1000, value: "b"),
+          (range: 10000..<100000, value: "c"),
+        ]
+      )
+      #expect(pairs.limited(within: EmptyRange<Int>()).isEmpty)
+      #expect(pairs.limited(within: 50...60).isEmpty)
+      #expect(pairs.limited(within: 3...3)[4] == nil)
+      #expect(pairs.limited(within: 3...3)[3] == "a")
+      #expect(pairs.limited(within: 500..<50000).count == 2)
+      #expect(pairs.limited(within: 500..<50000)[499] == nil)
+      #expect(pairs.limited(within: 500..<50000)[500] == "b")
+      #expect(pairs.limited(within: 500..<50000)[5000] == nil)
+      #expect(pairs.limited(within: 500..<50000)[49999] == "c")
+      #expect(pairs.limited(within: 500..<50000)[50000] == nil)
+    }
   }
 
   let simpleDictionary: RangeDictionary<Int, String> = [

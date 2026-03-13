@@ -487,3 +487,95 @@ extension _SortedRangeValuePairs where Value == Never {
     self._storage.removeValues(in: range)
   }
 }
+
+private extension ArraySlice {
+  var _array: Array<Element> {
+    .init(self)
+  }
+
+  mutating func _setElementAtFirst(_ newElement: Element) {
+    self[self.startIndex] = newElement
+  }
+
+  mutating func _setElementAtLast(_ newElement: Element) {
+    self[self.index(before: self.endIndex)] = newElement
+  }
+}
+
+extension _SortedRangeValuePairs._Storage {
+  func limited(within range: any GeneralizedRange<Bound>) -> Self {
+    guard
+      !range.isEmpty,
+      case .overlap(first: let firstIndex, last: let lastIndex) = self.indices(for: range)
+    else {
+      switch self {
+      case .pairs, .separated:
+        return .separated(ranges: [], values: [])
+      case .ranges:
+        return .ranges([])
+      }
+    }
+
+    switch self {
+    case .pairs(let pairs):
+      var limited = pairs[firstIndex...lastIndex]
+      assert(!limited.isEmpty)
+
+      let firstPair = limited.first!
+      let firstRange = firstPair.range.intersection(range)
+      assert(!firstRange.isEmpty)
+      limited._setElementAtFirst((range: firstRange, value: firstPair.value))
+
+      if limited.count > 1 {
+        let lastPair = limited.last!
+        let lastRange = lastPair.range.intersection(range)
+        assert(!lastRange.isEmpty)
+        limited._setElementAtLast((range: lastRange, value: lastPair.value))
+      }
+
+      return .pairs(limited._array)
+    case .ranges(let ranges):
+      var limited = ranges[firstIndex...lastIndex]
+      assert(limited.isEmpty)
+
+      let firstRange = limited.first!.intersection(range)
+      assert(!firstRange.isEmpty)
+      limited._setElementAtLast(firstRange)
+
+      if limited.count > 1 {
+        let lastRange = limited.last!.intersection(range)
+        assert(!lastRange.isEmpty)
+        limited._setElementAtLast(lastRange)
+      }
+
+      return .ranges(limited._array)
+    case .separated(ranges: let ranges, values: let values):
+      var limitedRanges = ranges[firstIndex...lastIndex]
+      let limitedValues = values[firstIndex...lastIndex]
+
+      let firstRange = limitedRanges.first!.intersection(range)
+      assert(!firstRange.isEmpty)
+      limitedRanges._setElementAtFirst(firstRange)
+
+      if limitedRanges.count > 1 {
+        let lastRange = limitedRanges.last!.intersection(range)
+        assert(!lastRange.isEmpty)
+        limitedRanges._setElementAtLast(lastRange)
+      }
+
+      return .separated(ranges: limitedRanges._array, values: limitedValues._array)
+    }
+  }
+}
+
+extension _SortedRangeValuePairs {
+  @inlinable
+  func limited(within range: any GeneralizedRange<Bound>) -> Self {
+    return .init(_storage: self._storage.limited(within: range))
+  }
+
+  @inlinable
+  func limited(within: UnboundedRange) -> Self {
+    return self
+  }
+}
