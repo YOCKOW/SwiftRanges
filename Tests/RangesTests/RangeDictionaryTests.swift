@@ -70,6 +70,31 @@ import Testing
       #expect(pairs.limited(within: 500..<50000)[49999] == "c")
       #expect(pairs.limited(within: 500..<50000)[50000] == nil)
     }
+
+    test_normalization: do {
+      let doublePairs = _SortedRangeValuePairs<Double, String>(
+        carefullySortedPairs: [
+          (range: 0.0..<1.0, value: "a"),
+          (range: 1.0..<2.0, value: "a"),
+          (range: 2.0..<3.0, value: "a"),
+        ]
+      )
+      let doubleNormalized = doublePairs.normalized()
+      #expect(doubleNormalized.count == 1)
+      #expect(doubleNormalized.range(at: 0).isEquivalent(to: 0.0..<3.0))
+      #expect(doubleNormalized[1.0] == "a")
+
+      let intPairs = _SortedRangeValuePairs<Int, String>(
+        carefullySortedPairs: [
+          (range: 0...1, value: "a"),
+          (range: 2...3, value: "a"),
+        ]
+      )
+      let intNormalized = intPairs.normalized()
+      #expect(intNormalized.count == 1)
+      #expect(intNormalized.range(at: 0).isEquivalent(to: 0...3))
+      #expect(intNormalized[2] == "a")
+    }
   }
 
   let simpleDictionary: RangeDictionary<Int, String> = [

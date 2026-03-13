@@ -266,6 +266,9 @@ extension _SortedRangeValuePairs {
   }
 }
 
+
+// MARK: - Insert & Remove
+
 extension _SortedRangeValuePairs where Value == Never {
   @inlinable
   func contains(_ bound: Bound) -> Bool {
@@ -488,19 +491,8 @@ extension _SortedRangeValuePairs where Value == Never {
   }
 }
 
-private extension ArraySlice {
-  var _array: Array<Element> {
-    .init(self)
-  }
 
-  mutating func _setElementAtFirst(_ newElement: Element) {
-    self[self.startIndex] = newElement
-  }
-
-  mutating func _setElementAtLast(_ newElement: Element) {
-    self[self.index(before: self.endIndex)] = newElement
-  }
-}
+// MARK: - Limit
 
 extension _SortedRangeValuePairs._Storage {
   func limited(within range: any GeneralizedRange<Bound>) -> Self {
@@ -577,5 +569,68 @@ extension _SortedRangeValuePairs {
   @inlinable
   func limited(within: UnboundedRange) -> Self {
     return self
+  }
+}
+
+
+// MARK: - Normalization
+
+extension _SortedRangeValuePairs._Storage where Value: Equatable {
+  func normilized() -> Self {
+    switch self {
+    case .pairs(let pairs):
+      var newPairs: [_SortedRangeValuePairs._Pair] = []
+      for pair in pairs {
+        if let lastPair = newPairs.last,
+           lastPair.value == pair.value,
+           let concatenated = lastPair.range.concatenating(pair.range) {
+          newPairs._setElementAtLast((range: concatenated, value: lastPair.value))
+        } else {
+          newPairs.append(pair)
+        }
+      }
+      return .pairs(newPairs)
+    case .ranges:
+      return self
+    case .separated(let ranges, let values):
+      var newRanges: [any GeneralizedRange<Bound>] = []
+      var newValues: [Value] = []
+      for (range, value) in zip(ranges, values) {
+        if let lastRange = newRanges.last,
+           let lastValue = newValues.last,
+           lastValue == value,
+           let concatenated = lastRange.concatenating(range) {
+          newRanges._setElementAtLast(concatenated)
+        } else {
+          newRanges.append(range)
+          newValues.append(value)
+        }
+      }
+      assert(newRanges.count == newValues.count)
+      return .separated(ranges: newRanges, values: newValues)
+    }
+  }
+}
+
+extension _SortedRangeValuePairs where Value: Equatable {
+  func normalized() -> Self {
+    return .init(_storage: self._storage.normilized())
+  }
+}
+
+
+// MARK: - Misc Extensions
+
+private extension MutableCollection where Self: BidirectionalCollection {
+  var _array: Array<Element> {
+    .init(self)
+  }
+
+  mutating func _setElementAtFirst(_ newElement: Element) {
+    self[self.startIndex] = newElement
+  }
+
+  mutating func _setElementAtLast(_ newElement: Element) {
+    self[self.index(before: self.endIndex)] = newElement
   }
 }
