@@ -95,6 +95,26 @@ import Testing
       #expect(intNormalized.range(at: 0).isEquivalent(to: 0...3))
       #expect(intNormalized[2] == "a")
     }
+
+    test_equatable: do {
+      let pairs1 = _SortedRangeValuePairs<Int, String>(
+        carefullySortedPairs: [
+          (range: 0..<10, "value0"),
+          (range: 10..<20, "value1"),
+        ]
+      )
+      let pairs2 = _SortedRangeValuePairs<Int, String>(
+        carefullySortedPairs: [
+          (range: 0...9, "value0"),
+          (range: 9<..<20, "value1"),
+        ]
+      )
+      #expect(pairs1 == pairs2)
+
+      let ranges1 = _SortedRanges<Int>(carefullySortedRanges: [0..<10, 100..<200])
+      let ranges2 = _SortedRanges<Int>(carefullySortedRanges: [0...9, 100...199])
+      #expect(ranges1 == ranges2)
+    }
   }
 
   let simpleDictionary: RangeDictionary<Int, String> = [

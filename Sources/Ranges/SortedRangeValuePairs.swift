@@ -619,6 +619,42 @@ extension _SortedRangeValuePairs where Value: Equatable {
 }
 
 
+// MARK: - Equatable
+
+extension _SortedRangeValuePairs._Storage: Equatable where Value: Equatable {
+  static func ==(
+    lhs: _SortedRangeValuePairs<Bound, Value>._Storage,
+    rhs: _SortedRangeValuePairs<Bound, Value>._Storage
+  ) -> Bool {
+    guard lhs.count == rhs.count else {
+      return false
+    }
+
+    for ii in 0..<lhs.count {
+      guard lhs.range(at: ii).isEquivalent(to: rhs.range(at: ii)) else {
+        return false
+      }
+
+      if let lValue = lhs.value(at: ii), let rValue = rhs.value(at: ii) {
+        guard lValue == rValue else {
+          return false
+        }
+      }
+    }
+    return true
+  }
+}
+
+extension _SortedRangeValuePairs: Equatable where Value: Equatable {
+  static func ==(
+    lhs: _SortedRangeValuePairs<Bound, Value>,
+    rhs: _SortedRangeValuePairs<Bound, Value>
+  ) -> Bool {
+    return lhs._storage == rhs._storage
+  }
+}
+
+
 // MARK: - Misc Extensions
 
 private extension MutableCollection where Self: BidirectionalCollection {
