@@ -102,6 +102,43 @@ import Testing
     }
   }
 
+  @Test func wellknownRange() {
+    class MyCustomRange: GeneralizedRange {
+      typealias Bound = Int
+      var bounds: Bounds<Int>? = nil
+    }
+
+    let customRange = MyCustomRange()
+    #expect(customRange._wellknownRange is EmptyRange<Int>)
+
+    customRange.bounds = (lower: .included(0), upper: .included(10))
+    #expect(customRange._wellknownRange is ClosedRange<Int>)
+
+    customRange.bounds = (lower: .excluded(0), upper: .included(10))
+    #expect(customRange._wellknownRange is LeftOpenRange<Int>)
+
+    customRange.bounds = (lower: .excluded(0), upper: .excluded(10))
+    #expect(customRange._wellknownRange is OpenRange<Int>)
+
+    customRange.bounds = (lower: .included(0), upper: .excluded(10))
+    #expect(customRange._wellknownRange is Range<Int>)
+
+    customRange.bounds = (lower: .included(0), upper: .unbounded)
+    #expect(customRange._wellknownRange is PartialRangeFrom<Int>)
+
+    customRange.bounds = (lower: .excluded(0), upper: .unbounded)
+    #expect(customRange._wellknownRange is PartialRangeGreaterThan<Int>)
+
+    customRange.bounds = (lower: .unbounded, upper: .included(10))
+    #expect(customRange._wellknownRange is PartialRangeThrough<Int>)
+
+    customRange.bounds = (lower: .unbounded, upper: .excluded(10))
+    #expect(customRange._wellknownRange is PartialRangeUpTo<Int>)
+
+    customRange.bounds = (lower: .unbounded, upper: .unbounded)
+    #expect(customRange._wellknownRange is TangibleUnboundedRange<Int>)
+  }
+
   @Test func comparison() {
     #expect(!EmptyRange<Double>().isEqual(to: TangibleUnboundedRange<Double>()))
     #expect(EmptyRange<Int>().compare(TangibleUnboundedRange<Int>()) == .orderedDescending)
