@@ -178,22 +178,32 @@ extension _SortedRangeValuePairs._Storage {
   }
 
   enum _IndicesForReplacement: Equatable {
-    /// There are ranges which overlap the range to be replaced with.
-    case overlap(first: Int, last: Int)
-
     /// No overlaps. The range can be simply inserted at the index.
     case insertable(Int)
+
+    /// There are ranges which overlap the range to be replaced with.
+    case overlap(first: Int, last: Int)
   }
 
   func indices(for range: any GeneralizedRange<Bound>) -> _IndicesForReplacement {
     assert(!range.isEmpty, "\(#function): Empty range?!")
 
     let count = self.count
-    if count < 1 || range._isLessThanAndApartFrom(self.range(at: 0)) {
+    if count < 1 {
       return .insertable(0)
     }
-    if self.range(at: count - 1)._isLessThanAndApartFrom(range) {
+
+    let firstRange = self.range(at: 0)
+    if range._isLessThanAndApartFrom(firstRange) {
+      return .insertable(0)
+    }
+
+    let lastRange = self.range(at: count - 1)
+    if lastRange._isLessThanAndApartFrom(range) {
       return .insertable(count)
+    }
+    if lastRange.compare(range) == .orderedAscending && lastRange.overlaps(range)  {
+      return .overlap(first: count - 1, last: count - 1)
     }
 
     var firstIndexWhereOverlaps: Int? = nil
@@ -206,13 +216,14 @@ extension _SortedRangeValuePairs._Storage {
 
       assert(count > 1, "Must be already handled if `count` == 1")
       for ii in 0..<(count - 1) {
-        let range0 = self.range(at: ii)
-        let range1 = self.range(at: ii + 1)
-        if range.overlaps(range0) {
+        let nextRange = self.range(at: ii + 1)
+        if range.overlaps(nextRange) {
           firstIndexWhereOverlaps = ii + 1
           break DETERMINE_FIRST_INDEX
         }
-        if range0._isLessThanAndApartFrom(range) && range._isLessThanAndApartFrom(range1) {
+
+        let currentRange = self.range(at: ii)
+        if currentRange._isLessThanAndApartFrom(range) && range._isLessThanAndApartFrom(nextRange) {
           return .insertable(ii + 1)
         }
       }
@@ -252,5 +263,227 @@ extension _SortedRangeValuePairs {
       return nil
     }
     return self.value(at: index)
+  }
+}
+
+extension _SortedRangeValuePairs where Value == Never {
+  @inlinable
+  func contains(_ bound: Bound) -> Bool {
+    return index(whereRangeContains: bound) != nil
+  }
+}
+
+extension _SortedRangeValuePairs._Storage {
+  private func _splitted(
+    by range: any GeneralizedRange<Bound>
+  ) -> (
+    formerPairsOrRanges: any Collection,
+    formerValues: (any Collection<Value>)?,
+    latterPairsOrRanges: any Collection,
+    latterValues: (any Collection<Value>)?
+  ) {
+    assert(!range.isEmpty, "\(#function): Empty range?!")
+
+    switch self.indices(for: range) {
+    case .insertable(let index):
+      switch self {
+      case .pairs(let pairs):
+        return (
+          formerPairsOrRanges: pairs[..<index],
+          formerValues: nil,
+          latterPairsOrRanges: pairs[index...],
+          latterValues: nil
+        )
+      case .ranges(let ranges):
+        return (
+          formerPairsOrRanges: ranges[..<index],
+          formerValues: nil,
+          latterPairsOrRanges: ranges[index...],
+          latterValues: nil
+        )
+      case .separated(ranges: let ranges, values: let values):
+        return (
+          formerPairsOrRanges: ranges[..<index],
+          formerValues: values[..<index],
+          latterPairsOrRanges: ranges[index...],
+          latterValues: values[index...]
+        )
+      }
+    case .overlap(first: let firstIndex, last: let lastIndex):
+      typealias __Splitted = (
+        formerRanges: ArraySlice<any GeneralizedRange<Bound>>,
+        formerValues: ArraySlice<Value>?,
+        latterRanges: ArraySlice<any GeneralizedRange<Bound>>,
+        latterValues: ArraySlice<Value>?
+      )
+      func __split(
+        ranges: [any GeneralizedRange<Bound>],
+        values: [Value]?
+      ) -> __Splitted {
+        var formerRanges = ranges[..<firstIndex]
+        var formerValues = values?[..<firstIndex]
+        var latterRanges = ranges[lastIndex<..]
+        var latterValues = values?[lastIndex<..]
+
+        if firstIndex == lastIndex {
+          switch ranges[firstIndex].subtracting(range) {
+          case (let subtracted, nil):
+            if subtracted.compare(range) == .orderedAscending {
+              formerRanges.append(subtracted)
+              if let theValue = values?[firstIndex] {
+                formerValues!.append(theValue)
+              }
+            } else {
+              latterRanges.insert(subtracted, at: latterRanges.startIndex)
+              if let theValue = values?[firstIndex] {
+                latterValues!.insert(theValue, at: latterValues!.startIndex)
+              }
+            }
+          case (let subtractedL, let subtractedR?):
+            // The range at `firstIndex` is splitted.
+            formerRanges.append(subtractedL)
+            latterRanges.insert(subtractedR, at: latterRanges.startIndex)
+            if let theValue = values?[firstIndex] {
+              formerValues!.append(theValue)
+              latterValues!.insert(theValue, at: latterValues!.startIndex)
+            }
+          }
+        } else {
+          assert(firstIndex < lastIndex)
+
+          let formerSubtracted = ranges[firstIndex].subtracting(range)
+          assert(formerSubtracted.1 == nil)
+          if !formerSubtracted.0.isEmpty {
+            formerRanges.append(formerSubtracted.0)
+            if let theValue = values?[firstIndex] {
+              formerValues!.append(theValue)
+            }
+          }
+
+          let latterSubtracted = ranges[lastIndex].subtracting(range)
+          assert(latterSubtracted.1 == nil)
+          if !latterSubtracted.0.isEmpty {
+            latterRanges.append(latterSubtracted.0)
+            if let theValue = values?[lastIndex] {
+              latterValues!.append(theValue)
+            }
+          }
+        }
+        return (
+          formerRanges: formerRanges,
+          formerValues: formerValues,
+          latterRanges: latterRanges,
+          latterValues: latterValues
+        )
+      }
+
+      let splitted: __Splitted = ({ () -> __Splitted in
+        switch self {
+        case .pairs(let pairs):
+          let rangesAndValues: (
+            ranges: [any GeneralizedRange<Bound>],
+            values: [Value]
+          ) = pairs.reduce(into: ([], [])) {
+            $0.ranges.append($1.range)
+            $0.values.append($1.value)
+          }
+          return __split(ranges: rangesAndValues.ranges, values: rangesAndValues.values)
+        case .ranges(let ranges):
+          return __split(ranges: ranges, values: nil)
+        case .separated(let ranges, let values):
+          return __split(ranges: ranges, values: values)
+        }
+      })()
+
+      return (
+        formerPairsOrRanges: splitted.formerRanges,
+        formerValues: splitted.formerValues,
+        latterPairsOrRanges: splitted.latterRanges,
+        latterValues: splitted.latterValues
+      )
+    }
+  }
+
+  fileprivate mutating func _insertValue(
+    _ value: Value?,
+    forRange  range: any GeneralizedRange<Bound>,
+    dontRemoveValueEvenIfValueIsNil: Bool = false
+  ) {
+    if range.isEmpty {
+      return
+    }
+
+    let splitted = _splitted(by: range)
+    switch (splitted.formerPairsOrRanges, splitted.latterPairsOrRanges) {
+    case (
+      let formerPairs as any Collection<_SortedRangeValuePairs._Pair>,
+      let latterPairs as any Collection<_SortedRangeValuePairs._Pair>
+    ):
+      assert(splitted.formerValues == nil && splitted.latterValues == nil)
+
+      var newPairs: [_SortedRangeValuePairs._Pair] = []
+      newPairs.append(contentsOf: formerPairs)
+      if let value = value {
+        newPairs.append((range: range, value: value))
+      }
+      newPairs.append(contentsOf: latterPairs)
+      self = .pairs(newPairs)
+    case (
+      let formerRanges as any Collection<any GeneralizedRange<Bound>>,
+      let latterRanges as any Collection<any GeneralizedRange<Bound>>
+    ):
+      var newRanges: [any GeneralizedRange<Bound>] = []
+      newRanges.append(contentsOf: formerRanges)
+      if value != nil || dontRemoveValueEvenIfValueIsNil {
+        newRanges.append(range)
+      }
+      newRanges.append(contentsOf: latterRanges)
+
+      switch (splitted.formerValues, splitted.latterValues) {
+      case (nil, nil):
+        self = .ranges(newRanges)
+      case (let formerValues?, let latterValues?):
+        var newValues: [Value] = []
+        newValues.append(contentsOf: formerValues)
+        if let value = value {
+          newValues.append(value)
+        }
+        newValues.append(contentsOf: latterValues)
+        assert(newRanges.count == newValues.count, "Count unmatched?!")
+        self = .separated(ranges: newRanges, values: newValues)
+      default:
+        fatalError("Unexpected splitted values?!")
+      }
+    default:
+      fatalError("Unexpected splitted ranges?!")
+    }
+  }
+
+  mutating func removeValues(in range: any GeneralizedRange<Bound>) {
+    self._insertValue(nil, forRange: range)
+  }
+}
+
+extension _SortedRangeValuePairs {
+  mutating func insertValue(_ value: Value, forRange range: any GeneralizedRange<Bound>) {
+    self._storage._insertValue(value, forRange: range)
+  }
+
+  mutating func insertValue(_ value: Value, forRange range: UnboundedRange) {
+    self._storage._insertValue(value, forRange: TangibleUnboundedRange<Bound>())
+  }
+
+  mutating func removeValues(in range: any GeneralizedRange<Bound>) {
+    self._storage.removeValues(in: range)
+  }
+}
+
+extension _SortedRangeValuePairs where Value == Never {
+  mutating func insertRange(_ range: any GeneralizedRange<Bound>) {
+    self._storage._insertValue(nil, forRange: range, dontRemoveValueEvenIfValueIsNil: true)
+  }
+
+  mutating func removeRange(_ range: any GeneralizedRange<Bound>) {
+    self._storage.removeValues(in: range)
   }
 }

@@ -10,7 +10,9 @@ import Testing
 
 @Suite struct RangeDictionaryTests {
   @Test func sortedRangePairs() {
-    let pairs = _SortedRangeValuePairs<Int, String>(
+    // Tests for the backend type.
+
+    var pairs = _SortedRangeValuePairs<Int, String>(
       carefullySortedSendablePairs: [
         (range: ..<0, value: "negative"),
         (range: 0...0, value: "zero"),
@@ -22,13 +24,32 @@ import Testing
     #expect(pairs.index(whereRangeContains: 10) == 2)
     #expect(pairs[-1] == "negative")
 
-    let ranges = _SortedRanges<Int>(carefullySortedSendableRanges: [0..<10, 100...199, 999...])
+    pairs.insertValue("huge", forRange: 1000...)
+    #expect(pairs.value(at: 3) == "huge")
+
+    pairs.insertValue("integer", forRange: ...)
+    #expect(pairs[Int.random(in: .min ... .max)] == "integer")
+
+    var ranges = _SortedRanges<Int>(carefullySortedSendableRanges: [0..<10, 100...199, 999...])
     #expect(ranges.count == 3)
     #expect(ranges.range(at: 1).isEqual(to: 100...199))
     #expect(ranges.index(whereRangeContains: 0) == 0)
     #expect(ranges._storage.indices(for: ..<(-1)) == .insertable(0))
     #expect(ranges._storage.indices(for: 20...30) == .insertable(1))
     #expect(ranges._storage.indices(for: 5...10000) == .overlap(first: 0, last: 2))
+
+    ranges.insertRange(..<(-10))
+    #expect(ranges.count == 4)
+    #expect(ranges.index(whereRangeContains: -999) == 0)
+
+    ranges.removeRange(150...1050)
+    #expect(ranges.count == 4)
+    #expect(ranges.contains(149))
+    #expect(!ranges.contains(150))
+    #expect(!ranges.contains(189))
+    #expect(!ranges.contains(789))
+    #expect(!ranges.contains(1050))
+    #expect(ranges.contains(1051))
   }
 
   let simpleDictionary: RangeDictionary<Int, String> = [
