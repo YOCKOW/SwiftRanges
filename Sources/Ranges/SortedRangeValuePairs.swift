@@ -424,10 +424,15 @@ extension _SortedRangeValuePairs._Storage {
     }
   }
 
-  fileprivate mutating func _insertValue(
-    _ value: Value?,
-    forRange  range: any GeneralizedRange<Bound>,
-    dontRemoveValueEvenIfValueIsNil: Bool = false
+  fileprivate enum _MutationAction {
+    case insertValue(Value)
+    case removeValues
+    case onlyInsertRange
+  }
+
+  fileprivate mutating func _mutateWithRange(
+    _ range: any GeneralizedRange<Bound>,
+    action: _MutationAction
   ) {
     if range.isEmpty {
       return
@@ -443,7 +448,7 @@ extension _SortedRangeValuePairs._Storage {
 
       var newPairs: [_SortedRangeValuePairs._Pair] = []
       newPairs.append(contentsOf: formerPairs)
-      if let value = value {
+      if case .insertValue(let value) = action {
         newPairs.append((range: range, value: value))
       }
       newPairs.append(contentsOf: latterPairs)
@@ -454,8 +459,11 @@ extension _SortedRangeValuePairs._Storage {
     ):
       var newRanges: [any GeneralizedRange<Bound>] = []
       newRanges.append(contentsOf: formerRanges)
-      if value != nil || dontRemoveValueEvenIfValueIsNil {
+      switch action {
+      case .insertValue, .onlyInsertRange:
         newRanges.append(range)
+      default:
+        break
       }
       newRanges.append(contentsOf: latterRanges)
 
@@ -465,7 +473,7 @@ extension _SortedRangeValuePairs._Storage {
       case (let formerValues?, let latterValues?):
         var newValues: [Value] = []
         newValues.append(contentsOf: formerValues)
-        if let value = value {
+        if case .insertValue(let value) = action {
           newValues.append(value)
         }
         newValues.append(contentsOf: latterValues)
@@ -480,17 +488,17 @@ extension _SortedRangeValuePairs._Storage {
   }
 
   mutating func removeValues(in range: any GeneralizedRange<Bound>) {
-    self._insertValue(nil, forRange: range)
+    self._mutateWithRange(range, action: .removeValues)
   }
 }
 
 extension _SortedRangeValuePairs {
   mutating func insertValue(_ value: Value, forRange range: any GeneralizedRange<Bound>) {
-    self._storage._insertValue(value, forRange: range)
+    self._storage._mutateWithRange(range, action: .insertValue(value))
   }
 
   mutating func insertValue(_ value: Value, forRange range: UnboundedRange) {
-    self._storage._insertValue(value, forRange: TangibleUnboundedRange<Bound>())
+    self.insertValue(value, forRange: TangibleUnboundedRange<Bound>())
   }
 
   mutating func removeValues(in range: any GeneralizedRange<Bound>) {
@@ -500,7 +508,7 @@ extension _SortedRangeValuePairs {
 
 extension _SortedRangeValuePairs where Value == Never {
   mutating func insertRange(_ range: any GeneralizedRange<Bound>) {
-    self._storage._insertValue(nil, forRange: range, dontRemoveValueEvenIfValueIsNil: true)
+    self._storage._mutateWithRange(range, action: .onlyInsertRange)
   }
 
   mutating func removeRange(_ range: any GeneralizedRange<Bound>) {
