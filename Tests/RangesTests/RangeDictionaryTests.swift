@@ -119,6 +119,14 @@ import Testing
     #expect(ranges1.isEquivalent(to: ranges2))
   }
 
+  @Test func sortedRangeValuePairs_hashable() {
+    let pairs1 = _SortedRangeValuePairs<Int, String>(carefullySortedPairs: [(range: 0..<10, value: "value0")])
+    let pairs2 = _SortedRangeValuePairs<Int, String>(carefullySortedPairs: [(range: 10..<20, value: "value1")])
+    let dic = [pairs1: 1, pairs2: 2]
+    #expect(dic[pairs1] == 1)
+    #expect(dic[pairs2] == 2)
+  }
+
   let simpleDictionary: RangeDictionary<Int, String> = [
         0 ...<    10: "A",
       100 ...<   110: "B",

@@ -126,7 +126,7 @@ extension _SortedRangeValuePairs._Storage {
   }
 
   @inlinable
-  func pair(at index: Int) -> (range: any GeneralizedRange, value: Value) {
+  func pair(at index: Int) -> (range: any GeneralizedRange<Bound>, value: Value) {
     switch self {
     case .pairs(let pairs):
       return pairs[index]
@@ -268,7 +268,7 @@ extension _SortedRangeValuePairs {
   func value(at index: Int) -> Value? { _storage.value(at: index) }
 
   @inlinable
-  func pair(at index: Int) -> (range: any GeneralizedRange, value: Value) {
+  func pair(at index: Int) -> (range: any GeneralizedRange<Bound>, value: Value) {
     return _storage.pair(at: index)
   }
 
@@ -708,6 +708,31 @@ extension _SortedRangeValuePairs: Equatable where Value: Equatable {
   }
 }
 
+
+// MARK: - Hashable
+
+extension _SortedRangeValuePairs._Storage: Hashable where Bound: Hashable, Value: Hashable {
+  func hash(into hasher: inout Hasher) {
+    switch self {
+    case .ranges(let ranges):
+      for range in ranges {
+        _hashBounds(range.bounds, into: &hasher)
+      }
+    default:
+      for ii in 0..<self.count {
+        let pair = self.pair(at: ii)
+        _hashBounds(pair.range.bounds, into: &hasher)
+        hasher.combine(pair.value)
+      }
+    }
+  }
+}
+
+extension _SortedRangeValuePairs: Hashable where Bound: Hashable, Value: Hashable {
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(self._storage)
+  }
+}
 
 // MARK: - Misc Extensions
 
