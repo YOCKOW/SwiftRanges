@@ -18,4 +18,10 @@ extension PartialRangeFrom: GeneralizedRange {
 extension PartialRangeFrom: GeneralizedCountableRange where Bound: Strideable,
                                                             Bound.Stride: SignedInteger {}
 
+extension PartialRangeFrom: @retroactive Equatable {}
+
+extension PartialRangeFrom: @retroactive Hashable where Bound: Hashable {}
+
+extension PartialRangeFrom: HashableRange where Bound: Hashable {}
+
 extension PartialRangeFrom: SendableGeneralizedRange {}

@@ -15,4 +15,6 @@ extension Range: GeneralizedRange {
 extension Range: GeneralizedCountableRange where Bound: Strideable,
                                                  Bound.Stride: SignedInteger {}
 
+extension Range: HashableRange where Bound: Hashable {}
+
 extension Range: SendableGeneralizedRange {}
