@@ -622,35 +622,72 @@ extension _SortedRangeValuePairs where Value: Equatable {
 // MARK: - Equatable
 
 extension _SortedRangeValuePairs._Storage: Equatable where Value: Equatable {
-  static func ==(
-    lhs: _SortedRangeValuePairs<Bound, Value>._Storage,
-    rhs: _SortedRangeValuePairs<Bound, Value>._Storage
+  private func _isConsideredEquivalent(
+    to other: _SortedRangeValuePairs<Bound, Value>._Storage,
+    rangeComparator: (any GeneralizedRange<Bound>, any GeneralizedRange<Bound>) -> Bool
   ) -> Bool {
-    guard lhs.count == rhs.count else {
+    guard self.count == other.count else {
       return false
     }
 
-    for ii in 0..<lhs.count {
-      guard lhs.range(at: ii).isEquivalent(to: rhs.range(at: ii)) else {
+    for ii in 0..<self.count {
+      let myRange = self.range(at: ii)
+      let otherRange = other.range(at: ii)
+      guard rangeComparator(myRange, otherRange) else {
         return false
       }
 
-      if let lValue = lhs.value(at: ii), let rValue = rhs.value(at: ii) {
-        guard lValue == rValue else {
+      if let myValue = self.value(at: ii), let otherValue = other.value(at: ii) {
+        guard myValue == otherValue else {
           return false
         }
       }
     }
     return true
   }
+
+  /// Returns a Boolean value indicating the storage is equivalent to `other`.
+  ///
+  /// - Note:
+  ///   - Both storages are normalized before comparison.
+  ///   - Each range is compared by `isEquivalent(to:)`.
+  @inlinable
+  func isEquivalent(to other: _SortedRangeValuePairs<Bound, Value>._Storage) -> Bool {
+    return self.normilized()._isConsideredEquivalent(
+      to: other.normilized(),
+      rangeComparator: { $0.isEquivalent(to: $1) }
+    )
+  }
+
+  @inlinable
+  func isEqual(to other: _SortedRangeValuePairs<Bound, Value>._Storage) -> Bool {
+    return self._isConsideredEquivalent(to: other, rangeComparator: { $0.isEqual(to: $1) })
+  }
+
+  static func ==(
+    lhs: _SortedRangeValuePairs<Bound, Value>._Storage,
+    rhs: _SortedRangeValuePairs<Bound, Value>._Storage
+  ) -> Bool {
+    return lhs.isEqual(to: rhs)
+  }
 }
 
 extension _SortedRangeValuePairs: Equatable where Value: Equatable {
+  @inlinable
+  func isEquivalent(to other: _SortedRangeValuePairs<Bound, Value>) -> Bool {
+    return self._storage.isEquivalent(to: other._storage)
+  }
+
+  @inlinable
+  func isEqual(to other: _SortedRangeValuePairs<Bound, Value>) -> Bool {
+    return self._storage.isEqual(to: other._storage)
+  }
+
   static func ==(
     lhs: _SortedRangeValuePairs<Bound, Value>,
     rhs: _SortedRangeValuePairs<Bound, Value>
   ) -> Bool {
-    return lhs._storage == rhs._storage
+    return lhs.isEqual(to: rhs)
   }
 }
 
