@@ -125,6 +125,18 @@ extension _SortedRangeValuePairs._Storage {
     }
   }
 
+  @inlinable
+  func pair(at index: Int) -> (range: any GeneralizedRange, value: Value) {
+    switch self {
+    case .pairs(let pairs):
+      return pairs[index]
+    case .separated(ranges: let ranges, values: let values):
+      return (range: ranges[index], value: values[index])
+    default:
+      fatalError("Can't form a pair tuple.")
+    }
+  }
+
   func validateRanges() -> Bool {
     if case .separated(let ranges, let values) = self {
       guard ranges.count == values.count else {
@@ -254,6 +266,11 @@ extension _SortedRangeValuePairs {
 
   @inlinable
   func value(at index: Int) -> Value? { _storage.value(at: index) }
+
+  @inlinable
+  func pair(at index: Int) -> (range: any GeneralizedRange, value: Value) {
+    return _storage.pair(at: index)
+  }
 
   @inlinable
   func index(whereRangeContains bound: Bound) -> Int? { _storage.index(whereRangeContains: bound) }
