@@ -8,10 +8,8 @@
 import Testing
 @testable import Ranges
 
-@Suite struct RangeDictionaryTests {
-  @Test func sortedRangePairs() {
-    // Tests for the backend type.
-
+@Suite struct SortedRangeValuePairsTests {
+  @Test func basics() {
     var pairs = _SortedRangeValuePairs<Int, String>(
       carefullySortedSendablePairs: [
         (range: ..<0, value: "negative"),
@@ -50,54 +48,54 @@ import Testing
     #expect(!ranges.contains(789))
     #expect(!ranges.contains(1050))
     #expect(ranges.contains(1051))
-
-    test_limited: do {
-      let pairs = _SortedRangeValuePairs<Int, String>(
-        carefullySortedPairs: [
-          (range: 0..<10, value: "a"),
-          (range: 100..<1000, value: "b"),
-          (range: 10000..<100000, value: "c"),
-        ]
-      )
-      #expect(pairs.limited(within: EmptyRange<Int>()).isEmpty)
-      #expect(pairs.limited(within: 50...60).isEmpty)
-      #expect(pairs.limited(within: 3...3)[4] == nil)
-      #expect(pairs.limited(within: 3...3)[3] == "a")
-      #expect(pairs.limited(within: 500..<50000).count == 2)
-      #expect(pairs.limited(within: 500..<50000)[499] == nil)
-      #expect(pairs.limited(within: 500..<50000)[500] == "b")
-      #expect(pairs.limited(within: 500..<50000)[5000] == nil)
-      #expect(pairs.limited(within: 500..<50000)[49999] == "c")
-      #expect(pairs.limited(within: 500..<50000)[50000] == nil)
-    }
-
-    test_normalization: do {
-      let doublePairs = _SortedRangeValuePairs<Double, String>(
-        carefullySortedPairs: [
-          (range: 0.0..<1.0, value: "a"),
-          (range: 1.0..<2.0, value: "a"),
-          (range: 2.0..<3.0, value: "a"),
-        ]
-      )
-      let doubleNormalized = doublePairs.normalized()
-      #expect(doubleNormalized.count == 1)
-      #expect(doubleNormalized.range(at: 0).isEquivalent(to: 0.0..<3.0))
-      #expect(doubleNormalized[1.0] == "a")
-
-      let intPairs = _SortedRangeValuePairs<Int, String>(
-        carefullySortedPairs: [
-          (range: 0...1, value: "a"),
-          (range: 2...3, value: "a"),
-        ]
-      )
-      let intNormalized = intPairs.normalized()
-      #expect(intNormalized.count == 1)
-      #expect(intNormalized.range(at: 0).isEquivalent(to: 0...3))
-      #expect(intNormalized[2] == "a")
-    }
   }
 
-  @Test func sortedRangePairs_equatable() {
+  @Test func limited() {
+    let pairs = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: 0..<10, value: "a"),
+        (range: 100..<1000, value: "b"),
+        (range: 10000..<100000, value: "c"),
+      ]
+    )
+    #expect(pairs.limited(within: EmptyRange<Int>()).isEmpty)
+    #expect(pairs.limited(within: 50...60).isEmpty)
+    #expect(pairs.limited(within: 3...3)[4] == nil)
+    #expect(pairs.limited(within: 3...3)[3] == "a")
+    #expect(pairs.limited(within: 500..<50000).count == 2)
+    #expect(pairs.limited(within: 500..<50000)[499] == nil)
+    #expect(pairs.limited(within: 500..<50000)[500] == "b")
+    #expect(pairs.limited(within: 500..<50000)[5000] == nil)
+    #expect(pairs.limited(within: 500..<50000)[49999] == "c")
+    #expect(pairs.limited(within: 500..<50000)[50000] == nil)
+  }
+
+  @Test func normalize() {
+    let doublePairs = _SortedRangeValuePairs<Double, String>(
+      carefullySortedPairs: [
+        (range: 0.0..<1.0, value: "a"),
+        (range: 1.0..<2.0, value: "a"),
+        (range: 2.0..<3.0, value: "a"),
+      ]
+    )
+    let doubleNormalized = doublePairs.normalized()
+    #expect(doubleNormalized.count == 1)
+    #expect(doubleNormalized.range(at: 0).isEquivalent(to: 0.0..<3.0))
+    #expect(doubleNormalized[1.0] == "a")
+
+    let intPairs = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: 0...1, value: "a"),
+        (range: 2...3, value: "a"),
+      ]
+    )
+    let intNormalized = intPairs.normalized()
+    #expect(intNormalized.count == 1)
+    #expect(intNormalized.range(at: 0).isEquivalent(to: 0...3))
+    #expect(intNormalized[2] == "a")
+  }
+
+  @Test func equatable() {
     let pairs1 = _SortedRangeValuePairs<Int, String>(
       carefullySortedPairs: [
         (range: 0..<10, "value0"),
@@ -126,7 +124,9 @@ import Testing
     #expect(dic[pairs1] == 1)
     #expect(dic[pairs2] == 2)
   }
+}
 
+@Suite struct RangeDictionaryTests {
   let simpleDictionary: RangeDictionary<Int, String> = [
         0 ...<    10: "A",
       100 ...<   110: "B",
