@@ -31,62 +31,71 @@ extension GeneralizedRange {
 }
 
 extension GeneralizedRange {
-  fileprivate func _subtracting<R>(_ other: R) -> (
-    any GeneralizedRange<Bound>,
-    (any GeneralizedRange<Bound>)?
-  ) where R: GeneralizedRange, R.Bound == Bound {
-    guard let myBounds = self.bounds else {
+  public typealias SubtractionResult = (any GeneralizedRange<Bound>, (any GeneralizedRange<Bound>)?)
+
+  fileprivate func _subtracting<R>(_ other: R) -> SubtractionResult where R: GeneralizedRange,
+                                                                         R.Bound == Bound
+  {
+    var emptyResult: SubtractionResult {
       return (EmptyRange<Bound>(), nil)
     }
-    guard let otherBounds = other.bounds else {
+
+    var selfResult: SubtractionResult {
       return (self, nil)
     }
 
-    // Not overlaps...
-    if (
-      myBounds.lower._compare(otherBounds.upper, side: .lower) == .definitelyOrderedDescending ||
-      myBounds.upper._compare(otherBounds.lower, side: .upper) == .definitelyOrderedAscending
-    ) {
-      return (self, nil)
+    guard let myBounds = self.bounds else {
+      return emptyResult
+    }
+
+    if other.isEmpty {
+      return selfResult
+    }
+
+    guard let intersectionBounds = self.intersection(other).bounds else {
+      return selfResult
     }
 
     var subtracted: [any GeneralizedRange<Bound>] = []
 
-    // /------ self -----
-    //     /----- other -----
-    if (
-      otherBounds.lower != .unbounded &&
-      myBounds.lower._compare(otherBounds.lower, side: .lower) == .definitelyOrderedAscending
-    ) {
-      let lowerRangeBounds: Bounds<Bound> = (
-        lower: myBounds.lower,
-        upper: ~otherBounds.lower
+    switch myBounds.lower._compare(intersectionBounds.lower, side: .lower) {
+    case .definitelyOrderedSame, .orderedAscendingButConsideredEquivalent:
+      break
+    case .definitelyOrderedAscending:
+      let lowerSubRange = _makeRange(
+        uncheckedBounds: (
+          lower: myBounds.lower,
+          upper: ~intersectionBounds.lower
+        )
       )
-      let lowerRange = _makeRange(uncheckedBounds: lowerRangeBounds)
-      if !lowerRange.isEmpty {
-        subtracted.append(lowerRange)
+      if !lowerSubRange.isEmpty {
+        subtracted.append(lowerSubRange)
       }
+    case .definitelyOrderedDescending, .orderedDescendingButConsideredEquivalent:
+      fatalError("Unexpected Intersection?!")
     }
 
-    //      ----- self -----/
-    // ----- other -----/
-    if (
-      otherBounds.upper != .unbounded &&
-      myBounds.upper._compare(otherBounds.upper, side: .upper) == .definitelyOrderedDescending
-    ) {
-      let upperRangeBounds: Bounds<Bound> = (
-        lower: ~otherBounds.upper,
-        upper: myBounds.upper
+    switch intersectionBounds.upper._compare(myBounds.upper, side: .upper) {
+    case .definitelyOrderedSame, .orderedAscendingButConsideredEquivalent:
+      break
+    case .definitelyOrderedAscending:
+      let upperSubRange = _makeRange(
+        uncheckedBounds: (
+          lower: ~intersectionBounds.upper,
+          upper: myBounds.upper
+        )
       )
-      let upperRange = _makeRange(uncheckedBounds: upperRangeBounds)
-      if !upperRange.isEmpty {
-        subtracted.append(upperRange)
+      if !upperSubRange.isEmpty {
+        subtracted.append(upperSubRange)
       }
+    case .definitelyOrderedDescending, .orderedDescendingButConsideredEquivalent:
+      fatalError("Unexpected Intersection?!")
     }
+
 
     switch subtracted.count {
     case 0:
-      return (EmptyRange<Bound>(), nil)
+      return emptyResult
     case 1:
       return (subtracted[0], nil)
     case 2:

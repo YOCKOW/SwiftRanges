@@ -64,4 +64,31 @@ import Testing
     #expect(_max(boundary1, boundary2, boundary3, boundary4, boundary5, boundary6, side: .lower) == boundary6)
     #expect(_max(boundary1, boundary2, boundary3, boundary4, boundary5, boundary6, side: .upper) == boundary5)
   }
+
+  @Test func comparison_unbounded() {
+    func __assert(
+      _ left: GeneralizedRangeBound<Int>,
+      _ right: GeneralizedRangeBound<Int>,
+      side: GeneralizedRangeBound<Int>._Side,
+      expected: GeneralizedRangeBound<Int>._ComparisonResult,
+      sourceLocation: SourceLocation = #_sourceLocation
+    ) {
+      #expect(left._compare(right, side: side) == expected, sourceLocation: sourceLocation)
+    }
+
+    __assert(.unbounded, .unbounded, side: .lower, expected: .definitelyOrderedSame)
+    __assert(.unbounded, .excluded(1), side: .lower, expected: .definitelyOrderedAscending)
+    __assert(.unbounded, .included(1), side: .lower, expected: .definitelyOrderedAscending)
+
+    __assert(.unbounded, .unbounded, side: .upper, expected: .definitelyOrderedSame)
+    __assert(.unbounded, .excluded(1), side: .upper, expected: .definitelyOrderedDescending)
+    __assert(.unbounded, .included(1), side: .upper, expected: .definitelyOrderedDescending)
+
+
+    __assert(.excluded(1), .unbounded, side: .lower, expected: .definitelyOrderedDescending)
+    __assert(.included(1), .unbounded, side: .lower, expected: .definitelyOrderedDescending)
+
+    __assert(.excluded(1), .unbounded, side: .upper, expected: .definitelyOrderedAscending)
+    __assert(.included(1), .unbounded, side: .upper, expected: .definitelyOrderedAscending)
+  }
 }

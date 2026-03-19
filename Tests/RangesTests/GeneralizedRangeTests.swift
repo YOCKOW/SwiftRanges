@@ -197,7 +197,19 @@ import Testing
     #expect(subtracted.1 == nil)
 
     subtracted = (10<..<20).subtracting(0..<11)
-    #expect(subtracted.0.isEqual(to: 11..<20))
+    #expect(subtracted.0.isEqual(to: 10<..<20))
     #expect(subtracted.1 == nil)
+
+    subtracted = (..<20).subtracting(...10)
+    #expect(subtracted.0.isEqual(to: 10<..<20))
+    #expect(subtracted.1 == nil)
+
+    subtracted = (20...).subtracting(30...)
+    #expect(subtracted.0.isEqual(to: 20..<30))
+    #expect(subtracted.1 == nil)
+
+    subtracted = (20...).subtracting(30..<40)
+    #expect(subtracted.0.isEqual(to: 20..<30))
+    #expect(try #require(subtracted.1).isEqual(to: 40...))
   }
 }

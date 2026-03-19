@@ -1,6 +1,6 @@
 /* *************************************************************************************************
- MemoizableMultipleRangesTests.swift
-   © 2020,2023-2025 YOCKOW.
+ Memoizableests.swift
+   © 2020,2023-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -10,7 +10,7 @@ import Testing
 
 @Suite struct MemoizablesTests {
   @Test func ranges() {
-    let normalRanges = GeneralizedRangeSet<Int>([0...<10, 100...<1000])
+    let normalRanges = GeneralizedRangeSet<Int>([0..<10, 100..<1000])
     let ranges = MemoizableGeneralizedRangeSet<Int>(normalRanges)
     #expect(ranges.contains(5))
     #expect(ranges.contains(555))
@@ -21,9 +21,9 @@ import Testing
 
   @Test func dictionary() {
     let normalDictionary: RangeDictionary<Int, String> = [
-      0...<10: "0",
-      10...<20: "10",
-      20...<30: "20",
+      0..<10: "0",
+      10..<20: "10",
+      20..<30: "20",
     ]
     let dictionary = MemoizableRangeDictionary(normalDictionary)
     #expect(dictionary[5] == "0")

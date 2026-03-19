@@ -21,7 +21,7 @@ internal struct _SortedRangeValuePairs<Bound, Value> where Bound: Comparable {
 
   private init(_storage storage: _Storage) {
     self._storage = storage
-    assert(self._storage.validateRanges())
+    assert(self._storage.validateRanges(), "Invalid range-value pair(s): \(storage)")
   }
 
   init(carefullySortedPairs pairs: [_Pair]) {
@@ -57,7 +57,7 @@ extension _SortedRangeValuePairs where Bound: Sendable {
   }
 }
 
-extension _SortedRangeValuePairs where Bound: Sendable, Value: Sendable {
+extension _SortedRangeValuePairs where Bound: Sendable {
   init(carefullySortedPairs pairs: [_SendablePair]) {
     self.init(_storage: .pairs(pairs))
   }
@@ -65,6 +65,10 @@ extension _SortedRangeValuePairs where Bound: Sendable, Value: Sendable {
   init(carefullySortedSendablePairs pairs: [_Pair]) {
     self.init(_storage: .pairs(pairs))
     _assertSendableGeneralizedRangeProtocolConformances()
+  }
+
+  init(carefullySortedRanges ranges: [any GeneralizedRange<Bound> & Sendable]) {
+    self.init(_storage: .ranges(ranges))
   }
 }
 
@@ -383,9 +387,9 @@ extension _SortedRangeValuePairs._Storage {
           let latterSubtracted = ranges[lastIndex].subtracting(range)
           assert(latterSubtracted.1 == nil)
           if !latterSubtracted.0.isEmpty {
-            latterRanges.append(latterSubtracted.0)
+            latterRanges.insert(latterSubtracted.0, at: latterRanges.startIndex)
             if let theValue = values?[lastIndex] {
-              latterValues!.append(theValue)
+              latterValues!.insert(theValue, at: latterValues!.startIndex)
             }
           }
         }
@@ -447,36 +451,87 @@ extension _SortedRangeValuePairs._Storage {
       assert(splitted.formerValues == nil && splitted.latterValues == nil)
 
       var newPairs: [_SortedRangeValuePairs._Pair] = []
-      newPairs.append(contentsOf: formerPairs)
-      if case .insertValue(let value) = action {
-        newPairs.append((range: range, value: value))
+
+      func __appendPair(_ newPair: _SortedRangeValuePairs._Pair) {
+        if let lastPair = newPairs.last,
+           case let equatableLastValue as any Equatable = lastPair.value,
+           case let equatableNewValue as any Equatable = newPair.value,
+           equatableLastValue._isEqual(to: equatableNewValue),
+           let concatenated = lastPair.range.concatenating(newPair.range) {
+          newPairs._setElementAtLast((range: concatenated, value: newPair.value))
+        } else {
+          newPairs.append(newPair)
+        }
       }
-      newPairs.append(contentsOf: latterPairs)
+
+      formerPairs.forEach(__appendPair)
+      if case .insertValue(let value) = action {
+        __appendPair((range: range, value: value))
+      }
+      latterPairs.forEach(__appendPair)
       self = .pairs(newPairs)
     case (
       let formerRanges as any Collection<any GeneralizedRange<Bound>>,
       let latterRanges as any Collection<any GeneralizedRange<Bound>>
     ):
       var newRanges: [any GeneralizedRange<Bound>] = []
-      newRanges.append(contentsOf: formerRanges)
-      switch action {
-      case .insertValue, .onlyInsertRange:
-        newRanges.append(range)
-      default:
-        break
+      var newValues: [Value] = []
+
+      func __append(range: any GeneralizedRange<Bound>, value: Value?) {
+        if let lastRange = newRanges.last,
+           let concatenated = lastRange.concatenating(range) {
+          guard let newValue = value else {
+            newRanges._setElementAtLast(concatenated)
+            return
+          }
+          if case let equatableLastValue as any Equatable = newValues.last!,
+             case let equatableNewValue as any Equatable = newValue,
+             equatableLastValue._isEqual(to: equatableNewValue) {
+            newRanges._setElementAtLast(concatenated)
+            return
+          }
+        }
+
+        AS_USUAL: do {
+          newRanges.append(range)
+          if let value = value {
+            newValues.append(value)
+          }
+        }
       }
-      newRanges.append(contentsOf: latterRanges)
 
       switch (splitted.formerValues, splitted.latterValues) {
       case (nil, nil):
+        formerRanges.forEach({ __append(range: $0, value: nil) })
+        if case .onlyInsertRange = action {
+          __append(range: range, value: nil)
+        }
+        latterRanges.forEach({ __append(range: $0, value: nil) })
+        assert(newValues.isEmpty)
         self = .ranges(newRanges)
       case (let formerValues?, let latterValues?):
-        var newValues: [Value] = []
-        newValues.append(contentsOf: formerValues)
-        if case .insertValue(let value) = action {
-          newValues.append(value)
+        assert(
+          formerRanges.count == formerValues.count &&
+          latterRanges.count == latterValues.count,
+          "Unmatched count: ranges vs values?!"
+        )
+
+        func __zippingAppend<C1, C2>(
+          ranges: C1,
+          values: C2
+        ) where C1: Collection,
+                C1.Element == any GeneralizedRange<Bound>,
+                C2: Collection,
+                C2.Element == Value
+        {
+          zip(ranges, values).forEach({ (r, v) in __append(range: r, value: v) })
         }
-        newValues.append(contentsOf: latterValues)
+
+        __zippingAppend(ranges: formerRanges, values: formerValues)
+        if case .insertValue(let value) = action {
+          __append(range: range, value: value)
+        }
+        __zippingAppend(ranges: latterRanges, values: latterValues)
         assert(newRanges.count == newValues.count, "Count unmatched?!")
         self = .separated(ranges: newRanges, values: newValues)
       default:
@@ -553,11 +608,11 @@ extension _SortedRangeValuePairs._Storage {
       return .pairs(limited._array)
     case .ranges(let ranges):
       var limited = ranges[firstIndex...lastIndex]
-      assert(limited.isEmpty)
+      assert(!limited.isEmpty)
 
       let firstRange = limited.first!.intersection(range)
       assert(!firstRange.isEmpty)
-      limited._setElementAtLast(firstRange)
+      limited._setElementAtFirst(firstRange)
 
       if limited.count > 1 {
         let lastRange = limited.last!.intersection(range)
@@ -600,6 +655,24 @@ extension _SortedRangeValuePairs {
 
 // MARK: - Normalization
 
+extension _SortedRangeValuePairs._Storage {
+  fileprivate func _normalizedRanges() -> Self {
+    guard case .ranges(let ranges) = self else {
+      fatalError("Non-ranges storage.")
+    }
+    var newRanges: [any GeneralizedRange<Bound>] = []
+    for range in ranges {
+      if let lastRange = newRanges.last,
+         let concatenated = lastRange.concatenating(range) {
+        newRanges._setElementAtLast(concatenated)
+      } else {
+        newRanges.append(range)
+      }
+    }
+    return .ranges(newRanges)
+  }
+}
+
 extension _SortedRangeValuePairs._Storage where Value: Equatable {
   func normilized() -> Self {
     switch self {
@@ -616,7 +689,7 @@ extension _SortedRangeValuePairs._Storage where Value: Equatable {
       }
       return .pairs(newPairs)
     case .ranges:
-      return self
+      return _normalizedRanges()
     case .separated(let ranges, let values):
       var newRanges: [any GeneralizedRange<Bound>] = []
       var newValues: [Value] = []
@@ -755,5 +828,14 @@ private extension MutableCollection where Self: BidirectionalCollection {
 
   mutating func _setElementAtLast(_ newElement: Element) {
     self[self.index(before: self.endIndex)] = newElement
+  }
+}
+
+private extension Equatable {
+  func _isEqual<T>(to other: T) -> Bool where T: Equatable {
+    guard case let selfAsT as T = self else {
+      return false
+    }
+    return selfAsT == other
   }
 }

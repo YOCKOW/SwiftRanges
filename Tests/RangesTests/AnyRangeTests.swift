@@ -1,19 +1,21 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  AnyRangeTests.swift
-   © 2018-2019,2024-2025 YOCKOW.
+   © 2018-2019,2024-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
- 
+ ************************************************************************************************ */
+
 import Testing
 @testable import Ranges
 
+@available(*, deprecated)
 func _forceUncountableRange<R,B>(_ range: R) -> AnyRange<B> where R: GeneralizedRange, R.Bound == B {
   return AnyRange<B>(range)
 }
 
 @Suite("AnyRange Tests")
 struct AnyRangeTests {
+  @available(*, deprecated)
   @Test func operators() {
     #expect(0....10 == .init(0...10))
     #expect(0<...10 == .init(0<..10))
@@ -25,6 +27,7 @@ struct AnyRangeTests {
     #expect(0...<10 == .init(0..<10))
   }
 
+  @available(*, deprecated)
   @Test func asRangeExpression() {
     // Default implementation is in "GeneralizedRange"
 
@@ -47,18 +50,21 @@ struct AnyRangeTests {
     #expect(!range4.contains(1000))
   }
 
+  @available(*, deprecated)
   @Test func concatenation() {
     #expect((0....10).concatenating(_forceUncountableRange(11...20)) == (0....20))
     #expect(_forceUncountableRange(0...10).concatenating(20....30) == nil)
     #expect(_forceUncountableRange(10...20).concatenating(0....30) == (0....30))
   }
 
+  @available(*, deprecated)
   @Test func intersection() {
     #expect((0...<10).intersection(_forceUncountableRange(9<..20)) == .empty)
     #expect(_forceUncountableRange(0..<10).intersection(5<...20) == (5<...<10))
     #expect(_forceUncountableRange(0..<10).intersection(.unbounded) == (0...<10))
   }
 
+  @available(*, deprecated)
   @Test func subtraction() {
     var result: (AnyRange<Int>, AnyRange<Int>?)
 
