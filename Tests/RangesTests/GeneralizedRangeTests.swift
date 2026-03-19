@@ -175,7 +175,7 @@ import Testing
     #expect(try #require((0..<100).concatenating(100..<200)).isEqual(to: 0..<200))
     #expect(try #require((0...99).concatenating(100..<200)).isEqual(to: 0..<200)) // Countable!
     #expect(try #require((...400).concatenating(100..<200)).isEqual(to: ...400))
-    #expect(try #require((0<..<10).concatenating(())).isEqual(to: 0<..<10))
+    #expect((0<..<10).concatenating(()).isEqual(to: 0<..<10))
     #expect(try #require((...400).concatenating(100...)).isEqual(to: ...))
   }
 
