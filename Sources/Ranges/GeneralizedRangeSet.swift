@@ -5,48 +5,53 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-private func _bitCastArrayVoidToNone<T>(_ array: Array<(AnyRange<T>, Void)>) -> Array<AnyRange<T>> {
-  assert(MemoryLayout<(AnyRange<T>, Void)>.size == MemoryLayout<AnyRange<T>>.size)
-  return unsafeBitCast(array, to: Array<AnyRange<T>>.self)
-}
-
-private func _bitCastArrayNoneToVoid<T>(_ array: Array<AnyRange<T>>) -> Array<(AnyRange<T>, Void)> {
-  assert(MemoryLayout<(AnyRange<T>, Void)>.size == MemoryLayout<AnyRange<T>>.size)
-  return unsafeBitCast(array, to: Array<(AnyRange<T>, Void)>.self)
-}
-
 /// Represents multiple ranges.
 public struct GeneralizedRangeSet<Bound> where Bound: Comparable {
-  internal var _rangeDictionary: RangeDictionary<Bound, Void>
-  
-  private init(_ rangeDictionary: RangeDictionary<Bound, Void>) {
-    self._rangeDictionary = rangeDictionary
+  internal private(set) var _ranges: _SortedRanges<Bound>
+
+  private init(_ranges ranges: _SortedRanges<Bound>) {
+    self._ranges = ranges
   }
   
   /// Creates an empty ranges.
   public init() {
-    self._rangeDictionary = .init()
+    self.init(_ranges: .init(carefullySortedRanges: []))
   }
   
   /// Creates an instance initialized with `ranges`.
-  /// The ranges must be sorted in advance, and all ranges must not be overlapped each other.
-  /// Furthermore, no ranges must be empty.
-  /// You may not use this initializer usually.
-  public init(carefullySortedRanges ranges: [AnyRange<Bound>]) {
-    self._rangeDictionary = .init(carefullySortedRangesAndValues: _bitCastArrayNoneToVoid(ranges))
+  ///
+  /// - Warning: The ranges must be sorted in advance,
+  ///            and all ranges must not be overlapped each other.
+  ///            Furthermore, no ranges must be empty.
+  ///            You may not use this initializer usually.
+  public init(carefullySortedRanges ranges: [any GeneralizedRange<Bound>]) {
+    self.init(_ranges: .init(carefullySortedRanges: ranges))
   }
   
   /// Creates an instace initialized with `ranges`.
-  public init(_ ranges: [AnyRange<Bound>]) {
-    self.init()
-    self.ranges = ranges
+  public init(_ ranges: [any GeneralizedRange<Bound>]) {
+    var sortedRanges = _SortedRanges<Bound>(carefullySortedRanges: [])
+    for range in ranges {
+      sortedRanges.insertRange(range._wellknownRange)
+    }
+    self.init(_ranges: sortedRanges)
   }
 }
 
 @available(*, deprecated, renamed: "GeneralizedRangeSet")
 public typealias MultipleRanges = GeneralizedRangeSet
 
-extension GeneralizedRangeSet: Sendable where Bound: Sendable {}
+extension GeneralizedRangeSet: Sendable where Bound: Sendable {
+  /// Creates a `Sendable` instance initialized with `ranges`.
+  ///
+  /// - Warning: The ranges must be sorted in advance,
+  ///            and all ranges must not be overlapped each other.
+  ///            Furthermore, no ranges must be empty.
+  ///            You may not use this initializer usually.
+  public init(carefullySortedRanges ranges: [any GeneralizedRange<Bound> & Sendable]) {
+    self.init(_ranges: .init(carefullySortedRanges: ranges))
+  }
+}
 
 public typealias GeneralizedCountableRangeSet<Bound> =
   GeneralizedRangeSet<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
@@ -55,72 +60,84 @@ public typealias GeneralizedCountableRangeSet<Bound> =
 public typealias MultipleCountableRanges = GeneralizedCountableRangeSet
 
 extension GeneralizedRangeSet {
-  public var isEmpty:Bool { return self._rangeDictionary.isEmpty }
+  public var isEmpty:Bool { return self._ranges.isEmpty }
 }
 
 extension GeneralizedRangeSet {
-  public var ranges: [AnyRange<Bound>] {
+  public var ranges: [any GeneralizedRange<Bound>] {
     get {
-      return _bitCastArrayVoidToNone(Array<(AnyRange<Bound>, Void)>(self._rangeDictionary))
+      guard case .ranges(let ranges) = self._ranges._storage else {
+        fatalError("Unexpected storage.")
+      }
+      return ranges
     }
     set {
-      self._rangeDictionary = .init()
-      for range in newValue {
-        if range.isEmpty { continue }
-        self._rangeDictionary.insert(range: range)
-      }
+      self = Self.init(newValue)
     }
   }
 }
 
 extension GeneralizedRangeSet: Sequence {
-  public typealias Element = AnyRange<Bound>
-  
+  public typealias Element = any GeneralizedRange<Bound>
+
   public struct Iterator: IteratorProtocol {
     public typealias Element = GeneralizedRangeSet.Element
-    private var _rangeDictionaryIterator: RangeDictionary<Bound, Void>.Iterator
-    fileprivate init(_ rangeDictionaryIterator: RangeDictionary<Bound, Void>.Iterator) {
-      self._rangeDictionaryIterator = rangeDictionaryIterator
+    private var _iterator: Array<any GeneralizedRange<Bound>>.Iterator
+    fileprivate init(_ iterator: Array<any GeneralizedRange<Bound>>.Iterator) {
+      self._iterator = iterator
     }
     
-    public mutating func next() -> AnyRange<Bound>? {
-      return self._rangeDictionaryIterator.next()?.0
+    public mutating func next() -> (any GeneralizedRange<Bound>)? {
+      return self._iterator.next()
     }
   }
   
   public func makeIterator() -> GeneralizedRangeSet<Bound>.Iterator {
-    return .init(self._rangeDictionary.makeIterator())
+    return .init(self.ranges.makeIterator())
   }
 }
 
 extension GeneralizedRangeSet: Collection, BidirectionalCollection, RandomAccessCollection {
-  public typealias Index = RangeDictionary<Bound, Void>.Index
-  
-  public subscript(_ index: Index) -> AnyRange<Bound> {
-    return self._rangeDictionary[index].0
+  public struct Index: Equatable, Comparable {
+    fileprivate let _value: Int
+    fileprivate init(_ value: Int) {
+      self._value = value
+    }
+
+    public static func == (lhs: GeneralizedRangeSet<Bound>.Index, rhs: GeneralizedRangeSet<Bound>.Index) -> Bool {
+      return lhs._value == rhs._value
+    }
+
+    public static func < (lhs: GeneralizedRangeSet<Bound>.Index, rhs: GeneralizedRangeSet<Bound>.Index) -> Bool {
+      return lhs._value < rhs._value
+    }
+  }
+
+  public subscript(_ index: Index) -> any GeneralizedRange<Bound> {
+    return self._ranges.range(at: index._value)
   }
   
   public var startIndex: Index {
-    return self._rangeDictionary.startIndex
+    return .init(0)
   }
   
   public var endIndex: Index {
-    return self._rangeDictionary.endIndex
+    return .init(self._ranges.count)
   }
   
   public func index(after ii: Index) -> Index {
-    return self._rangeDictionary.index(after: ii)
+    return .init(ii._value + 1)
   }
   
   public func index(before ii: Index) -> Index {
-    return self._rangeDictionary.index(before: ii)
+    return .init(ii._value - 1)
   }
 }
 
 // Array Literal
 extension GeneralizedRangeSet: ExpressibleByArrayLiteral {
-  public typealias ArrayLiteralElement = AnyRange<Bound>
-  public init(arrayLiteral elements: AnyRange<Bound>...) {
+  public typealias ArrayLiteralElement = any GeneralizedRange<Bound>
+  public init(arrayLiteral elements: any GeneralizedRange<Bound>...) {
     self.init(elements)
   }
 }
@@ -128,30 +145,30 @@ extension GeneralizedRangeSet: ExpressibleByArrayLiteral {
 // Equatable
 extension GeneralizedRangeSet: Equatable {
   public static func ==(lhs:GeneralizedRangeSet<Bound>, rhs:GeneralizedRangeSet<Bound>) -> Bool {
-    return lhs._rangeDictionary == rhs._rangeDictionary
+    return lhs._ranges == rhs._ranges
   }
 }
 
 // INSERT
 extension GeneralizedRangeSet {
-  private mutating func _insert(_ newRange: AnyRange<Bound>) {
-    if newRange.isEmpty { return }
-    self._rangeDictionary.insert(range: newRange)
-  }
-  
-  /// Inserts the given *countable* range.
-  /// The range may be concatenated with other ranges included the receiver.
-  public mutating func insert<R>(_ newRange:R)
-    where R:GeneralizedRange, R.Bound == Bound, Bound:Strideable, Bound.Stride:SignedInteger
-  {
-    guard let bounds = newRange.bounds, _validateBounds(bounds) else { return }
-    self._insert(AnyRange(uncheckedBounds: bounds))
-  }
-  
   /// Inserts the given range.
+  ///
+  /// The range may be concatenated with other ranges included the receiver if `normalize` is `true`.
+  public mutating func insert<R>(
+    _ newRange:R,
+    normalize: Bool
+  ) where R:GeneralizedRange, R.Bound == Bound {
+    self._ranges.insertRange(newRange)
+    if normalize {
+      self._ranges = self._ranges.normalized()
+    }
+  }
+
+  /// Inserts the given range.
+  ///
   /// The range may be concatenated with other ranges included the receiver.
   public mutating func insert<R>(_ newRange:R) where R:GeneralizedRange, R.Bound == Bound {
-    self._insert(AnyRange(uncheckedBounds: newRange.bounds))
+    self.insert(newRange, normalize: true)
   }
   
   /// Inserts an empty range.
@@ -161,7 +178,7 @@ extension GeneralizedRangeSet {
   
   /// Inserts an unbounded range.
   public mutating func insert(_:UnboundedRange) {
-    self._rangeDictionary = .init([(AnyRange<Bound>(...), ())])
+    self._ranges = .init(carefullySortedRanges: [TangibleUnboundedRange<Bound>()])
   }
 }
 
@@ -183,64 +200,45 @@ extension GeneralizedRangeSet {
   /// Returns a Boolean value that indicates
   /// whether one of ranges in the receiver contains the value or not.
   public func contains(_ value:Bound) -> Bool {
-    return self._rangeDictionary[value] != nil
+    return self._ranges.contains(value)
   }
 }
 
 extension GeneralizedRangeSet: Hashable where Bound: Hashable {
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(self.ranges)
+    hasher.combine(self._ranges)
   }
 }
 
 // INTERSECTION
 extension GeneralizedRangeSet {
+  /// Returns a new instance with the ranges that are the intersection of each ranges
+  /// in the receiver and the given instance.
+  public func intersection(_ other: GeneralizedRangeSet<Bound>) -> GeneralizedRangeSet<Bound> {
+    var newRanges = _SortedRanges<Bound>(carefullySortedRanges: [])
+    for otherRange in other {
+      let intersection = self._ranges.limited(within: otherRange)
+      for ii in 0..<intersection.count {
+        newRanges.insertRange(intersection.range(at: ii))
+      }
+    }
+    return GeneralizedRangeSet<Bound>(_ranges: newRanges)
+  }
+
   /// Update the ranges to be the intersection of each ranges
   /// in the receiver and the given instance.
   public mutating func formIntersection(_ other:GeneralizedRangeSet<Bound>) {
     self = self.intersection(other)
-  }
-  
-  /// Returns a new instance with the ranges that are the intersection of each ranges
-  /// in the receiver and the given instance.
-  public func intersection(_ other:GeneralizedRangeSet<Bound>) -> GeneralizedRangeSet<Bound> {
-    var newDic: RangeDictionary<Bound, Void> = .init()
-    for otherRange in other {
-      for (newRange, _) in self._rangeDictionary.limited(within: otherRange) {
-        newDic.insert(range: newRange)
-      }
-    }
-    return GeneralizedRangeSet(newDic)
   }
 }
 
 // SUBTRACT
 extension GeneralizedRangeSet {
   /// Subtract `range` from each range in the receiver.
-  /// They will be treated as countable ranges.
-  public mutating func subtract<R>(_ range: R)
-    where R: GeneralizedRange, R.Bound == Bound, Bound: Strideable, Bound.Stride: SignedInteger
-  {
-    self._rangeDictionary.remove(range: .init(range))
+  public mutating func subtract<R>(_ range: R) where R: GeneralizedRange, R.Bound == Bound {
+    self._ranges.removeRange(range)
   }
-  
-  /// Subtract `range` from each range in the receiver.
-  public mutating func subtract<R>(_ range: R)
-    where R: GeneralizedRange, R.Bound == Bound
-  {
-    self._rangeDictionary.remove(range: .init(range))
-  }
-  
-  /// Returns a new instance with the ranges subtracting `range` from each range in the receiver.
-  /// They will be treated as countable ranges.
-  public func subtracting<R>(_ range: R) -> GeneralizedRangeSet<Bound>
-    where R: GeneralizedRange, R.Bound == Bound, Bound: Strideable, Bound.Stride: SignedInteger
-  {
-    var newRanges = self
-    newRanges.subtract(range)
-    return newRanges
-  }
-  
+
   /// Returns a new instance with the ranges subtracting `range` from each range in the receiver.
   public func subtracting<R>(_ range:R) -> GeneralizedRangeSet<Bound>
     where R:GeneralizedRange, R.Bound == Bound
@@ -299,7 +297,7 @@ extension GeneralizedRangeSet {
   /// Ranges will be concatenated if possible.
   public mutating func formUnion(_ other: GeneralizedRangeSet<Bound>) {
     for otherRange in other {
-      self._rangeDictionary.insert(range: otherRange)
+      self._ranges.insertRange(otherRange)
     }
   }
   

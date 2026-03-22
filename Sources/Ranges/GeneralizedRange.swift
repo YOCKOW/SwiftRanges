@@ -5,52 +5,107 @@
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
 
-
-/// Represents a set of a lower bound and an upper bound.
-public typealias Bounds<Bound> = (
-  lower: GeneralizedRangeBound<Bound>,
-  upper: GeneralizedRangeBound<Bound>
-) where Bound: Comparable
-
 /// A protocol for all ranges.
 public protocol GeneralizedRange<Bound>: RangeExpression {
   /// Retunrs a set of a lower bound and an upper bound, or returns `nil` if the range is empty.
   var bounds: Bounds<Bound>? { get }
+
+  /// A Boolean value indicating whether the range contains no elements.
+  var isEmpty: Bool { get }
 }
 
 /// A generalized range whose `Bound` is countable.
 public protocol GeneralizedCountableRange<Bound>: GeneralizedRange where Bound: Strideable,
                                                                          Bound.Stride: SignedInteger {}
 
-internal func __validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
+
+/// A `Sendable` generalized range.
+///
+/// - Note: The reason why this protocol is `internal` is
+///         [#87737](https://github.com/swiftlang/swift/issues/87737).
+internal protocol SendableGeneralizedRange<Bound>: Sendable,
+                                                   GeneralizedRange where Bound: Sendable {}
+
+// MARK: - Contability
+
+internal extension GeneralizedRange {
+  @inlinable
+  var _isCountable: Bool {
+    return self is any GeneralizedCountableRange || _boundsAreCountable(self.bounds)
+  }
+}
+
+internal extension GeneralizedCountableRange {
+  @inlinable
+  var _isCountable: Bool {
+    return true
+  }
+}
+
+
+// MARK: - Validation
+
+@usableFromInline
+internal func _validateBounds<Bound>(
+  _ uncheckedBounds: Bounds<Bound>
+) -> Bool where Bound: Comparable {
   switch (uncheckedBounds.lower, uncheckedBounds.upper) {
   case (.unbounded, _), (_, .unbounded):
     return true
+  case (.excluded(let lower), .excluded(let upper)):
+    if case let countableLower as any _CountableBoundProtocol = uncheckedBounds.lower,
+       case let countableUpper as any _CountableBoundProtocol = uncheckedBounds.upper {
+      func __canFormCountableOpenRange<B1, B2>(
+        lower: B1,
+        upper: B2
+      ) -> Bool where B1: _CountableBoundProtocol, B2: _CountableBoundProtocol {
+        return lower.value!.distance(to: upper.value! as! B1.Value) > 1
+      }
+
+      return __canFormCountableOpenRange(lower: countableLower, upper: countableUpper)
+    }
+    return lower < upper
+  case (.excluded(let lower), .included(let upper)),
+       (.included(let lower), .excluded(let upper)):
+    return lower < upper
   case (.included(let lower), .included(let upper)):
     return lower <= upper
-  case (.included(let lower), .excluded(let upper)),
-       (.excluded(let lower), .included(let upper)),
-       (.excluded(let lower), .excluded(let upper)):
-    return lower < upper
   }
 }
 
-/// Returns true if the range represented by the bounds is not empty.
-internal func _validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool where Bound: Comparable {
-  return __validateBounds(uncheckedBounds)
+
+// MARK: - Creation
+
+internal func _makeRange<Bound>(
+  uncheckedBounds: Bounds<Bound>
+) -> any GeneralizedRange<Bound> where Bound: Comparable {
+  guard _validateBounds(uncheckedBounds) else {
+    return EmptyRange<Bound>()
+  }
+
+  switch uncheckedBounds {
+  case (.included(let lower), .included(let upper)):
+    return ClosedRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.excluded(let lower), .included(let upper)):
+    return LeftOpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.excluded(let lower), .excluded(let upper)):
+    return OpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.included(let lower), .unbounded):
+    return PartialRangeFrom<Bound>(lower)
+  case (.excluded(let lower), .unbounded):
+    return PartialRangeGreaterThan<Bound>(lower)
+  case (.unbounded, .included(let upper)):
+    return PartialRangeThrough<Bound>(upper)
+  case (.unbounded, .excluded(let upper)):
+    return PartialRangeUpTo<Bound>(upper)
+  case (.included(let lower), .excluded(let upper)):
+    return Range<Bound>(uncheckedBounds: (lower: lower, upper: upper))
+  case (.unbounded, .unbounded):
+    return TangibleUnboundedRange<Bound>()
+  }
 }
 
-/// Returns true if the **countable** range represented by the bounds is not empty.
-internal func _validateBounds<Bound>(_ uncheckedBounds: Bounds<Bound>) -> Bool
-  where Bound: Strideable, Bound.Stride: SignedInteger
-{
-  if case .excluded(let lower) = uncheckedBounds.lower,
-     case .excluded(let upper) = uncheckedBounds.upper
-  {
-    return lower.distance(to: upper) > 1
-  }
-  return __validateBounds(uncheckedBounds)
-}
+// MARK: - Containment
 
 internal func _contains<T>(bounds: Bounds<T>?, element: T) -> Bool where T: Comparable {
   guard let bounds = bounds else { return false }
@@ -63,6 +118,8 @@ internal func _contains<T>(bounds: Bounds<T>?, element: T) -> Bool where T: Comp
     (upperComparison == .orderedSame || upperComparison == .orderedDescending)
   )
 }
+
+// MARK: - Extensions
 
 // Default implementation for functions that are required by `RangeExpression`
 extension GeneralizedRange {
@@ -94,47 +151,13 @@ extension GeneralizedRange {
 }
 
 extension GeneralizedRange {
-  @inline(__always)
-  var _wellknownRange: any GeneralizedRange<Bound> {
-    switch self {
-    case _ as ClosedRange<Bound>,
-         _ as EmptyRange<Bound>,
-         _ as LeftOpenRange<Bound>,
-         _ as OpenRange<Bound>,
-         _ as PartialRangeFrom<Bound>,
-         _ as PartialRangeGreaterThan<Bound>,
-         _ as PartialRangeThrough<Bound>,
-         _ as PartialRangeUpTo<Bound>,
-         _ as Range<Bound>,
-         _ as TangibleUnboundedRange<Bound>:
-      return self
-    default:
-      break
-    }
-
+  /// Default implementation of `var isEmpty { get }`.
+  /// A Boolean value indicating whether the range contains no elements.
+  @inlinable
+  public var isEmpty: Bool {
     guard let bounds = self.bounds else {
-      return EmptyRange<Bound>()
+      return true
     }
-
-    switch bounds {
-    case (.included(let lower), .included(let upper)):
-      return ClosedRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.excluded(let lower), .included(let upper)):
-      return LeftOpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.excluded(let lower), .excluded(let upper)):
-      return OpenRange<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.included(let lower), .unbounded):
-      return PartialRangeFrom<Bound>(lower)
-    case (.excluded(let lower), .unbounded):
-      return PartialRangeGreaterThan<Bound>(lower)
-    case (.unbounded, .included(let upper)):
-      return PartialRangeThrough<Bound>(upper)
-    case (.unbounded, .excluded(let upper)):
-      return PartialRangeUpTo<Bound>(upper)
-    case (.included(let lower), .excluded(let upper)):
-      return Range<Bound>(uncheckedBounds: (lower: lower, upper: upper))
-    case (.unbounded, .unbounded):
-      return TangibleUnboundedRange<Bound>()
-    }
+    return !_validateBounds(bounds)
   }
 }

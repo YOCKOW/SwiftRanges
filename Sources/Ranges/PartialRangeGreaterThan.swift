@@ -14,6 +14,10 @@ public struct PartialRangeGreaterThan<Bound> where Bound: Comparable {
   public init(_ lowerBound: Bound) { self.lowerBound = lowerBound }
 }
 
+extension PartialRangeGreaterThan: Sendable where Bound: Sendable {}
+
+extension PartialRangeGreaterThan: SendableGeneralizedRange {}
+
 /// "Countable" PartialRangeGreaterThan
 public typealias CountablePartialRangeGreaterThan<Bound> =
   PartialRangeGreaterThan<Bound> where Bound:Strideable, Bound.Stride:SignedInteger
@@ -53,6 +57,10 @@ extension PartialRangeGreaterThan: RangeExpression {
 extension PartialRangeGreaterThan: GeneralizedRange {
   public var bounds: Bounds<Bound>? {
     return (lower: .excluded(self.lowerBound), upper: .unbounded)
+  }
+
+  public var isEmpty: Bool {
+    return false
   }
 }
 

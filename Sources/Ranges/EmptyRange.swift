@@ -9,7 +9,13 @@
 /// # EmptyRange
 ///
 /// A range that does not contain any elements.
-public struct EmptyRange<Bound> where Bound:Comparable {}
+public struct EmptyRange<Bound> where Bound:Comparable {
+  public init() {}
+}
+
+extension EmptyRange: Sendable {} // Always sendable.
+
+extension EmptyRange: SendableGeneralizedRange {}
 
 public typealias CountableEmptyRange<Bound> =
   EmptyRange<Bound> where Bound: Strideable, Bound.Stride: SignedInteger

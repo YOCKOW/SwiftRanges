@@ -11,32 +11,95 @@ extension GeneralizedRangeBound {
   internal enum _Side {
     case lower, upper
   }
+
+  internal enum _ComparisonResult: Equatable {
+    /// The left operand is definitely smaller than the right operand.
+    case definitelyOrderedAscending
+
+    /// The left operand is smaller than the right operand but can be considered equivalent.
+    ///
+    /// e.g.) .excluded(2) vs .included(3) at lower side;
+    ///       .included(4) vs .excluded(5) at upper side
+    case orderedAscendingButConsideredEquivalent
+
+    /// The two operands are definitely equal.
+    case definitelyOrderedSame
+
+    /// The left operand is smaller than the right operand but can be considered equivalent.
+    ///
+    /// e.g.) .included(3) vs .excluded(2) at lower side;
+    ///       .excluded(5) vs .included(4) at upper side
+    case orderedDescendingButConsideredEquivalent
+
+    /// The left operand is definitely greater than the right operand.
+    case definitelyOrderedDescending
+
+    var foundationComparisonResult: Foundation.ComparisonResult {
+      switch self {
+      case .definitelyOrderedAscending, .orderedAscendingButConsideredEquivalent:
+        return .orderedAscending
+      case .definitelyOrderedSame:
+        return .orderedSame
+      case .orderedDescendingButConsideredEquivalent, .definitelyOrderedDescending:
+        return .orderedDescending
+      }
+    }
+  }
 }
 
 extension GeneralizedRangeBound {
-  internal func _compare(_ other: GeneralizedRangeBound<Value>, side: _Side) -> ComparisonResult {
-    if self == other { return .orderedSame }
-    
+  internal func _compare(_ other: GeneralizedRangeBound<Value>, side: _Side) -> _ComparisonResult {
+    if self == other {
+      return .definitelyOrderedSame
+    }
+
     // from here, self != other
     if self == .unbounded {
-      return side == .lower ? .orderedAscending : .orderedDescending
+      return side == .lower ? .definitelyOrderedAscending : .definitelyOrderedDescending
     } else if other == .unbounded {
-      return side == .lower ? .orderedDescending : .orderedAscending
+      return side == .lower ? .definitelyOrderedDescending : .definitelyOrderedAscending
     }
     
     // from here, both self and other are not .unbounded
+    assert(self != other && self != .unbounded && other != .unbounded)
     let myValue = self.value!
     let otherValue = other.value!
     
-    if myValue < otherValue { return .orderedAscending }
-    if myValue > otherValue { return .orderedDescending }
-    
+    if myValue < otherValue {
+      if case let countableSelf as any _CountableBoundProtocol<Value> = self {
+        switch (side, self, other) {
+        case (.lower, .excluded, .included), (.upper, .included, .excluded):
+          if countableSelf.nextValue == otherValue {
+            return .orderedAscendingButConsideredEquivalent
+          }
+        default:
+          break
+        }
+      }
+      return .definitelyOrderedAscending
+    }
+
+    if myValue > otherValue {
+      if case let countableSelf as any _CountableBoundProtocol<Value> = self {
+        switch (side, self, other) {
+        case (.lower, .included, .excluded), (.upper, .excluded, .included):
+          if countableSelf.previousValue == otherValue {
+            return .orderedDescendingButConsideredEquivalent
+          }
+        default:
+          break
+        }
+      }
+      return .definitelyOrderedDescending
+    }
+
     // from here, they have the same values
+    assert(myValue == otherValue)
     if case .included = self {
       // other is not included
-      return side == .lower ? .orderedAscending : .orderedDescending
+      return side == .lower ? .definitelyOrderedAscending : .definitelyOrderedDescending
     }
-    return side == .lower ? .orderedDescending : .orderedAscending
+    return side == .lower ? .definitelyOrderedDescending : .definitelyOrderedAscending
   }
   
   internal func _compare(_ value: Value, side: _Side) -> ComparisonResult {
@@ -67,7 +130,9 @@ internal func _max<Bound>(
   var max: GeneralizedRangeBound<Bound> = firstBound
   for boundary in otherBounds {
     if boundary == .unbounded && side == .upper { return .unbounded }
-    if max._compare(boundary, side: side) == .orderedAscending { max = boundary }
+    if max._compare(boundary, side: side).foundationComparisonResult == .orderedAscending {
+      max = boundary
+    }
   }
   return max
 }
@@ -80,9 +145,60 @@ internal func _min<Bound>(
   var min: GeneralizedRangeBound<Bound> = firstBounds
   for boundary in otherBounds {
     if boundary == .unbounded && side == .lower { return .unbounded }
-    if min._compare(boundary, side: side) == .orderedDescending { min = boundary }
+    if min._compare(boundary, side: side).foundationComparisonResult == .orderedDescending {
+      min = boundary
+    }
   }
   return min
 }
 
+extension GeneralizedRangeBound {
+  /// Returns whether the two points are concatenatable or not.
+  ///
+  /// - parameter otherLowerBound:
+  ///     The lower bound of another range.
+  /// - Warning:
+  ///     **`self` must be upper bound.**
+  private func __isConcatenatable(with otherLowerBound: GeneralizedRangeBound<Value>) -> Bool {
+    // always concatenatable when self or the lower bound is .unbounded
+    guard let myValue = self.value, let otherLowerValue = otherLowerBound.value else {
+      return true
+    }
 
+    // Check if
+    // ------/
+    //    /-------
+    if myValue < otherLowerValue { return false }
+    if myValue > otherLowerValue { return true }
+
+    // if myValue == otherLowerValue
+    assert(myValue == otherLowerValue)
+    if case (.excluded, .excluded) = (self, otherLowerBound) { return false }
+    return true
+  }
+
+  /// Returns whether the two points are concatenatable or not.
+  ///
+  /// - Warning: **`self` must be upper bound.**
+  ///
+  /// - parameter otherLowerBound:
+  ///     The lower bound of another range.
+  internal func _isConcatenatable(with otherLowerBound: GeneralizedRangeBound<Value>) -> Bool {
+    if case let countableSelf as any _CountableBoundProtocol<Value> = self,
+       countableSelf._valueIsIncluded,
+       case let countableOther as any _CountableBoundProtocol<Value> = otherLowerBound,
+       countableOther._valueIsIncluded {
+
+      // NOTE: Work around for https://github.com/swiftlang/swift/issues/87711
+      func __concatenatable<T, U>(myUpper: T, otherLower: U) -> Bool where T: _CountableBoundProtocol,
+                                                                           U: _CountableBoundProtocol,
+                                                                           T.Value == U.Value
+      {
+        assert(T.self == U.self)
+        return myUpper.value!.distance(to: otherLower.value!) <= 1
+      }
+      return __concatenatable(myUpper: countableSelf, otherLower: countableOther)
+    }
+    return self.__isConcatenatable(with: otherLowerBound)
+  }
+}

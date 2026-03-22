@@ -1,6 +1,6 @@
 /* *************************************************************************************************
  RangeDictionaryTests.swift
-   © 2019,2024-2025 YOCKOW.
+   © 2019,2024-2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
  ************************************************************************************************ */
@@ -8,19 +8,153 @@
 import Testing
 @testable import Ranges
 
+@Suite struct SortedRangeValuePairsTests {
+  @Test func basics() {
+    var pairs = _SortedRangeValuePairs<Int, String>(
+      carefullySortedSendablePairs: [
+        (range: ..<0, value: "negative"),
+        (range: 0...0, value: "zero"),
+        (range: 1..., value: "positive")
+      ]
+    )
+    #expect(pairs.count == 3)
+    #expect(pairs.value(at: 1) == "zero")
+    #expect(pairs.index(whereRangeContains: 10) == 2)
+    #expect(pairs[-1] == "negative")
+
+    pairs.insertValue("huge", forRange: 1000...)
+    #expect(pairs.value(at: 3) == "huge")
+
+    pairs.insertValue("integer", forRange: ...)
+    #expect(pairs[Int.random(in: .min ... .max)] == "integer")
+
+    var ranges = _SortedRanges<Int>(carefullySortedSendableRanges: [0..<10, 100...199, 999...])
+    #expect(ranges.count == 3)
+    #expect(ranges.range(at: 1).isEqual(to: 100...199))
+    #expect(ranges.index(whereRangeContains: 0) == 0)
+    #expect(ranges._storage.indices(for: ..<(-1)) == .insertable(0))
+    #expect(ranges._storage.indices(for: 20...30) == .insertable(1))
+    #expect(ranges._storage.indices(for: 5...10000) == .overlap(first: 0, last: 2))
+
+    ranges.insertRange(..<(-10))
+    #expect(ranges.count == 4)
+    #expect(ranges.index(whereRangeContains: -999) == 0)
+
+    ranges.removeRange(150...1050)
+    #expect(ranges.count == 4)
+    #expect(ranges.contains(149))
+    #expect(!ranges.contains(150))
+    #expect(!ranges.contains(189))
+    #expect(!ranges.contains(789))
+    #expect(!ranges.contains(1050))
+    #expect(ranges.contains(1051))
+  }
+
+  @Test func removal() {
+    var ranges = _SortedRanges<Int>(carefullySortedRanges: [..<20, 30...40, 70..<90, 90<..])
+    ranges.removeRange(...10)
+    guard ranges.count == 4 else { Issue.record("Unexpected count."); return }
+    #expect(ranges.range(at: 0).isEqual(to: 10<..<20))
+  }
+
+  @Test func limited() {
+    let pairs = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: 0..<10, value: "a"),
+        (range: 100..<1000, value: "b"),
+        (range: 10000..<100000, value: "c"),
+      ]
+    )
+    #expect(pairs.limited(within: EmptyRange<Int>()).isEmpty)
+    #expect(pairs.limited(within: 50...60).isEmpty)
+    #expect(pairs.limited(within: 3...3)[4] == nil)
+    #expect(pairs.limited(within: 3...3)[3] == "a")
+    #expect(pairs.limited(within: 500..<50000).count == 2)
+    #expect(pairs.limited(within: 500..<50000)[499] == nil)
+    #expect(pairs.limited(within: 500..<50000)[500] == "b")
+    #expect(pairs.limited(within: 500..<50000)[5000] == nil)
+    #expect(pairs.limited(within: 500..<50000)[49999] == "c")
+    #expect(pairs.limited(within: 500..<50000)[50000] == nil)
+  }
+
+  @Test func limited_test2() {
+    let ranges = _SortedRanges<Int>(carefullySortedRanges: [..<20, 30<..<40, 50<..60])
+    let limited = ranges.limited(within: 15...55)
+    guard limited.count == 3 else { Issue.record("Unexpected count."); return }
+    #expect(limited.range(at: 0).isEqual(to: 15..<20))
+    #expect(limited.range(at: 1).isEqual(to: 30<..<40))
+    #expect(limited.range(at: 2).isEqual(to: 50<..55))
+  }
+
+  @Test func normalize() {
+    let doublePairs = _SortedRangeValuePairs<Double, String>(
+      carefullySortedPairs: [
+        (range: 0.0..<1.0, value: "a"),
+        (range: 1.0..<2.0, value: "a"),
+        (range: 2.0..<3.0, value: "a"),
+      ]
+    )
+    let doubleNormalized = doublePairs.normalized()
+    #expect(doubleNormalized.count == 1)
+    #expect(doubleNormalized.range(at: 0).isEquivalent(to: 0.0..<3.0))
+    #expect(doubleNormalized[1.0] == "a")
+
+    let intPairs = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: 0...1, value: "a"),
+        (range: 2...3, value: "a"),
+      ]
+    )
+    let intNormalized = intPairs.normalized()
+    #expect(intNormalized.count == 1)
+    #expect(intNormalized.range(at: 0).isEquivalent(to: 0...3))
+    #expect(intNormalized[2] == "a")
+  }
+
+  @Test func equatable() {
+    let pairs1 = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: 0..<10, "value0"),
+        (range: 10..<20, "value1"),
+      ]
+    )
+    let pairs2 = _SortedRangeValuePairs<Int, String>(
+      carefullySortedPairs: [
+        (range: 0...9, "value0"),
+        (range: 9<..<20, "value1"),
+      ]
+    )
+    #expect(pairs1 != pairs2)
+    #expect(pairs1.isEquivalent(to: pairs2))
+
+    let ranges1 = _SortedRanges<Int>(carefullySortedRanges: [0..<10, 100..<200])
+    let ranges2 = _SortedRanges<Int>(carefullySortedRanges: [0...9, 100...199])
+    #expect(ranges1 != ranges2)
+    #expect(ranges1.isEquivalent(to: ranges2))
+  }
+
+  @Test func sortedRangeValuePairs_hashable() {
+    let pairs1 = _SortedRangeValuePairs<Int, String>(carefullySortedPairs: [(range: 0..<10, value: "value0")])
+    let pairs2 = _SortedRangeValuePairs<Int, String>(carefullySortedPairs: [(range: 10..<20, value: "value1")])
+    let dic = [pairs1: 1, pairs2: 2]
+    #expect(dic[pairs1] == 1)
+    #expect(dic[pairs2] == 2)
+  }
+}
+
 @Suite struct RangeDictionaryTests {
   let simpleDictionary: RangeDictionary<Int, String> = [
-        0 ...<    10: "A",
-      100 ...<   110: "B",
-     1000 ...<  1010: "C",
-    10000 ...< 10010: "D"
+        0 ..<    10: "A",
+      100 ..<   110: "B",
+     1000 ..<  1010: "C",
+    10000 ..< 10010: "D"
   ]
 
   @Test func normalizationInInit() {
     let dic = RangeDictionary<Int, String>([
-      (0....9, "A"),
-      (10....19, "A"),
-      (20....29, "B"),
+      (0...9, "A"),
+      (10...19, "A"),
+      (20...29, "B"),
     ])
     #expect(dic.count == 2)
   }
@@ -38,7 +172,7 @@ import Testing
 
   @Test func removal() {
     var dic = simpleDictionary
-    dic.remove(range: 5<...<10005)
+    dic.removeValues(in: 5<..<10005)
     #expect(dic[5] == "A")
     #expect(dic[6] == nil)
     #expect(dic[105] == nil)
@@ -47,7 +181,7 @@ import Testing
     #expect(dic[10005] == "D")
 
     dic = simpleDictionary
-    dic.remove(range: 105....200)
+    dic.removeValues(in: 105...200)
     #expect(dic[5] == "A")
     #expect(dic[100] == "B")
     #expect(dic[105] == nil)
@@ -55,7 +189,7 @@ import Testing
     #expect(dic[10000] == "D")
 
     dic = simpleDictionary
-    dic.remove(range: 90....105)
+    dic.removeValues(in: 90...105)
     #expect(dic[5] == "A")
     #expect(dic[100] == nil)
     #expect(dic[105] == nil)
@@ -64,7 +198,7 @@ import Testing
     #expect(dic[10000] == "D")
 
     dic = simpleDictionary
-    dic.remove(range: .init(singleValue: 105))
+    dic.removeValues(in: 105...105)
     #expect(dic[5] == "A")
     #expect(dic[100] == "B")
     #expect(dic[105] == nil)
@@ -73,13 +207,13 @@ import Testing
     #expect(dic[10000] == "D")
   }
 
-  @Test func insertion() {
+  @Test func insertion() throws {
     var dic = simpleDictionary
-    dic.insert("NEW", forRange: Int.min....Int.max)
+    dic.insert("NEW", forRange: Int.min...Int.max)
     #expect(dic[Int.random(in: Int.min...Int.max)] == "NEW")
 
     dic = simpleDictionary
-    dic.insert("NEW", forRange: 5<...<10005)
+    dic.insert("NEW", forRange: 5<..<10005)
     #expect(dic[3] == "A")
     #expect(dic[100] == "NEW")
     #expect(dic[555] == "NEW")
@@ -94,28 +228,42 @@ import Testing
       let range5: PartialRangeFrom<Int> = 100...
 
       var dic = RangeDictionary<Int, Int>()
-      dic.insert(0, forRange: .init(range5))
-      dic.insert(0, forRange: .init(range4))
-      dic.insert(0, forRange: .init(range3))
-      dic.insert(0, forRange: .init(range2))
-      dic.insert(0, forRange: .init(range1))
+      dic.insert(0, forRange: range5)
+      dic.insert(0, forRange: range4)
+      dic.insert(0, forRange: range3)
+      dic.insert(0, forRange: range2)
+      dic.insert(0, forRange: range1)
 
-      #expect(dic[dic.startIndex].0 == ...<40)
-      #expect(dic[dic.index(after: dic.startIndex)].0 == (60....80))
-      #expect(dic.last?.0 == 90....)
+      #expect(dic[dic.startIndex].0.isEqual(to: ..<40))
+      #expect(dic[dic.index(after: dic.startIndex)].0.isEqual(to: (60...80)))
+      #expect(try #require(dic.last).0.isEqual(to: 90...))
     }
   }
 
   @Test func asCollection() {
     let array: [RangeDictionary<Int, String>.Element] = .init(simpleDictionary)
-    #expect(array[0] == (0...<10, "A"))
-    #expect(array[1] == (100...<110, "B"))
-    #expect(array[2] == (1000...<1010, "C"))
-    #expect(array[3] == (10000...<10010, "D"))
+
+    func __assert<B, V>(
+      pair: (range: any GeneralizedRange<B>, value: V),
+      expected: (range: any GeneralizedRange<B>, value: V),
+      _ comment: @autoclosure () -> Comment? = nil,
+      sourceLocation: SourceLocation = #_sourceLocation
+    ) where V: Equatable {
+      #expect(
+        pair.range.isEqual(to: expected.range) && pair.value == expected.value,
+        comment(),
+        sourceLocation: sourceLocation
+      )
+    }
+
+    __assert(pair: array[0], expected: (range: 0..<10, value: "A"))
+    __assert(pair: array[1], expected: (range: 100..<110, value: "B"))
+    __assert(pair: array[2], expected: (range: 1000..<1010, value: "C"))
+    __assert(pair: array[3], expected: (range: 10000..<10010, value: "D"))
   }
 
   @Test func limit() {
-    let limited = simpleDictionary.limited(within: 5<...10005)
+    let limited = simpleDictionary.limited(within: 5<..10005)
     #expect(limited[0] == nil)
     #expect(limited[5] == nil)
     #expect(limited[7] == "A")

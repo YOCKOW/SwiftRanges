@@ -19,13 +19,13 @@ It was originally written as a part of [SwiftCGIResponder](https://github.com/YO
 
 ### Other `struct`s implemented in this library
 
-* `AnyRange`: A type-erased range.
+* `AnyRange`: A type-erased range. (Deprecated)
 * `RangeDictionary`: A collection like `Dictionary` whose key is a range.
-* `GeneralizedRangeSet`: A set that can contain multiple types of ranges.
+* `GeneralizedRangeSet`: A set that can contain multiple types of ranges. (Renamed from `MultipleRanges`)
 
 # Requirements
 
-- Swift 4.2, 5, 6
+- Swift >=6.2
 - macOS or Linux
 
 # Usage
@@ -54,34 +54,14 @@ print(greaterThan.overlaps(..<11)) // -> false
                                    // Because there is no integer in "10<..<11"
 ```
 
-## Type-erased Range: `AnyRange`
-
-```Swift
-import Ranges
-// Original operators are implemented for `AnyRange`.
-// Some of them are below:
-
-let leftOpenRange: LeftOpenRange<Int> = 10<..20
-let typeErasedLeftOpenRange: AnyRange<Int> = 10<...20
-print(leftOpenRange == typeErasedLeftOpenRange) // -> true
-
-let openRange: OpenRange<Int> = 10<..<20
-let typeErasedOpenRange: AnyRange<Int> = 19<...<30
-print(openRange.overlaps(typeErasedOpenRange)) // -> false
-
-let greaterThan: PartialRangeGreaterThan<Int> = 10<..
-let typeErasedGreaterThan: AnyRange<Int> = 20<...
-print(greaterThan.contains(15)) // -> true
-print(typeErasedGreaterThan.contains(15)) // -> false
-```
 
 ## `RangeDictionary` 
 
 ```Swift
 var dic: RangeDictionary<Int, String> = [
-  1....2: "Index",
-  3....10: "Chapter 01",
-  11....40: "Chapter 02"
+  1...2: "Index",
+  3...10: "Chapter 01",
+  11...40: "Chapter 02"
 ]
 
 print(dic[1]) // Prints "Index"
@@ -89,7 +69,7 @@ print(dic[5]) // Prints "Chapter 01"
 print(dic[15]) // Prints "Chapter 02"
 print(dic[100]) // Prints "nil"
 
-dic.insert("Prologue", forRange: 2....5)
+dic.insert("Prologue", forRange: 2...5)
 print(dic[5]) // Prints "Prologue"
 ```
 
@@ -99,15 +79,15 @@ print(dic[5]) // Prints "Prologue"
 ```Swift
 import Ranges
 
-var multi = GeneralizedRangeSet<Int>()
-multi.insert(10...20) 
-multi.insert(30...40)
-print(multi.contains(15)) // -> true
-print(multi.contains(25)) // -> false
-print(multi.contains(35)) // -> true
+var set = GeneralizedRangeSet<Int>()
+set.insert(10...20) 
+set.insert(30...40)
+print(set.contains(15)) // -> true
+print(set.contains(25)) // -> false
+print(set.contains(35)) // -> true
 
-multi.subtract(15...35)
-print(multi.ranges) // -> [10..<15, 35<..40]
+set.subtract(15...35)
+print(set.ranges) // -> [10..<15, 35<..40]
 
 ```
 

@@ -1,9 +1,9 @@
-/***************************************************************************************************
+/* *************************************************************************************************
  ExcludedLowerBound.swift
-   © 2017-2018 YOCKOW.
+   © 2017-2018,2026 YOCKOW.
      Licensed under MIT License.
      See "LICENSE.txt" for more information.
- **************************************************************************************************/
+ ************************************************************************************************ */
 
 
 /// Prepare workaround for "lower-open" ranges,
@@ -13,6 +13,8 @@ public struct ExcludedLowerBound<Bound> where Bound: Comparable {
   public let lowerBound:Bound
   public init(_ lowerBound:Bound) { self.lowerBound = lowerBound }
 }
+
+extension ExcludedLowerBound: Sendable where Bound: Sendable {}
 
 postfix operator <
 /// Create an instance of `ExcludedLowerBound`
