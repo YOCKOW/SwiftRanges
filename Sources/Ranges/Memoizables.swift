@@ -110,4 +110,8 @@ public final class MemoizableGeneralizedRangeSet<Bound>: @unchecked Sendable whe
   }
 }
 
-
+@available(*, deprecated, renamed: "MemoizableGeneralizedRangeSet")
+public typealias MemoizableMultipleRanges<Bound> =
+  MemoizableGeneralizedRangeSet<Bound> where Bound: Comparable,
+                                             Bound: Hashable,
+                                             Bound: Sendable
