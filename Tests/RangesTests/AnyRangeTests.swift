@@ -70,11 +70,11 @@ struct AnyRangeTests {
 
     result = (0<...<10).subtracting(_forceUncountableRange(1...9))
     #expect(result.0 == .empty)
-    #expect(result.1 == nil)
+    #expect(result.1 == Optional<AnyRange<Int>>.none)
 
     result = _forceUncountableRange(0..<10).subtracting(1....9)
     #expect(result.0 == (0...<1))
-    #expect(result.1 == nil)
+    #expect(result.1 == Optional<AnyRange<Int>>.none)
 
     result = _forceUncountableRange(0..<10).subtracting(1<...<9)
     #expect(result.0 == (0....1))
