@@ -299,16 +299,15 @@ extension _SortedRangeValuePairs where Value == Never {
 
 extension _SortedRangeValuePairs._Storage {
   private func _splitted(
-    by range: any GeneralizedRange<Bound>
+    by indices: _IndicesForReplacement,
+    splitter range: any GeneralizedRange<Bound>
   ) -> (
     formerPairsOrRanges: any Collection,
     formerValues: (any Collection<Value>)?,
     latterPairsOrRanges: any Collection,
     latterValues: (any Collection<Value>)?
   ) {
-    assert(!range.isEmpty, "\(#function): Empty range?!")
-
-    switch self.indices(for: range) {
+    switch indices {
     case .insertable(let index):
       switch self {
       case .pairs(let pairs):
@@ -442,7 +441,79 @@ extension _SortedRangeValuePairs._Storage {
       return
     }
 
-    let splitted = _splitted(by: range)
+    let indices = self.indices(for: range)
+    FAST_PATH: if case .insertable(let index) = indices {
+      switch (self, action) {
+      case (_, .removeValues):
+        return
+      case (.pairs(var pairs), .insertValue(let newValue)) where index == 0:
+        if let firstRange = pairs.first?.range,
+           let concatenated = range.concatenating(firstRange),
+           case let firstValue as any Equatable = pairs.first?.value,
+           firstValue._isEqual(to: newValue) {
+          pairs._setElementAtFirst((range: concatenated, value: newValue))
+        } else {
+          pairs.insert((range: range, value: newValue), at: 0)
+        }
+        self = .pairs(pairs)
+        return
+      case (.pairs(var pairs), .insertValue(let newValue)) where index == pairs.endIndex:
+        if let lastRange = pairs.last?.range,
+           let concatenated = lastRange.concatenating(range),
+           case let lastValue as any Equatable = pairs.last?.value,
+           lastValue._isEqual(to: newValue) {
+          pairs._setElementAtLast((range: concatenated, value: newValue))
+        } else {
+          pairs.append((range: range, value: newValue))
+        }
+        self = .pairs(pairs)
+        return
+      case (.ranges(var ranges), .onlyInsertRange) where index == 0:
+        if let firstRange = ranges.first, let concatenated = range.concatenating(firstRange) {
+          ranges._setElementAtFirst(concatenated)
+        } else {
+          ranges.insert(range, at: 0)
+        }
+        self = .ranges(ranges)
+        return
+      case (.ranges(var ranges), .onlyInsertRange) where index == ranges.endIndex:
+        if let lastRange = ranges.last, let concatenated = lastRange.concatenating(range) {
+          ranges._setElementAtLast(concatenated)
+        } else {
+          ranges.append(range)
+        }
+        self = .ranges(ranges)
+        return
+      case (.separated(ranges: var ranges, values: var values), .insertValue(let newValue)) where index == 0:
+        if let firstRange = ranges.first,
+           let concatenated = range.concatenating(firstRange),
+           case let firstValue as any Equatable = values.first,
+           firstValue._isEqual(to: newValue) {
+          ranges._setElementAtFirst(concatenated)
+        } else {
+          ranges.insert(range, at: 0)
+          values.insert(newValue, at: 0)
+        }
+        self = .separated(ranges: ranges, values: values)
+        return
+      case (.separated(ranges: var ranges, values: var values), .insertValue(let newValue)) where index == ranges.endIndex:
+        if let lastRange = ranges.last,
+           let concatenated = lastRange.concatenating(range),
+           case let lastValue as any Equatable = values.last,
+           lastValue._isEqual(to: newValue) {
+          ranges._setElementAtLast(concatenated)
+        } else {
+          ranges.append(range)
+          values.append(newValue)
+        }
+        self = .separated(ranges: ranges, values: values)
+        return
+      default:
+        break FAST_PATH
+      }
+    } // FAST_PATH
+
+    let splitted = _splitted(by: indices, splitter: range)
     switch (splitted.formerPairsOrRanges, splitted.latterPairsOrRanges) {
     case (
       let formerPairs as any Collection<_SortedRangeValuePairs._Pair>,
@@ -455,8 +526,7 @@ extension _SortedRangeValuePairs._Storage {
       func __appendPair(_ newPair: _SortedRangeValuePairs._Pair) {
         if let lastPair = newPairs.last,
            case let equatableLastValue as any Equatable = lastPair.value,
-           case let equatableNewValue as any Equatable = newPair.value,
-           equatableLastValue._isEqual(to: equatableNewValue),
+           equatableLastValue._isEqual(to: newPair.value),
            let concatenated = lastPair.range.concatenating(newPair.range) {
           newPairs._setElementAtLast((range: concatenated, value: newPair.value))
         } else {
@@ -485,8 +555,7 @@ extension _SortedRangeValuePairs._Storage {
             return
           }
           if case let equatableLastValue as any Equatable = newValues.last!,
-             case let equatableNewValue as any Equatable = newValue,
-             equatableLastValue._isEqual(to: equatableNewValue) {
+             equatableLastValue._isEqual(to: newValue) {
             newRanges._setElementAtLast(concatenated)
             return
           }
@@ -832,10 +901,10 @@ private extension MutableCollection where Self: BidirectionalCollection {
 }
 
 private extension Equatable {
-  func _isEqual<T>(to other: T) -> Bool where T: Equatable {
-    guard case let selfAsT as T = self else {
+  func _isEqual<T>(to other: T) -> Bool {
+    guard case let otherAsSelf as Self = other else {
       return false
     }
-    return selfAsT == other
+    return self == otherAsSelf
   }
 }

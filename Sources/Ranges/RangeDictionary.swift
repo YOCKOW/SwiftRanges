@@ -125,6 +125,7 @@ extension RangeDictionary: Hashable where Bound: Hashable, Value: Hashable {
   }
 }
 
+@available(*, deprecated, message: "`RangeDictionary` is always normalized.")
 extension RangeDictionary where Value: Equatable {
   /// Inserts the given value for `range`.
   public mutating func insert(
@@ -136,25 +137,6 @@ extension RangeDictionary where Value: Equatable {
     if normalize {
       self._pairs = self._pairs.normalized()
     }
-  }
-
-  /// Inserts the given value for `range`.
-  /// Ranges are concatenated if possible.
-  public mutating func insert(_ value: Value, forRange range: any GeneralizedRange<Bound>) {
-    self.insert(value, forRange: range, normalize: true)
-  }
-  
-  /// Creates a dictionary with `rangesAndValues`.
-  public init(_ rangesAndValues: [(any GeneralizedRange<Bound>, Value)]) {
-    self.init()
-    if rangesAndValues.isEmpty {
-      return
-    }
-    for (range, value) in rangesAndValues.dropLast() {
-      self.insert(value, forRange: range, normalize: false)
-    }
-    let lastPair = rangesAndValues.last!
-    self.insert(lastPair.1, forRange: lastPair.0, normalize: true)
   }
 }
 
