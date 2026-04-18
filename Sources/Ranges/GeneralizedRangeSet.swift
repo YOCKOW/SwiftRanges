@@ -154,6 +154,7 @@ extension GeneralizedRangeSet {
   /// Inserts the given range.
   ///
   /// The range may be concatenated with other ranges included the receiver if `normalize` is `true`.
+  @available(*, deprecated, message: "`GeneralizedRangeSet` is always normalized.")
   public mutating func insert<R>(
     _ newRange:R,
     normalize: Bool
@@ -168,7 +169,7 @@ extension GeneralizedRangeSet {
   ///
   /// The range may be concatenated with other ranges included the receiver.
   public mutating func insert<R>(_ newRange:R) where R:GeneralizedRange, R.Bound == Bound {
-    self.insert(newRange, normalize: true)
+    self._ranges.insertRange(newRange)
   }
   
   /// Inserts an empty range.
@@ -182,12 +183,6 @@ extension GeneralizedRangeSet {
   }
 }
 
-extension GeneralizedRangeSet where Bound: Strideable, Bound.Stride: SignedInteger {
-  /// Inserts a single *countable* value
-  public mutating func insert(singleValue value:Bound) {
-    self.insert(value...value)
-  }
-}
 extension GeneralizedRangeSet {
   /// Inserts a single value
   public mutating func insert(singleValue value:Bound) {

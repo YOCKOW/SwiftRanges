@@ -150,13 +150,18 @@ import Testing
     10000 ..< 10010: "D"
   ]
 
-  @Test func normalizationInInit() {
-    let dic = RangeDictionary<Int, String>([
+  @Test func autoNormalization() {
+    var dic = RangeDictionary<Int, String>([
       (0...9, "A"),
       (10...19, "A"),
       (20...29, "B"),
     ])
     #expect(dic.count == 2)
+
+    dic.insert("B", forRange: 30..<40)
+    #expect(dic.count == 2)
+    #expect(dic[10] == "A")
+    #expect(dic[30] == "B")
   }
 
   @Test func subscriptTest() {
